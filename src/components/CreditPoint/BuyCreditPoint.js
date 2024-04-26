@@ -108,4 +108,4 @@ function BuyCreditPoint({ currency }) {
   );
 }
 
-export default BuyCreditPoint;
+export default BuyCreditPoint; 

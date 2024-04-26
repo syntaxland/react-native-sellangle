@@ -36,8 +36,9 @@ import {
   VERIFY_USD_OTP_FAIL,
 } from "../constants/accountFundOtpConstants";
 
-import { API_URL } from "../../config/apiConfig";
-import { PAYSOFTER_API_URL } from "../../config/apiConfig";
+// const API_URL = process.env.REACT_APP_API_URL;
+import { API_URL, PAYSOFTER_API_URL } from "../../config/apiConfig";
+
 
 export const debitPaysofterUsdAccountFund = (debitUsdAccountData) => async (
   dispatch
@@ -193,7 +194,7 @@ export const createPayment = (paymentData) => async (dispatch, getState) => {
   }
 };
 
-export const createPaysofterPayment = (paysofterPaymentData) => async (
+export const createPaysofterPayment = (paysofterPaymentData) => async ( 
   dispatch
 ) => {
   try {

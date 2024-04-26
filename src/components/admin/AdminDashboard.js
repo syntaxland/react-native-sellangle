@@ -1,7 +1,10 @@
 // AdminDashboard.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Container, Button } from "react-bootstrap";
 // import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
+import { listAllSupportTickets } from "../../actions/supportActions";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import Orders from "./Orders";
@@ -18,7 +21,40 @@ import PromoTimer from "./ApplyPromoCode";
 import SupportTicket from "./SupportTicket";
 import Feedback from "./Feedback";
 
-function AdminDashboard({ history }) {
+function AdminDashboard() {
+  const dispatch = useDispatch();
+  const history = useHistory();
+
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+  // console.log("userInfo:", userInfo);
+
+  // const userProfile = useSelector((state) => state.userProfile);
+  // const { profile } = userProfile;
+  // console.log("profile:", profile?.is_usd_selected);
+
+  useEffect(() => {
+    if (!userInfo) {
+      window.location.href = "/login";
+    }
+  }, [userInfo]);
+
+  const allTicketList = useSelector(
+    (state) => state.allTicketList
+  );
+  const { tickets } = allTicketList;
+
+  const supportMsgCounted = tickets?.reduce(
+    (total, userMessages) => total + userMessages.admin_user_msg_count,
+    0
+  );
+
+  useEffect(() => {
+    if (userInfo) {
+      dispatch(listAllSupportTickets());
+    }
+  }, [dispatch, userInfo]);
+
   const [activeTab, setActiveTab] = useState("admin-dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -92,7 +128,9 @@ function AdminDashboard({ history }) {
               <div>
                 <Button
                   variant={
-                    activeTab === "admin-dashboard" ? "info" : "outline-info"
+                    activeTab === "admin-dashboard"
+                      ? "primary"
+                      : "outline-primary"
                   }
                   className="sidebar-link"
                   onClick={() => handleTabChange("admin-dashboard")}
@@ -102,7 +140,9 @@ function AdminDashboard({ history }) {
               </div>
               <div>
                 <Button
-                  variant={activeTab === "orders" ? "info" : "outline-info"}
+                  variant={
+                    activeTab === "orders" ? "primary" : "outline-primary"
+                  }
                   className="sidebar-link"
                   onClick={() => handleTabChange("orders")}
                 >
@@ -111,7 +151,9 @@ function AdminDashboard({ history }) {
               </div>
               <div>
                 <Button
-                  variant={activeTab === "payments" ? "info" : "outline-info"}
+                  variant={
+                    activeTab === "payments" ? "primary" : "outline-primary"
+                  }
                   className="sidebar-link"
                   onClick={() => handleTabChange("payments")}
                 >
@@ -121,7 +163,9 @@ function AdminDashboard({ history }) {
               <div>
                 <Button
                   variant={
-                    activeTab === "order-shipment" ? "info" : "outline-info"
+                    activeTab === "order-shipment"
+                      ? "primary"
+                      : "outline-primary"
                   }
                   className="sidebar-link"
                   onClick={() => handleTabChange("order-shipment")}
@@ -133,7 +177,7 @@ function AdminDashboard({ history }) {
               <div>
                 <Button
                   variant={
-                    activeTab === "send-message" ? "info" : "outline-info"
+                    activeTab === "send-message" ? "primary" : "outline-primary"
                   }
                   className="sidebar-link"
                   onClick={() => handleTabChange("send-message")}
@@ -144,7 +188,9 @@ function AdminDashboard({ history }) {
 
               <div>
                 <Button
-                  variant={activeTab === "send-email" ? "info" : "outline-info"}
+                  variant={
+                    activeTab === "send-email" ? "primary" : "outline-primary"
+                  }
                   className="sidebar-link"
                   onClick={() => handleTabChange("send-email")}
                 >
@@ -155,7 +201,9 @@ function AdminDashboard({ history }) {
               <div>
                 <Button
                   variant={
-                    activeTab === "message-inbox" ? "info" : "outline-info"
+                    activeTab === "message-inbox"
+                      ? "primary"
+                      : "outline-primary"
                   }
                   className="sidebar-link"
                   onClick={() => handleTabChange("message-inbox")}
@@ -168,8 +216,8 @@ function AdminDashboard({ history }) {
                 <Button
                   variant={
                     activeTab === "credit-point-requests"
-                      ? "info"
-                      : "outline-info"
+                      ? "primary"
+                      : "outline-primary"
                   }
                   className="sidebar-link"
                   onClick={() => handleTabChange("credit-point-requests")}
@@ -181,7 +229,9 @@ function AdminDashboard({ history }) {
               <div>
                 <Button
                   variant={
-                    activeTab === "set-promo-code" ? "info" : "outline-info"
+                    activeTab === "set-promo-code"
+                      ? "primary"
+                      : "outline-primary"
                   }
                   className="sidebar-link"
                   onClick={() => handleTabChange("set-promo-code")}
@@ -192,7 +242,7 @@ function AdminDashboard({ history }) {
 
               {/* <div>
                 <Button
-                  variant={activeTab === "promo-code" ? "info" : "outline-info"}
+                  variant={activeTab === "promo-code" ? "primary" : "outline-primary"}
                   className="sidebar-link"
                   onClick={() => handleTabChange("promo-code")}
                 >
@@ -202,7 +252,9 @@ function AdminDashboard({ history }) {
 
               <div>
                 <Button
-                  variant={activeTab === "feedback" ? "info" : "outline-info"}
+                  variant={
+                    activeTab === "feedback" ? "primary" : "outline-primary"
+                  }
                   className="sidebar-link"
                   onClick={() => handleTabChange("feedback")}
                 >
@@ -213,17 +265,24 @@ function AdminDashboard({ history }) {
               <div>
                 <Button
                   variant={
-                    activeTab === "support-ticket" ? "info" : "outline-info"
+                    activeTab === "support-ticket"
+                      ? "primary"
+                      : "outline-primary"
                   }
                   className="sidebar-link"
                   onClick={() => handleTabChange("support-ticket")}
                 >
-                  <i className="fa fa-ticket"></i> Support Ticket
+                  <i className="fa fa-ticket"></i> Support Ticket{" "}
+                  {supportMsgCounted > 0 && (
+                    <span className="msg-counter">{supportMsgCounted}</span>
+                  )}
                 </Button>
               </div>
               <div>
                 <Button
-                  variant={activeTab === "live-chat" ? "info" : "outline-info"}
+                  variant={
+                    activeTab === "live-chat" ? "primary" : "outline-primary"
+                  }
                   className="sidebar-link"
                   onClick={() => handleTabChange("live-chat")}
                 >
@@ -233,7 +292,9 @@ function AdminDashboard({ history }) {
               <div>
                 <Button
                   variant={
-                    activeTab === "admin-dashboard" ? "info" : "outline-info"
+                    activeTab === "admin-dashboard"
+                      ? "primary"
+                      : "outline-primary"
                   }
                   className="sidebar-link"
                   onClick={() => handleUserDashboard()}

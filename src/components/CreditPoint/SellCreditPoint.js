@@ -2,13 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Button, Container, Row, Col } from "react-bootstrap";
-import { sellCreditPoint } from "../../redux/actions/creditPointActions";
+import { sellCreditPoint } from "../../actions/creditPointActions";
 import { useHistory } from "react-router-dom";
-import Message from "../../Message";
-import Loader from "../../Loader";
+import Message from "../Message";
+import Loader from "../Loader";
 
 function SellCreditPoint() {
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
   const history = useHistory();
 
   const userLogin = useSelector((state) => state.userLogin);

@@ -8,7 +8,7 @@ import { clearCart } from "../../actions/cartActions";
 import {
   createPayment,
   createPaysofterPayment,
-} from "../../actions/paymentActions"; 
+} from "../../actions/paymentActions";
 import Message from "../Message";
 import Loader from "../Loader";
 
@@ -71,7 +71,6 @@ function CardPayment({
   };
 
   const createdAt = new Date().toISOString();
-  const currency = "NGN";
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -82,7 +81,6 @@ function CardPayment({
       amount: promoTotalPrice,
       public_api_key: publicApiKey,
       created_at: createdAt,
-      currency: currency,
 
       card_number: paymentDetails.cardNumber,
       expiration_month_year: paymentDetails.expirationMonthYear,

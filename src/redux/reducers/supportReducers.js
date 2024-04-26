@@ -7,7 +7,7 @@ import {
   CREATE_SUPPORT_MESSAGE_SUCCESS,
   CREATE_SUPPORT_MESSAGE_FAIL,
   LIST_SUPPORT_TICKET_REQUEST,
-  LIST_SUPPORT_TICKET_SUCCESS, 
+  LIST_SUPPORT_TICKET_SUCCESS,
   LIST_SUPPORT_TICKET_FAIL,
   LIST_SUPPORT_MESSAGE_REQUEST,
   LIST_SUPPORT_MESSAGE_SUCCESS,
@@ -27,6 +27,15 @@ import {
   LIST_ALL_TICKET_RESPONSE_REQUEST,
   LIST_ALL_TICKET_RESPONSE_SUCCESS,
   LIST_ALL_TICKET_RESPONSE_FAIL,
+  CLEAR_USER_SUPPORT_MESSAGE_COUNTER_REQUEST,
+  CLEAR_USER_SUPPORT_MESSAGE_COUNTER_SUCCESS,
+  CLEAR_USER_SUPPORT_MESSAGE_COUNTER_FAIL,
+  CLEAR_ADMIN_SUPPORT_MESSAGE_COUNTER_REQUEST,
+  CLEAR_ADMIN_SUPPORT_MESSAGE_COUNTER_SUCCESS,
+  CLEAR_ADMIN_SUPPORT_MESSAGE_COUNTER_FAIL,
+  ADMIN_REPLY_SUPPORT_TICKET_REQUEST,
+  ADMIN_REPLY_SUPPORT_TICKET_SUCCESS,
+  ADMIN_REPLY_SUPPORT_TICKET_FAIL,
 } from "../constants/supportConstants";
 
 const initialState = {
@@ -36,6 +45,38 @@ const initialState = {
   tickets: [],
   ticketMessages: [],
   ticketReplies: [],
+};
+
+export const clearUserSupportMsgCounterReducer = (
+  state = initialState,
+  action
+) => {
+  switch (action.type) {
+    case CLEAR_USER_SUPPORT_MESSAGE_COUNTER_REQUEST:
+      return { loading: true };
+    case CLEAR_USER_SUPPORT_MESSAGE_COUNTER_SUCCESS:
+      return { loading: false, success: true };
+    case CLEAR_USER_SUPPORT_MESSAGE_COUNTER_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const clearAdminSupportMsgCounterReducer = (
+  state = initialState,
+  action
+) => {
+  switch (action.type) {
+    case CLEAR_ADMIN_SUPPORT_MESSAGE_COUNTER_REQUEST:
+      return { loading: true };
+    case CLEAR_ADMIN_SUPPORT_MESSAGE_COUNTER_SUCCESS:
+      return { loading: false, success: true };
+    case CLEAR_ADMIN_SUPPORT_MESSAGE_COUNTER_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
 };
 
 export const createSupportTicketReducer = (state = initialState, action) => {
@@ -58,6 +99,22 @@ export const replySupportTicketReducer = (state = initialState, action) => {
     case REPLY_SUPPORT_TICKET_SUCCESS:
       return { loading: false, success: true };
     case REPLY_SUPPORT_TICKET_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const adminReplySupportTicketReducer = (
+  state = initialState,
+  action
+) => {
+  switch (action.type) {
+    case ADMIN_REPLY_SUPPORT_TICKET_REQUEST:
+      return { loading: true };
+    case ADMIN_REPLY_SUPPORT_TICKET_SUCCESS:
+      return { loading: false, success: true };
+    case ADMIN_REPLY_SUPPORT_TICKET_FAIL:
       return { loading: false, error: action.payload };
     default:
       return state;

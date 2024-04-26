@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { Col, Row } from "react-bootstrap";
 import BuyCreditPoint from "./BuyCreditPoint";
 import BuyUsdCreditPoint from "./BuyUsdCreditPoint";
-import Select from "react-select"; 
+import Select from "react-select";
 
 function SelectCurrency() {
   const userLogin = useSelector((state) => state.userLogin);

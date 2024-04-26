@@ -1,4 +1,4 @@
-// // Paystack.js
+// // PaystackUsd.js
 import React, { useEffect } from "react";
 import { Button, Row, Col, ListGroup } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
@@ -7,8 +7,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { buyCreditPoint } from "../../../actions/creditPointActions";
 import Loader from "../../Loader";
 import Message from "../../Message";
+import { formatAmount } from "../../FormatAmount";
 
-function Paystack({currency, amount, paystackPublicKey, userEmail }) {
+function PaystackUsd({ currency, amount, paystackPublicKey, userEmail }) {
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -76,20 +77,24 @@ function Paystack({currency, amount, paystackPublicKey, userEmail }) {
 
             <ListGroup variant="flush" className="text-center py-2">
               <ListGroup.Item>
-                Amount: {" "}
-                {amount?.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}{" "}{currency}
+                Amount:{" "}
+                {formatAmount(amount)
+
+                // ?.toLocaleString(undefined, {
+                //   minimumFractionDigits: 2,
+                //   maximumFractionDigits: 2,
+                // })
+                }{" "}
+                {currency}
               </ListGroup.Item>
             </ListGroup>
 
             <div className="text-center py-2">
-              <PaystackButton {...paymentObject}>
-                <Button className="w-100 rounded" variant="dark">
+              <Button className="rounded" variant="dark" disabled>
+                <PaystackButton {...paymentObject}>
                   Pay Now ({currency})
-                </Button>
-              </PaystackButton>
+                </PaystackButton>
+              </Button>
             </div>
           </Col>
         </div>
@@ -98,4 +103,4 @@ function Paystack({currency, amount, paystackPublicKey, userEmail }) {
   );
 }
 
-export default Paystack;
+export default PaystackUsd;

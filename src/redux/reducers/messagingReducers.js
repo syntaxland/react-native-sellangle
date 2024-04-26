@@ -9,6 +9,12 @@ import {
   EMAIL_SEND_REQUEST,
   EMAIL_SEND_SUCCESS,
   EMAIL_SEND_FAIL,
+  CLEAR_MESSAGE_COUNTER_REQUEST,
+CLEAR_MESSAGE_COUNTER_SUCCESS,
+CLEAR_MESSAGE_COUNTER_FAIL,
+GET_USER_MESSAGES_REQUEST,
+GET_USER_MESSAGES_SUCCESS,
+GET_USER_MESSAGES_FAIL,
 } from "../constants/messagingConstants";
 
 const initialState = {
@@ -20,6 +26,40 @@ const initialState = {
   success: false,
   sent: false,
   error: null,
+};
+
+export const getUserMessagesReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case GET_USER_MESSAGES_REQUEST:
+      return { loading: true };
+    case GET_USER_MESSAGES_SUCCESS:
+      return {
+        loading: false,
+        success: true,
+        messages: action.payload,
+      };
+
+    case GET_USER_MESSAGES_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const clearMessageCounterReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case CLEAR_MESSAGE_COUNTER_REQUEST:
+      return { loading: true };
+    case CLEAR_MESSAGE_COUNTER_SUCCESS:
+      return {
+        loading: false,
+        success: true,
+      };
+    case CLEAR_MESSAGE_COUNTER_FAIL:
+      return { loading: false, error: action.payload }; 
+    default:
+      return state;
+  }
 };
 
 export const messagingReducer = (state = initialState, action) => {

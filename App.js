@@ -8,7 +8,7 @@ import Footer from "./src/Footer";
 import { StatusBar } from "react-native";
 
 export default function App() {
-  const [store, setStore] = useState(null);
+  const [store, setStore] = useState(null); 
   useEffect(() => {
     const initStore = async () => {
       const store = await initializeStore();
@@ -24,9 +24,9 @@ export default function App() {
   return (
     <Provider store={store}>
       <NavigationContainer>
-        <MyDrawer />
+        <MyDrawer /> 
         <Footer />
-        <StatusBar style="light" />
+        <StatusBar style="auto" /> 
       </NavigationContainer>
     </Provider>
   );

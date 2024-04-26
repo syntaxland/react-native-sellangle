@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Row, Col, Modal } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import Paystack from "./Paystack";
+import PaystackUsd from "./PaystackUsd";
 import Paysofter from "./Paysofter";
 
 function PaymentScreen({
@@ -116,13 +117,30 @@ function PaymentScreen({
               </Row>
             </div>
 
-            {selectedPaymentGateway === "paystack" && (
-              <Paystack
-                currency={currency}
-                amount={amount}
-                userEmail={userEmail}
-                paystackPublicKey={paystackPublicKey}
-              />
+            {currency === "NGN" && (
+              <div>
+                {selectedPaymentGateway === "paystack" && (
+                  <Paystack
+                    currency={currency}
+                    amount={amount}
+                    userEmail={userEmail}
+                    paystackPublicKey={paystackPublicKey}
+                  />
+                )}
+              </div>
+            )}
+
+            {currency === "USD" && (
+              <div>
+                {selectedPaymentGateway === "paystack" && (
+                  <PaystackUsd
+                    currency={currency}
+                    amount={amount}
+                    userEmail={userEmail}
+                    paystackPublicKey={paystackPublicKey}
+                  />
+                )}
+              </div>
             )}
 
             {selectedPaymentGateway === "paysofter" && (

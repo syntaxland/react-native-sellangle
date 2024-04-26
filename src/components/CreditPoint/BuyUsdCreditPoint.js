@@ -7,7 +7,7 @@ import PaymentScreen from "./payment/PaymentScreen";
 // import Select from "react-select";
 
 function BuyUsdCreditPoint({ currency }) {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch(); 
 
   const getPaymentApiKeysState = useSelector(
     (state) => state.getPaymentApiKeysState
@@ -32,9 +32,9 @@ function BuyUsdCreditPoint({ currency }) {
   const handleShowPaymentScreen = () => {
     setShowPaymentScreen(true);
   };
-
+ 
   const USD_CPS_CHOICES = [
-    ["1", "1,000 cps for 1 USD"],
+    ["1", "1,000 cps for 1 USD"], 
     ["5", "5,200 cps for 5 USD"],
     ["10", "10,800 cps for 10 USD"],
     ["15", "16,500 cps for 15 USD"],

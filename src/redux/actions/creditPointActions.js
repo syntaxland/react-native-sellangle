@@ -37,9 +37,130 @@ import {
   GET_BUYER_CREDIT_POINT_REQUEST,
   GET_BUYER_CREDIT_POINT_SUCCESS,
   GET_BUYER_CREDIT_POINT_FAIL,
+
+  BUY_USD_CREDIT_POINT_REQUEST,
+BUY_USD_CREDIT_POINT_SUCCESS,
+BUY_USD_CREDIT_POINT_FAIL,
+
+GET_USD_BUY_CREDIT_POINT_REQUEST,
+GET_USD_BUY_CREDIT_POINT_SUCCESS,
+GET_USD_BUY_CREDIT_POINT_FAIL,
+
+GET_ADS_CPS_CHARGES_REQUEST,
+GET_ADS_CPS_CHARGES_SUCCESS,
+GET_ADS_CPS_CHARGES_FAIL,
+
+GET_USER_CPS_BONUSES_REQUEST,
+GET_USER_CPS_BONUSES_SUCCESS,
+GET_USER_CPS_BONUSES_FAIL,
 } from "../constants/creditPointConstants";
 
+// const API_URL = process.env.REACT_APP_API_URL;
 import { API_URL } from "../../config/apiConfig";
+
+
+export const getUserCpsBonuses = () => async (dispatch, getState) => {
+  try {
+    dispatch({ type: GET_USER_CPS_BONUSES_REQUEST });
+
+    const { 
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.access}`,
+      },
+    };
+
+    const { data } = await axios.get(
+      `${API_URL}/api/get-user-cps-bonuses/`,
+
+      config
+    );
+
+    dispatch({
+      type: GET_USER_CPS_BONUSES_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_USER_CPS_BONUSES_FAIL,
+      payload:
+        error.response && error.response.data.detail
+          ? error.response.data.detail
+          : error.message,
+    });
+  }
+};
+
+export const getAdCpsCharges = () => async (dispatch, getState) => {
+  try {
+    dispatch({ type: GET_ADS_CPS_CHARGES_REQUEST });
+
+    const { 
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.access}`,
+      },
+    };
+
+    const { data } = await axios.get(
+      `${API_URL}/api/get-ad-charges-cps/`,
+
+      config
+    );
+
+    dispatch({
+      type: GET_ADS_CPS_CHARGES_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_ADS_CPS_CHARGES_FAIL,
+      payload:
+        error.response && error.response.data.detail
+          ? error.response.data.detail
+          : error.message,
+    });
+  }
+};
+
+export const getUsdBuyCreditPoint = () => async (dispatch, getState) => {
+  try {
+    dispatch({ type: GET_USD_BUY_CREDIT_POINT_REQUEST });
+
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.access}`,
+      },
+    };
+
+    const { data } = await axios.get(
+      `${API_URL}/api/get-usd-buy-credit-point/`,
+      config
+    );
+
+    dispatch({ type: GET_USD_BUY_CREDIT_POINT_SUCCESS, payload: data });
+  } catch (error) {
+    dispatch({
+      type: GET_USD_BUY_CREDIT_POINT_FAIL,
+      payload:
+        error.response && error.response.data.detail
+          ? error.response.data.detail
+          : error.message,
+    });
+  }
+};
 
 export const getBuyerCreditPoint = () => async (dispatch, getState) => {
   try {
@@ -164,6 +285,44 @@ export const buyCreditPoint = (creditPointData) => async (
   } catch (error) {
     dispatch({
       type: BUY_CREDIT_POINT_FAIL,
+      payload:
+        error.response && error.response.data.detail
+          ? error.response.data.detail
+          : error.message,
+    });
+  }
+};
+
+export const buyUsdCreditPoint = (creditPointData) => async (
+  dispatch,
+  getState
+) => {
+  try {
+    dispatch({ type: BUY_USD_CREDIT_POINT_REQUEST });
+
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.access}`,
+      },
+    };
+
+    const { data } = await axios.post(
+      `${API_URL}/api/buy-usd-credit-point/`,
+      creditPointData,
+      config
+    );
+
+    dispatch({ type: BUY_USD_CREDIT_POINT_SUCCESS, payload: data });
+    // window.location.reload();
+    // window.location.href = "/dashboard/users";
+  } catch (error) {
+    dispatch({
+      type: BUY_USD_CREDIT_POINT_FAIL,
       payload:
         error.response && error.response.data.detail
           ? error.response.data.detail

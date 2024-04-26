@@ -12,7 +12,7 @@ import {
   USER_FAVORITE_PRODUCTS_REQUEST,
   USER_FAVORITE_PRODUCTS_SUCCESS,
   USER_FAVORITE_PRODUCTS_FAIL,
- 
+
   USER_VIEWED_PRODUCTS_REQUEST,
   USER_VIEWED_PRODUCTS_SUCCESS,
   USER_VIEWED_PRODUCTS_FAIL,
@@ -35,14 +35,7 @@ import {
   PRODUCT_SEARCH_FAIL,
 } from "../constants/productConstants";
 
-const initialState = {
-  products: [],
-  loading: false,
-  error: null,
-};
-
-
-export const productListReducers = (state = { products: [] }, action) => { 
+export const productListReducers = (state = { products: [] }, action) => {
   switch (action.type) {
     case PRODUCT_LIST_REQUEST:
       return { laoding: true, products: [] };

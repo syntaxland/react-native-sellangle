@@ -10,7 +10,7 @@ import {
   Text,
   TextInput,
   Button,
-  SafeAreaView,
+  SafeAreaView, 
   ScrollView,
   TouchableOpacity,
 } from "react-native";
@@ -163,7 +163,7 @@ const RegisterScreen = () => {
     isTermsConditionsRead,
   ]);
 
-  console.log("formData:", formData);
+  // console.log("formData:", formData);
 
   const submitHandler = async (e) => {
     e.preventDefault();

@@ -5,7 +5,8 @@ import { Row, Col, Form, Button, Modal } from "react-bootstrap";
 import { debitPaysofterUsdAccountFund } from "../../../actions/paymentActions";
 import Message from "../../Message";
 import Loader from "../../Loader";
-import VerifyUsdAccountFundOtp from "./VerifyUsdAccountFundOtp"; 
+import VerifyUsdAccountFundOtp from "./VerifyUsdAccountFundOtp";
+import { formatAmount } from "../../FormatAmount";
 
 const PaysofterUsdAccountFund = ({
   history,
@@ -46,9 +47,10 @@ const PaysofterUsdAccountFund = ({
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showAccountInfoModal, setShowAccountInfoModal] = useState(false);
   const [showSecurityCodeModal, setShowSecurityCodeModal] = useState(false);
-  const [showVerifyUsdAccountFundOtp, setShowVerifyUsdAccountFundOtp] = useState(
-    false
-  );
+  const [
+    showVerifyUsdAccountFundOtp,
+    setShowVerifyUsdAccountFundOtp,
+  ] = useState(false);
   const [securityCodeVisible, setSecurityCodeVisible] = useState(false);
 
   const handleAccountInfoModalShow = () => {
@@ -132,7 +134,9 @@ const PaysofterUsdAccountFund = ({
           <Col>
             <Row className="text-center py-2">
               <Col md={10}>
-                <h2 className="py-2 text-center">Paysofter Account Fund (USD)</h2>
+                <h2 className="py-2 text-center">
+                  Paysofter Account Fund (USD)
+                </h2>
               </Col>
               <Col md={2}>
                 <Button
@@ -190,7 +194,6 @@ const PaysofterUsdAccountFund = ({
             {loading && <Loader />}
 
             <Form onSubmit={submitHandler}>
-              
               <Form.Group controlId="accountId">
                 <Form.Label>Account ID</Form.Label>
 
@@ -340,12 +343,7 @@ const PaysofterUsdAccountFund = ({
                 >
                   Pay{" "}
                   <span>
-                    ({" "}
-                    {amount?.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}{" "}{currency}
-                    )
+                    ({formatAmount(amount)} {currency})
                   </span>
                 </Button>
               </div>

@@ -12,6 +12,7 @@ import {
   EMAIL_OTP_RESEND_FAIL,
 } from "../constants/emailOtpConstants";
 
+// const API_URL = process.env.REACT_APP_API_URL;
 import { API_URL } from "../../config/apiConfig";
  
 export const sendEmailOtp =

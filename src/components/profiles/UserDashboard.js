@@ -2,15 +2,23 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col, Container, Button } from "react-bootstrap";
 // import { Link} from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 // import { login } from "../../actions/userActions";
 import { getUserProfile } from "../../actions/userProfileActions";
+import { getUserMessages } from "../../actions/messagingActions";
+import {
+  GetActiveBuyerFreeAdMessages,
+  GetActiveBuyerPaidAdMessages,
+  listBuyerFreeAdMessages, 
+  listBuyerPaidAdMessages,
+} from "../../actions/marketplaceSellerActions";
+import { listSupportTicket } from "../../actions/supportActions";
 import UserProfile from "./UserProfile";
 import Orders from "./Orders";
 import Payments from "./Payments";
-import Favorites from "./SavedItems";
 import OrderShipment from "./OrderShipment";
 import OrderItem from "./OrderItem";
 import Reviews from "./Reviews";
@@ -18,24 +26,32 @@ import Dashboard from "./Dashboard";
 import MessageInbox from "./MessageInbox";
 import CreditPoint from "./CreditPoint";
 import PromoProduct from "./Offers";
-import RecommendedProducts from "./RecommendedProducts";
-import ViewedItems from "./ViewedItems";
-// import LiveChat from "./LiveChat";
+import SavedAds from "./SavedAds";
+import ViewedAds from "./ViewedAds";
+import RecommendedAds from "../recommender/RecommendedAds";
+import Inbox from "./Inbox";
 import Referrals from "./Referrals";
-import SupportTicket from "./SupportTicket";
+import SupportTicket from "../support/SupportTicket";
 import Feedback from "./Feedback";
 import Settings from "./Settings";
 
-function UserDashboard({ history }) {
+function UserDashboard() {
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const userProfile = useSelector((state) => state.userProfile);
   const { profile } = userProfile;
   console.log("profile:", profile);
 
+  const getUserMessagesState = useSelector(
+    (state) => state.getUserMessagesState
+  );
+  const { messages } = getUserMessagesState;
+  console.log("messages:", messages);
+
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
-  console.log("userInfo:", userInfo);
+  // console.log("userInfo:", userInfo);
 
   useEffect(() => {
     if (!userInfo) {
@@ -43,11 +59,64 @@ function UserDashboard({ history }) {
     }
   }, [userInfo]);
 
-  useEffect(() => {
-    if (userInfo) {
-      dispatch(getUserProfile());
-    }
-  }, [dispatch, userInfo]);
+  const msgCounted = messages?.reduce(
+    (total, userMessages) => total + userMessages.msg_count,
+    0
+  );
+
+  const listBuyerFreeAdMessagesState = useSelector(
+    (state) => state.listBuyerFreeAdMessagesState
+  );
+  const { freeAdMessages } = listBuyerFreeAdMessagesState;
+
+  const listBuyerPaidAdMessagesState = useSelector(
+    (state) => state.listBuyerPaidAdMessagesState
+  );
+  const { paidAdMessages } = listBuyerPaidAdMessagesState;
+   const listSupportTicketState = useSelector(
+    (state) => state.listSupportTicketState
+  );
+  const { tickets } = listSupportTicketState;
+
+  const supportMsgCounted = tickets?.reduce(
+    (total, userMessages) => total + userMessages.user_msg_count,
+    0
+  );
+
+  const msgFreeAdCounted = freeAdMessages?.reduce(
+    (total, userMessages) => total + userMessages.seller_free_ad_msg_count,
+    0
+  );
+
+  const msgPaidAdCounted = paidAdMessages?.reduce(
+    (total, userMessages) => total + userMessages.seller_paid_ad_msg_count,
+    0
+  );
+
+  const GetActiveBuyerFreeAdMessageState = useSelector(
+    (state) => state.GetActiveBuyerFreeAdMessageState
+  );
+  const { activeBuyerFreeAdMessages } = GetActiveBuyerFreeAdMessageState;
+
+  const GetActiveBuyerPaidAdMessageState = useSelector(
+    (state) => state.GetActiveBuyerPaidAdMessageState
+  );
+  const { activeBuyerPaidAdMessages } = GetActiveBuyerPaidAdMessageState;
+
+  const msgActiveFreeAdCounted = activeBuyerFreeAdMessages?.reduce(
+    (total, userMessages) => total + userMessages.buyer_free_ad_msg_count,
+    0
+  );
+
+  const msgActivePaidAdCounted = activeBuyerPaidAdMessages?.reduce(
+    (total, userMessages) => total + userMessages.buyer_paid_ad_msg_count,
+    0
+  );
+  console.log("msgCounted:", msgCounted);
+  console.log("msgFreeAdCounted:", msgFreeAdCounted);
+  console.log("msgPaidAdCounted:", msgPaidAdCounted);
+  console.log("msgActiveFreeAdCounted:", msgActiveFreeAdCounted);
+  console.log("msgActivePaidAdCounted:", msgActivePaidAdCounted);
 
   const [activeTab, setActiveTab] = useState("user-dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -64,13 +133,23 @@ function UserDashboard({ history }) {
     history.push("/dashboard/admin");
   };
 
-  // const handleAddbusiness = () => {
-  //   history.push("/create-marketplace-seller");
-  // };
+  const handleAddbusiness = () => {
+    history.push("/create-marketplace-seller");
+  };
 
-  // const handleMarketplaceDashboard = () => {
-  //   history.push("/dashboard/marketplace/sellers");
-  // };
+  const handleMarketplaceDashboard = () => {
+    history.push("/dashboard/marketplace/sellers");
+  };
+
+  useEffect(() => {
+    dispatch(getUserProfile());
+    dispatch(getUserMessages());
+    dispatch(GetActiveBuyerFreeAdMessages());
+    dispatch(GetActiveBuyerPaidAdMessages());
+    dispatch(listBuyerFreeAdMessages());
+    dispatch(listBuyerPaidAdMessages());
+          dispatch(listSupportTicket());
+  }, [dispatch, userInfo]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -84,7 +163,7 @@ function UserDashboard({ history }) {
         return <Payments />;
 
       case "favorites":
-        return <Favorites />;
+        return <SavedAds />;
 
       case "order-shipment":
         return <OrderShipment />;
@@ -101,20 +180,20 @@ function UserDashboard({ history }) {
       case "credit-point":
         return <CreditPoint />;
 
-      case "recommended-products":
-        return <RecommendedProducts />;
+      case "recommended-ads":
+        return <RecommendedAds />;
 
       case "offers":
         return <PromoProduct />;
 
       case "viewed-products":
-        return <ViewedItems />;
+        return <ViewedAds />;
 
       case "referrals":
         return <Referrals />;
 
-      // case "live-chat":
-      //   return <LiveChat />;
+      case "inbox":
+        return <Inbox />;
 
       case "support-ticket":
         return <SupportTicket />;
@@ -124,6 +203,9 @@ function UserDashboard({ history }) {
 
       case "settings":
         return <Settings />;
+
+      // case "billing":
+      //   return <Billing />;
 
       default:
         return <Dashboard />;
@@ -148,7 +230,9 @@ function UserDashboard({ history }) {
               <div>
                 <Button
                   variant={
-                    activeTab === "user-dashboard" ? "info" : "outline-info"
+                    activeTab === "user-dashboard"
+                      ? "primary"
+                      : "outline-primary"
                   }
                   className="sidebar-link"
                   // activeClassName="active-link"
@@ -160,16 +244,19 @@ function UserDashboard({ history }) {
 
               <div>
                 <Button
-                  variant={activeTab === "profile" ? "info" : "outline-info"}
+                  variant={
+                    activeTab === "profile" ? "primary" : "outline-primary"
+                  }
                   className="sidebar-link"
                   onClick={() => handleTabChange("profile")}
                 >
-                  <i className="fas fa-user"></i> Profile
+                  <i className="fas fa-user"></i> User Profile
                 </Button>
               </div>
-              <div>
+
+              {/* <div>
                 <Button
-                  variant={activeTab === "orders" ? "info" : "outline-info"}
+                  variant={activeTab === "orders" ? "primary" : "outline-primary"}
                   className="sidebar-link"
                   onClick={() => handleTabChange("orders")}
                 >
@@ -179,7 +266,7 @@ function UserDashboard({ history }) {
               <div>
                 <Button
                   variant={
-                    activeTab === "order-items" ? "info" : "outline-info"
+                    activeTab === "order-items" ? "primary" : "outline-primary"
                   }
                   className="sidebar-link"
                   onClick={() => handleTabChange("order-items")}
@@ -189,7 +276,7 @@ function UserDashboard({ history }) {
               </div>
               <div>
                 <Button
-                  variant={activeTab === "payments" ? "info" : "outline-info"}
+                  variant={activeTab === "payments" ? "primary" : "outline-primary"}
                   className="sidebar-link"
                   onClick={() => handleTabChange("payments")}
                 >
@@ -199,7 +286,7 @@ function UserDashboard({ history }) {
               <div>
                 <Button
                   variant={
-                    activeTab === "order-shipment" ? "info" : "outline-info"
+                    activeTab === "order-shipment" ? "primary" : "outline-primary"
                   }
                   className="sidebar-link"
                   onClick={() => handleTabChange("order-shipment")}
@@ -209,17 +296,19 @@ function UserDashboard({ history }) {
               </div>
               <div>
                 <Button
-                  variant={activeTab === "reviews" ? "info" : "outline-info"}
+                  variant={activeTab === "reviews" ? "primary" : "outline-primary"}
                   className="sidebar-link"
                   onClick={() => handleTabChange("reviews")}
                 >
                   <i className="fas fa-star"></i> Reviews
                 </Button>
-              </div>
+              </div> */}
 
               <div>
                 <Button
-                  variant={activeTab === "referrals" ? "info" : "outline-info"}
+                  variant={
+                    activeTab === "referrals" ? "primary" : "outline-primary"
+                  }
                   className="sidebar-link"
                   onClick={() => handleTabChange("referrals")}
                 >
@@ -230,76 +319,98 @@ function UserDashboard({ history }) {
               <div>
                 <Button
                   variant={
-                    activeTab === "credit-point" ? "info" : "outline-info"
+                    activeTab === "credit-point" ? "primary" : "outline-primary"
                   }
                   className="sidebar-link"
                   onClick={() => handleTabChange("credit-point")}
                 >
-                  <i className="fas fa-sack-dollar"></i> Bonus Point
+                  <i className="fas fa-sack-dollar"></i> Credit Point
                 </Button>
               </div>
 
               <div>
                 <Button
                   variant={
-                    activeTab === "message-inbox" ? "info" : "outline-info"
+                    activeTab === "inbox"
+                      ? "primary"
+                      : "outline-primary"
                   }
                   className="sidebar-link"
-                  onClick={() => handleTabChange("message-inbox")}
+                  onClick={() => handleTabChange("inbox")}
                 >
-                  <i className="fa fa-message"></i> Inbox
+                  <i className="fa fa-message"></i> Inbox{" "}
+                  {(msgCounted +
+                    msgPaidAdCounted +
+                    msgFreeAdCounted +
+                    msgActiveFreeAdCounted +
+                    msgActivePaidAdCounted) >
+                    0 && (
+                    <span className="msg-counter">
+                      {msgCounted +
+                        msgPaidAdCounted +
+                        msgFreeAdCounted +
+                        msgActiveFreeAdCounted +
+                        msgActivePaidAdCounted}
+                    </span>
+                  )}
                 </Button>
               </div>
 
               <div>
                 <Button
-                  variant={activeTab === "favorites" ? "info" : "outline-info"}
+                  variant={
+                    activeTab === "favorites" ? "primary" : "outline-primary"
+                  }
                   className="sidebar-link"
                   onClick={() => handleTabChange("favorites")}
                 >
-                  <i className="fa fa-heart"></i> Saved Items
+                  <i className="fa fa-heart"></i> Saved Ads
                 </Button>
               </div>
 
               <div>
                 <Button
                   variant={
-                    activeTab === "viewed-products" ? "info" : "outline-info"
+                    activeTab === "viewed-products"
+                      ? "primary"
+                      : "outline-primary"
                   }
                   className="sidebar-link"
                   onClick={() => handleTabChange("viewed-products")}
                 >
-                  <i className="fa fa-eye"></i> Viewed Items
+                  <i className="fa fa-eye"></i> Viewed Ads
                 </Button>
               </div>
 
               <div>
                 <Button
                   variant={
-                    activeTab === "recommended-products"
-                      ? "info"
-                      : "outline-info"
+                    activeTab === "recommended-ads"
+                      ? "primary"
+                      : "outline-primary"
                   }
                   className="sidebar-link"
-                  onClick={() => handleTabChange("recommended-products")}
+                  onClick={() => handleTabChange("recommended-ads")}
                 >
-                  <i className="fa fa-thumbs-up"></i> Recommended
+                  <i className="fa fa-thumbs-up"></i> Recommended Ads
                 </Button>
               </div>
 
-              <div>
+              {/* <div>
                 <Button
-                  variant={activeTab === "offers" ? "info" : "outline-info"}
+                  variant={activeTab === "billing" ? "primary" : "outline-primary"}
                   className="sidebar-link"
-                  onClick={() => handleTabChange("offers")}
+                  onClick={() => handleTabChange("billing")}
                 >
-                  <i className="fa fa-gift"></i> Offers
+                  <i className="fa fa-gift"></i> Billing
                 </Button>
-              </div>
+              </div> */}
 
               <div>
                 <Button
-                  variant={activeTab === "feedback" ? "info" : "outline-info"}
+                  variant={
+                    activeTab === "feedback" ? "primary" : "outline-primary"
+                  }
                   className="sidebar-link"
                   onClick={() => handleTabChange("feedback")}
                 >
@@ -310,18 +421,24 @@ function UserDashboard({ history }) {
               <div>
                 <Button
                   variant={
-                    activeTab === "support-ticket" ? "info" : "outline-info"
+                    activeTab === "support-ticket"
+                      ? "primary"
+                      : "outline-primary"
                   }
                   className="sidebar-link"
                   onClick={() => handleTabChange("support-ticket")}
                 >
-                  <i className="fa fa-ticket"></i> Support Ticket
+                  <i className="fa fa-ticket"></i> Support Ticket 
+                  {" "}
+                  {supportMsgCounted > 0 && (
+                    <span className="msg-counter">{supportMsgCounted}</span>
+                  )}
                 </Button>
               </div>
 
               {/* <div>
                 <Button
-                  variant={activeTab === "live-chat" ? "info" : "outline-info"}
+                  variant={activeTab === "live-chat" ? "primary" : "outline-primary"}
                   className="sidebar-link"
                   onClick={() => handleTabChange("live-chat")}
                 >
@@ -331,7 +448,9 @@ function UserDashboard({ history }) {
 
               <div>
                 <Button
-                  variant={activeTab === "settings" ? "info" : "outline-info"}
+                  variant={
+                    activeTab === "settings" ? "primary" : "outline-primary"
+                  }
                   className="sidebar-link"
                   onClick={() => handleTabChange("settings")}
                 >
@@ -345,8 +464,8 @@ function UserDashboard({ history }) {
                     <Button
                       variant={
                         activeTab === "admin-dashboard"
-                          ? "info"
-                          : "outline-info"
+                          ? "primary"
+                          : "outline-primary"
                       }
                       className="sidebar-link"
                       onClick={() => handleAdminDashboard()}
@@ -360,14 +479,13 @@ function UserDashboard({ history }) {
                 )}
               </div>
 
-              {/* <div className="">
+              <div className="">
                 {!profile?.is_marketplace_seller ? (
                   <div className="mt-3">
-                    
                     <Button
                       size="sm"
                       className="sidebar-link py-2"
-                      variant="outline-success"
+                      variant="outline-primary"
                       onClick={handleAddbusiness}
                     >
                       <i className="fa fa-user-alt"></i> Create Seller Account
@@ -379,17 +497,16 @@ function UserDashboard({ history }) {
                       <Button
                         size="sm"
                         className="sidebar-link py-2"
-                        variant="outline-success"
+                        variant="outline-primary"
                         onClick={handleMarketplaceDashboard}
                       >
-                        <i className="fa fa-user-alt"></i> Go to Marketplace
+                        <i className="fa fa-user-alt"></i> Go to Seller
                         Dashboard
                       </Button>
                     </div>
                   </>
                 )}
-              </div> */}
-
+              </div>
             </div>
           )}
         </Col>

@@ -4,13 +4,14 @@ import { Form, Button } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { buyCreditPoint } from "../../../actions/creditPointActions";
+import { buyUsdCreditPoint } from "../../../actions/creditPointActions";
 import {
   // createPayment,
   createPaysofterPayment,
 } from "../../../actions/paymentActions";
-import Message from "../../Message"; 
+import Message from "../../Message";
 import Loader from "../../Loader";
+import { formatAmount } from "../../FormatAmount";
 
 function UsdCardPayment({
   amount,
@@ -35,11 +36,11 @@ function UsdCardPayment({
   const paysofterPayment = useSelector((state) => state.paysofterPayment);
   const { loading, success, error } = paysofterPayment;
 
-  const buyCreditPointState = useSelector((state) => state.buyCreditPointState);
+  const buyUsdCreditPointState = useSelector((state) => state.buyUsdCreditPointState);
   const {
-    success: buyCreditPointSuccess,
-    error: buyCreditPointError,
-  } = buyCreditPointState;
+    success: buyUsdCreditPointSuccess,
+    error: buyUsdCreditPointError,
+  } = buyUsdCreditPointState;
 
   const [cardType, setCardType] = useState("");
   const [paymentDetails, setPaymentDetails] = useState({
@@ -104,7 +105,7 @@ function UsdCardPayment({
 
   useEffect(() => {
     if (success) {
-      dispatch(buyCreditPoint(creditPointData));
+      dispatch(buyUsdCreditPoint(creditPointData));
       const timer = setTimeout(() => {
         // window.location.reload();
         // window.location.href = "/dashboard/users";
@@ -116,13 +117,13 @@ function UsdCardPayment({
   }, [dispatch, success, history]);
 
   useEffect(() => {
-    if (buyCreditPointSuccess) {
+    if (buyUsdCreditPointSuccess) {
       const timer = setTimeout(() => {
         window.location.reload();
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [buyCreditPointSuccess, history]);
+  }, [buyUsdCreditPointSuccess, history]);
 
   return (
     <div>
@@ -134,15 +135,15 @@ function UsdCardPayment({
       {error && <Message variant="danger">{error}</Message>}
       {loading && <Loader />}
 
-      {buyCreditPointSuccess && (
+      {buyUsdCreditPointSuccess && (
         <Message variant="success">
-          Your account has been credited with the CPS purchased for
-          NGN {amount}.
+          Your account has been credited with the CPS purchased for USD {amount}
+          .
         </Message>
       )}
 
-      {buyCreditPointError && (
-        <Message variant="danger">{buyCreditPointError}</Message>
+      {buyUsdCreditPointError && (
+        <Message variant="danger">{buyUsdCreditPointError}</Message>
       )}
 
       <Form onSubmit={submitHandler}>
@@ -211,16 +212,11 @@ function UsdCardPayment({
           <Button variant="primary" type="submit" disabled={!isFormValid()}>
             Pay{" "}
             <span>
-              (NGN{" "}
-              {amount?.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-              )
+              ({formatAmount(amount)} {currency})
             </span>
           </Button>
         </div>
-        <div className="py-2 d-flex justify-content-center">
+        <div className="py-2 d-flex justify-content-center"> 
           <Form.Text className="text-danger">{error}</Form.Text>
         </div>
       </Form>

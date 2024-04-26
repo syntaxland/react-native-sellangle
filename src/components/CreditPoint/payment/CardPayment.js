@@ -11,6 +11,7 @@ import {
 } from "../../../actions/paymentActions";
 import Message from "../../Message";
 import Loader from "../../Loader";
+import { formatAmount } from "../../FormatAmount";
 
 function CardPayment({
   amount,
@@ -211,12 +212,7 @@ function CardPayment({
           <Button variant="primary" type="submit" disabled={!isFormValid()}>
             Pay{" "}
             <span>
-              ({" "}
-              {amount?.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}{" "}
-              {currency})
+              ({formatAmount(amount)} {currency})
             </span>
           </Button>
         </div>

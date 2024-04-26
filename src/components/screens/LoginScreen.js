@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"; 
 import { faUser, faKey } from "@fortawesome/free-solid-svg-icons";
 import { login } from "../../redux/actions/userActions";
 import Loader from "../../Loader";

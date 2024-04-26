@@ -7,6 +7,7 @@ import { debitPaysofterAccountFund } from "../../../actions/paymentActions";
 import Message from "../../Message";
 import Loader from "../../Loader";
 import VerifyAccountFundOtp from "./VerifyAccountFundOtp";
+import { formatAmount } from "../../FormatAmount";
 
 const PaysofterAccountFund = ({
   history,
@@ -135,7 +136,9 @@ const PaysofterAccountFund = ({
           <Col>
             <Row className="text-center py-2">
               <Col md={10}>
-                <h2 className="py-2 text-center">Paysofter Account Fund (NGN)</h2>
+                <h2 className="py-2 text-center">
+                  Paysofter Account Fund (NGN)
+                </h2>
               </Col>
               <Col md={2}>
                 <Button
@@ -355,11 +358,7 @@ const PaysofterAccountFund = ({
                 >
                   Pay{" "}
                   <span>
-                    {amount?.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })} {" "}{currency}
-                    )
+                    ({formatAmount(amount)} {currency})
                   </span>
                 </Button>
               </div>

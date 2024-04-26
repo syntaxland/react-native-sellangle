@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   productListReducers,
   productDetailsReducers,
+  // productTrackSaveReducer,
   saveProductReducer,
   userFavoriteProductsReducer,
   userViewedProductsReducer,
@@ -55,6 +56,36 @@ import {
   listPaidAdMessageReducer,
   createFreeAdMessageReducer,
   listFreeAdMessageReducer,
+  sellerReplyFreeAdMessageReducer,
+  sellerReplyPaidAdMessageReducer,
+  listSellerFreeAdMessagesReducer,
+  listSellerPaidAdMessagesReducer,
+  listBuyerFreeAdMessagesReducer,
+  listBuyerPaidAdMessagesReducer,
+  toggleFreeAdSaveReducer,
+  togglePaidAdSaveReducer,
+  trackFreeAdViewReducer,
+  trackPaidAdViewReducer,
+  getUserViewedFreeAdsReducer,
+  getUserViewedPaidAdsReducer,
+  getUserSavedFreeAdsReducer,
+  getUserSavedPaidAdsReducer,
+  reviewFreeAdSellerReducer,
+  reviewPaidAdSellerReducer,
+  getFreeAdSellerReviewsReducer,
+  getPaidAdSellerReviewsReducer,
+  reportFreeAdReducer,
+  reportPaidAdReducer,
+  applyPomoCodeReducer,
+  getSellerPaidAdChargesReducer,
+  payAdChargesReducer,
+  getAdChargesReceiptReducer,
+  clearSellerFreeAdMsgCounterReducer,
+  clearBuyerFreeAdMsgCounterReducer,
+  clearSellerPaidAdMsgCounterReducer,
+  clearBuyerPaidAdMsgCounterReducer,
+  GetActiveBuyerFreeAdMessagesReducer,
+  GetActiveBuyerPaidAdMessagesReducer,
 } from "./reducers/marketplaceSellerReducers";
 
 import {
@@ -83,6 +114,8 @@ import {
   paymentListReducer,
   listAllPaymentsReducer,
 } from "./reducers/paymentReducers";
+// import { paymentListReducer } from './reducers/paymentReducers';
+// import { adminPaymentListReducer } from './reducers/adminReducers';
 
 import { favoriteReducer } from "./reducers/favoriteReducers";
 import {
@@ -91,10 +124,13 @@ import {
   listSupportTicketReducer,
   listSupportMessageReducer,
   replySupportTicketReducer,
-  listSupportTicketReplyReducer,
+  adminReplySupportTicketReducer, 
+  listSupportTicketReplyReducer, 
   ticketDetailListReducer,
   allTicketListReducer,
   allTicketResponseReducer,
+  clearUserSupportMsgCounterReducer,
+  clearAdminSupportMsgCounterReducer,
 } from "./reducers/supportReducers";
 import {
   getUserProfileReducer,
@@ -131,9 +167,18 @@ import {
   creditPointEarningsReducer,
   userCreditPointPaymentsReducer,
   allCreditPointPaymentsReducer,
+  buyUsdCreditPointReducer,
+  getUsdBuyCreditPointReducer,
+  getAdCpsChargesReducer,
+  getUserCpsBonusesReducer,
 } from "./reducers/creditPointReducers";
 
-import { messagingReducer, emailReducer } from "./reducers/messagingReducers";
+import {
+  messagingReducer,
+  emailReducer,
+  clearMessageCounterReducer,
+  getUserMessagesReducer,
+} from "./reducers/messagingReducers";
 import {
   // chatReducer,
   chatRoomsReducer,
@@ -143,7 +188,6 @@ import {
   referralReducer,
   referralButtonReducer,
   getUserReferralsReducer,
-  applyPomoCodeReducer,
   createPromoCodeReducer,
   promoProductListReducer,
 } from "./reducers/promoReducer";
@@ -152,6 +196,11 @@ import {
   feedbackCreateReducer,
   feedbackListReducer,
 } from "./reducers/feedbackReducers";
+
+import {
+  getUserRecommendedFreeAdsReducer,
+  getUserRecommendedPaidAdsReducer,
+} from "./reducers/recommenderReducers";
 
 const rootReducer = combineReducers({
   productList: productListReducers,
@@ -185,6 +234,11 @@ const rootReducer = combineReducers({
   sellCreditPointState: sellCreditPointReducer,
   getBuyCreditPointState: getBuyCreditPointReducer,
   getBuyerCreditPointState: getBuyerCreditPointReducer,
+  buyUsdCreditPointState: buyUsdCreditPointReducer,
+  getUsdBuyCreditPointState: getUsdBuyCreditPointReducer,
+  getAdCpsChargesState: getAdCpsChargesReducer,
+  getUserCpsBonusesState: getUserCpsBonusesReducer,
+
   getSellCreditPointState: getSellCreditPointReducer,
   creditPointRequestCreate: creditPointRequestCreateReducer,
   creditPointList: creditPointListReducer,
@@ -227,7 +281,8 @@ const rootReducer = combineReducers({
 
   messaging: messagingReducer,
   emailMessaging: emailReducer,
-  // chat: chatReducer,
+  clearMessageCounterState: clearMessageCounterReducer,
+  getUserMessagesState: getUserMessagesReducer,
   chatRooms: chatRoomsReducer,
   chatMessages: chatMessagesReducer,
 
@@ -236,17 +291,20 @@ const rootReducer = combineReducers({
   listSupportTicketState: listSupportTicketReducer,
   listSupportMessageState: listSupportMessageReducer,
   replySupportTicketState: replySupportTicketReducer,
+  adminReplySupportTicketState: adminReplySupportTicketReducer,
   listSupportTicketReplyState: listSupportTicketReplyReducer,
   ticketDetailList: ticketDetailListReducer,
   allTicketList: allTicketListReducer,
   allTicketResponse: allTicketResponseReducer,
+  clearUserSupportMsgCounterState: clearUserSupportMsgCounterReducer,
+  clearAdminSupportMsgCounterState: clearAdminSupportMsgCounterReducer,
+
   feedbackCreate: feedbackCreateReducer,
   feedbackList: feedbackListReducer,
 
   referral: referralReducer,
   referralButton: referralButtonReducer,
   userReferralState: getUserReferralsReducer,
-  applyPomoCodeState: applyPomoCodeReducer,
   createPromoCodeState: createPromoCodeReducer,
   promoProductList: promoProductListReducer,
 
@@ -292,21 +350,53 @@ const rootReducer = combineReducers({
   listPaidAdMessageState: listPaidAdMessageReducer,
   createFreeAdMessageState: createFreeAdMessageReducer,
   listFreeAdMessageState: listFreeAdMessageReducer,
+
+  sellerReplyFreeAdMessageState: sellerReplyFreeAdMessageReducer,
+  sellerReplyPaidAdMessageState: sellerReplyPaidAdMessageReducer,
+  listSellerFreeAdMessagesState: listSellerFreeAdMessagesReducer,
+  listSellerPaidAdMessagesState: listSellerPaidAdMessagesReducer,
+  listBuyerFreeAdMessagesState: listBuyerFreeAdMessagesReducer,
+  listBuyerPaidAdMessagesState: listBuyerPaidAdMessagesReducer,
+
+  toggleFreeAdSaveState: toggleFreeAdSaveReducer,
+  togglePaidAdSaveState: togglePaidAdSaveReducer,
+  trackFreeAdViewState: trackFreeAdViewReducer,
+  trackPaidAdViewState: trackPaidAdViewReducer,
+
+  getUserViewedFreeAdsState: getUserViewedFreeAdsReducer,
+  getUserViewedPaidAdsState: getUserViewedPaidAdsReducer,
+  getUserSavedFreeAdsState: getUserSavedFreeAdsReducer,
+  getUserSavedPaidAdsState: getUserSavedPaidAdsReducer,
+
+  getUserRecommendedFreeAdsState: getUserRecommendedFreeAdsReducer,
+  getUserRecommendedPaidAdsState: getUserRecommendedPaidAdsReducer,
+
+  reviewFreeAdSellerState: reviewFreeAdSellerReducer,
+  reviewPaidAdSellerState: reviewPaidAdSellerReducer,
+  getFreeAdSellerReviewsState: getFreeAdSellerReviewsReducer,
+  getPaidAdSellerReviewsState: getPaidAdSellerReviewsReducer,
+
+  reportFreeAdState: reportFreeAdReducer,
+  reportPaidAdState: reportPaidAdReducer,
+
+  getSellerPaidAdChargesState: getSellerPaidAdChargesReducer,
+  payAdChargesState: payAdChargesReducer,
+  getAdChargesReceiptState: getAdChargesReceiptReducer,
+
+  clearSellerFreeAdMsgCounterState: clearSellerFreeAdMsgCounterReducer,
+  clearBuyerFreeAdMsgCounterState: clearBuyerFreeAdMsgCounterReducer,
+  clearSellerPaidAdMsgCounterState: clearSellerPaidAdMsgCounterReducer,
+  clearBuyerPaidAdMsgCounterState: clearBuyerPaidAdMsgCounterReducer,
+
+  GetActiveBuyerFreeAdMessageState: GetActiveBuyerFreeAdMessagesReducer,
+  GetActiveBuyerPaidAdMessageState: GetActiveBuyerPaidAdMessagesReducer,
+
+  applyPomoCodeState: applyPomoCodeReducer,
 });
 
 // Function to initialize the store asynchronously
 export const initializeStore = async () => {
-  // Get cartItems from AsyncStorage
-  const getCartItems = async () => {
-    try {
-      const cartItems = await AsyncStorage.getItem("cartItems");
-      return cartItems ? JSON.parse(cartItems) : [];
-    } catch (error) {
-      console.error("Error getting cart items from AsyncStorage:", error);
-      return [];
-    }
-  };
-
+ 
   // Get userInfo from AsyncStorage
   const getUserInfo = async () => {
     try {
@@ -331,7 +421,6 @@ export const initializeStore = async () => {
 
   // Initial state with data from AsyncStorage
   const initialState = {
-    cart: { cartItems: await getCartItems() },
     userLogin: { userInfo: await getUserInfo() },
     userRegister: { registerData: await getUserRegisterData() },
   };

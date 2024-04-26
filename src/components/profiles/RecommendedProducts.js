@@ -1,22 +1,20 @@
 // RecommendedProducts.js
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import { Row, Col } from "react-bootstrap";
 import { fetchRecommendedProducts } from "../../actions/productAction";
 import Product from "../Product";
 import Message from "../Message";
 import Loader from "../Loader";
 
-const RecommendedProducts = () => {
+function RecommendedProducts() {
   const dispatch = useDispatch();
-
+ 
   useEffect(() => {
     dispatch(fetchRecommendedProducts());
   }, [dispatch]);
 
-  const recommendedProducts = useSelector(
-    (state) => state.recommendedProducts
-  );
+  const recommendedProducts = useSelector((state) => state.recommendedProducts);
   const { loading, error, productsRecommended } = recommendedProducts;
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,71 +22,97 @@ const RecommendedProducts = () => {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = productsRecommended?.slice(
+  const currentItems = productsRecommended.slice(
     indexOfFirstItem,
     indexOfLastItem
   );
 
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   const pageNumbers = [];
   for (
     let i = 1;
-    i <= Math.ceil(productsRecommended?.length / itemsPerPage);
+    i <= Math.ceil(productsRecommended.length / itemsPerPage);
     i++
   ) {
     pageNumbers.push(i);
   }
 
-  const handlePagination = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const renderItem = ({ item }) => <Product product={item} />;
-
-  if (loading) {
-    return <Loader />;
-  }
-
-  if (error) {
-    return <Message variant="danger">{error}</Message>;
-  }
-
   return (
-    <View>
-      <Text style={{ textAlign: "center", fontSize: 20 }}>
-        Recommended Products
-      </Text>
-      {currentItems?.length === 0 ? (
-        <Text style={{ textAlign: "center", marginVertical: 10 }}>
-          Recommended products appear here.
-        </Text>
-      ) : (
-        <FlatList
-          data={currentItems}
-          renderItem={renderItem}
-          keyExtractor={(item) => item._id.toString()}
-        />
-      )}
-      <View style={{ flexDirection: "row", justifyContent: "center" }}>
-        {pageNumbers.map((number) => (
-          <TouchableOpacity
-            key={number}
-            onPress={() => handlePagination(number)}
-            style={{
-              backgroundColor:
-                currentPage === number ? "blue" : "transparent",
-              padding: 10,
-              margin: 5,
-              borderRadius: 5,
-            }}
-          >
-            <Text style={{ color: currentPage === number ? "white" : "black" }}>
-              {number}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
+    <div>
+      <Row>
+        <Col>
+          <h1 className="text-center">Recommended Products</h1>
+          {loading ? (
+            <Loader />
+          ) : error ? (
+            <Message variant="danger">{error}</Message>
+          ) : (
+            <>
+              {currentItems.length === 0 ? (
+                <div className="text-center">
+                  Recommended products appear here.
+                </div>
+              ) : (
+                <Row>
+                  {currentItems.map((product) => (
+                    <Col key={product._id} xs={12} sm={12} md={6} lg={4} xl={4}>  
+                      <Product product={product} />
+                    </Col>
+                  ))}
+                </Row>
+              )}
+              <nav className="mt-4">
+                <ul className="pagination justify-content-center">
+                  <li
+                    className={`page-item ${
+                      currentPage === 1 ? "disabled" : ""
+                    }`}
+                  >
+                    <button
+                      className="page-link"
+                      onClick={() => paginate(currentPage - 1)}
+                    >
+                      Previous
+                    </button>
+                  </li>
+                  {pageNumbers.map((number) => (
+                    <li
+                      key={number}
+                      className={`page-item ${
+                        currentPage === number ? "active" : ""
+                      }`}
+                    >
+                      <button
+                        className="page-link"
+                        onClick={() => paginate(number)}
+                      >
+                        {number}
+                      </button>
+                    </li>
+                  ))}
+                  <li
+                    className={`page-item ${
+                      currentPage === pageNumbers.length ? "disabled" : ""
+                    }`}
+                  >
+                    <button
+                      className="page-link"
+                      onClick={() => paginate(currentPage + 1)}
+                    >
+                      Next
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </>
+          )}
+          <hr />
+
+        </Col>
+      </Row>
+    </div>
   );
-};
+}
 
 export default RecommendedProducts;

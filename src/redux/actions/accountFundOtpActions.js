@@ -10,7 +10,11 @@ import {
 } from "../constants/accountFundOtpConstants";
 
 import { PAYSOFTER_API_URL } from "../../config/apiConfig";
-// import { API_URL } from "../../config/apiConfig";
+
+// const API_URL = process.env.REACT_APP_API_URL;
+// const PAYSOFTER_API_URL = process.env.PAYSOFTER_API_URL;
+// const PAYSOFTER_API_URL = "http://localhost:8001";
+// const PAYSOFTER_API_URL = "https://api.paysofter.com";
 
 export const sendOtp = (email, firstName) => async (dispatch) => {
   try {

@@ -2,16 +2,16 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Button, Row, Col } from "react-bootstrap";
-import { sendMessage } from "../../actions/messagingActions"; 
+import { sendMessage } from "../../actions/messagingActions";
 import Message from "../Message";
 import Loader from "../Loader";
-import ReactQuill from "react-quill"; 
+import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 const SendMessage = () => {
   const dispatch = useDispatch();
   const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(""); 
   const [successMessage, setSuccessMessage] = useState("");
 
   const messaging = useSelector((state) => state.messaging);
@@ -83,7 +83,7 @@ const SendMessage = () => {
                     placeholder="Enter subject"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    maxLength={50}
+                    maxLength={100}
                     required
                   />
                 </Form.Group>

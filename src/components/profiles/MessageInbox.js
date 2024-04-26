@@ -1,117 +1,163 @@
 // MessageInbox.js
 import React, { useEffect, useState } from "react";
-import { View, Text, Button, FlatList } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { getMessages } from "../../actions/messagingActions";
+import { useHistory } from "react-router-dom";
+import { ListGroup, Button, Container, Row, Col, Card } from "react-bootstrap";
+import {
+  getUserMessages,
+  clearMessageCounter,
+} from "../../actions/messagingActions";
 import Message from "../Message";
 import Loader from "../Loader";
 import DOMPurify from "dompurify";
+import Pagination from "../Pagination";
 
 const MessageInbox = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
-  const messaging = useSelector((state) => state.messaging);
-  const { loading, messages, loadingError } = messaging;
+  const userProfile = useSelector((state) => state.userProfile);
+  const { profile } = userProfile;
+  console.log("profile:", profile);
+
+  const getUserMessagesState = useSelector(
+    (state) => state.getUserMessagesState
+  );
+  const { loading, messages, error } = getUserMessagesState;
+  console.log("messages:", messages);
+
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+  // console.log("userInfo:", userInfo);
+
+  useEffect(() => {
+    if (!userInfo) {
+      window.location.href = "/login";
+    }
+  }, [userInfo, history]);
+
+  const msgCounted = messages?.reduce(
+    (total, userMessages) => total + userMessages.msg_count, 
+    0
+  );
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = messages?.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   useEffect(() => {
-    dispatch(getMessages());
+    dispatch(getUserMessages());
   }, [dispatch]);
 
-  const renderItem = ({ item }) => (
-    <View>
-      <Text style={styles.subject}>{item.subject}</Text>
-      <Text style={styles.sender}>{item.sender.username}</Text>
-      <Text style={styles.timestamp}>
-        {new Date(item.timestamp).toLocaleString()}
-      </Text>
-      <Text style={styles.message}>
-        {item.message.split(" ").length > 10
-          ? item.message.split(" ").slice(0, 10).join(" ") + " ..."
-          : item.message}
-      </Text>
-      {item.message.split(" ").length > 10 && (
-        <Button
-          title="Read More"
-          onPress={() => expandMessage(item.id)}
-          color="#007bff"
-        />
-      )}
-    </View>
-  );
+  const [expandedMessages, setExpandedMessages] = useState([]);
+
+  const expandMessage = (messageId) => {
+    setExpandedMessages((prevExpanded) => [...prevExpanded, messageId]);
+  };
+
+  const clearMsgCounter = (msgId) => {
+    const messageData = {
+      msg_id: msgId,
+    };
+    dispatch(clearMessageCounter(messageData));
+  };
 
   return (
-    <View>
-      <Text style={styles.title}>Message Inbox</Text>
-      {loadingError && <Message variant="danger">{loadingError}</Message>}
-      {loading ? (
-        <Loader />
-      ) : (
-        <>
-          <FlatList
-            data={messages}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-          />
-          {/* Pagination buttons */}
-          <View style={styles.pagination}>
-            <Button
-              title="Previous"
-              onPress={() => setCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              color="#007bff"
-            />
-            <Text style={styles.pageNumber}>{currentPage}</Text>
-            <Button
-              title="Next"
-              onPress={() => setCurrentPage(currentPage + 1)}
-              disabled={
-                currentPage * itemsPerPage >= messages.length || loading
-              }
-              color="#007bff"
-            />
-          </View>
-        </>
-      )}
-    </View>
-  );
-};
+    <Container>
+      <Row>
+        <Col>
+          <hr />
+          <h2 className="text-center py-3">
+            <i className="fa fa-message"></i> Message Inbox{" "}
+            {msgCounted > 0 && (
+              <>
+                (<span className="msg-counter">{msgCounted}</span>)
+              </>
+            )}
+          </h2>
+          <hr />
+          {error && <Message variant="danger">{error}</Message>}
+          {loading ? (
+            <Loader />
+          ) : (
+            <>
+              {currentItems.length === 0 ? (
+                <div className="text-center py-3">
+                  Inbox messages appear here.
+                </div>
+              ) : (
+                <Card className="py-3">
+                  <Card.Body>
+                    <ListGroup>
+                      {currentItems?.map((message) => (
+                        <ListGroup.Item
+                          key={message.id}
+                          className={`message-list-item ${
+                            !message.is_read ? "unread-message" : ""
+                          }`}
+                        >
+                          <Card.Title>{message.subject}</Card.Title>
+                          <Card.Subtitle className="mb-2 text-muted">
+                            {message?.sender?.username}
+                          </Card.Subtitle>
+                          <Card.Text
+                            dangerouslySetInnerHTML={{
+                              __html: DOMPurify.sanitize(
+                                expandedMessages.includes(message.id)
+                                  ? message.message
+                                  : message?.message?.split(" ")?.length > 1
+                                  ? message.message
+                                      .split(" ")
+                                      ?.slice(0, 1)
+                                      .join(" ") + " ..."
+                                  : message.message
+                              ),
+                            }}
+                          />
 
-const styles = {
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop: 20,
-  },
-  subject: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  sender: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  timestamp: {
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  message: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  pagination: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 20,
-  },
-  pageNumber: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+                          {message?.message?.split(" ")?.length > 0 &&
+                            !expandedMessages?.includes(message.id) && (
+                              <Button
+                                variant="link"
+                                onClick={() => {
+                                  expandMessage(message.id);
+                                  clearMsgCounter(message.id);
+                                }}
+                              >
+                                View
+                              </Button>
+                            )}
+                          <small className="d-flex justify-content-between text-muted">
+                            {new Date(message.timestamp).toLocaleString()}
+                            {message.is_read && (
+                              <span className="text-success">
+                                <i className="fas fa-check-double"> </i>Seen
+                              </span>
+                            )}
+                          </small>
+                        </ListGroup.Item>
+                      ))}
+                    </ListGroup>
+                  </Card.Body>
+                </Card>
+              )}
+              <Pagination
+                itemsPerPage={itemsPerPage}
+                totalItems={messages?.length}
+                currentPage={currentPage}
+                paginate={paginate}
+              />
+            </>
+          )}
+        </Col>
+      </Row>
+    </Container>
+  );
 };
 
 export default MessageInbox;

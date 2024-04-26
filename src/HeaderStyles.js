@@ -9,8 +9,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    backgroundColor: '#6c757d', 
-    // backgroundColor: "#0f172a",
+    // backgroundColor: '#6c757d', 
+    backgroundColor: "#007bff",
 
   },
   // logo: {

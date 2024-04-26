@@ -57,10 +57,7 @@ const MessageInbox = () => {
                       expandedMessages.includes(message.id)
                         ? message.message
                         : message.message.split(" ").length > 10
-                        ? message.message
-                            .split(" ")
-                            .slice(0, 10)
-                            .join(" ") + " ..."
+                        ? message.message.split(" ").slice(0, 10).join(" ") + " ..."
                         : message.message
                     ),
                   }}
@@ -74,12 +71,7 @@ const MessageInbox = () => {
                       Read More
                     </Button>
                   )}
-                  
-                <div className="d-flex justify-content-end">
-                  <Button variant="success" className="rounded" size="sm">
-                    <i className="fa fa-edit"></i> Edit
-                  </Button>
-                </div>
+                  <div className="d-flex justify-content-end"><Button variant="success" className="rounded" size="sm"><i className="fa fa-edit"></i> Edit</Button></div>
               </ListGroup.Item>
             ))}
           </ListGroup>

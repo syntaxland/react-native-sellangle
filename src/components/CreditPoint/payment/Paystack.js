@@ -7,8 +7,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { buyCreditPoint } from "../../../actions/creditPointActions";
 import Loader from "../../Loader";
 import Message from "../../Message";
+import { formatAmount } from "../../FormatAmount";
 
-function Paystack({currency, amount, paystackPublicKey, userEmail }) { 
+function Paystack({ currency, amount, paystackPublicKey, userEmail }) {
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -75,11 +76,7 @@ function Paystack({currency, amount, paystackPublicKey, userEmail }) {
 
             <ListGroup variant="flush" className="text-center py-2">
               <ListGroup.Item>
-                Amount:{" "}
-                {amount?.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}{" "}{currency}
+                Amount: {formatAmount(amount)} {currency}
               </ListGroup.Item>
             </ListGroup>
 
@@ -88,7 +85,7 @@ function Paystack({currency, amount, paystackPublicKey, userEmail }) {
                 <Button className="w-100 rounded" variant="dark">
                   Pay Now
                 </Button>
-              </PaystackButton>
+              </PaystackButton> 
             </div>
           </Col>
         </div>

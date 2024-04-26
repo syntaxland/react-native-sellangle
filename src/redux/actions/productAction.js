@@ -1,6 +1,6 @@
 // productAction.js
 import axios from "axios";
-import { 
+import {
   PRODUCT_LIST_REQUEST,
   PRODUCT_LIST_SUCCESS,
   PRODUCT_LIST_FAIL,
@@ -8,7 +8,7 @@ import {
   PRODUCT_DETAILS_SUCCESS,
   PRODUCT_DETAILS_FAIL,
   SAVE_PRODUCT_REQUEST,
-  SAVE_PRODUCT_SUCCESS, 
+  SAVE_PRODUCT_SUCCESS,
   SAVE_PRODUCT_FAIL,
   REMOVE_PRODUCT_REQUEST,
   REMOVE_PRODUCT_SUCCESS,
@@ -29,15 +29,16 @@ import {
   PRODUCT_SEARCH_REQUEST,
   PRODUCT_SEARCH_SUCCESS,
   PRODUCT_SEARCH_FAIL,
-} from "../constants/productConstants"; 
+} from "../constants/productConstants";
 
+// const API_URL = process.env.REACT_APP_API_URL;
 import { API_URL } from "../../config/apiConfig";
 
 export const listProducts = () => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_LIST_REQUEST });
     const { data } = await axios.get(`${API_URL}/api/products/`);
-    dispatch({ 
+    dispatch({
       type: PRODUCT_LIST_SUCCESS,
       payload: data,
     });
@@ -181,7 +182,7 @@ export const getUserFavoriteProducts = () => async (dispatch, getState) => {
         Authorization: `Bearer ${userInfo.access}`,
       },
     };
- 
+
     const response = await axios.get(
       `${API_URL}/api/get-user-favorite-products/`,
       config
