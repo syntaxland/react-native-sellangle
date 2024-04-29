@@ -7,9 +7,9 @@ import { getUserProfile } from "../../actions/userProfileActions";
 import AllPaidAdScreen from "./AllPaidAdScreen";
 import AllFreeAdScreen from "./AllFreeAdScreen";
 import SellerSearchCard from "./SellerSearchCard";
-import FilterBar from "./FilterBar";
+import FilterBar from "./FilterBar"; 
 import {
-  getSellerUsernameSearch,
+  getSellerUsernameSearch, 
   getAllPaidAd,
   getAllFreeAd,
 } from "../../actions/marketplaceSellerActions";

@@ -2,7 +2,7 @@
   "expo": {
     "name": "react-native-sellangle",
     "slug": "sellangle",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
@@ -25,7 +27,7 @@
               "foregroundImage": "./assets/adaptive-icon.png",
               "backgroundColor": "#ffffff"
             },
-            "versionCode": 2,
+            "versionCode": 4,
             "package": "com.jondebosco.sellangle"
           },
           "ios": {
@@ -42,6 +44,9 @@
         "projectId": "e6f45b54-3975-4728-9b27-1af775f9145b"
       }
     },
-    "owner": "jondebosco"
+    "owner": "jondebosco",
+    "android": {
+      "package": "com.jondebosco.sellangle"
+    }
   }
 }
