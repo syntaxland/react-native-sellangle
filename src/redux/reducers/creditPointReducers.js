@@ -155,7 +155,7 @@ export const getBuyCreditPointReducer = (state = initialState, action) => {
   }
 };
 
-export const getSellCreditPointReducer = (state = initialState, action) => {
+export const getSellCreditPointReducer = (state = initialState, action) => { 
   switch (action.type) {
     case GET_SELL_CREDIT_POINT_REQUEST:
       return { ...state, loading: true };

@@ -233,7 +233,7 @@ export const getUserSellCreditPoint = () => async (dispatch, getState) => {
     } = getState();
 
     const config = {
-      headers: {
+      headers: { 
         Authorization: `Bearer ${userInfo.access}`,
       },
     };

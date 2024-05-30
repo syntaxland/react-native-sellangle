@@ -1,55 +1,55 @@
-// AllPaidAdCard.js
 import React, { useState, useEffect } from "react";
-import { Card, Button, Modal, Row, Col } from "react-bootstrap";
-import { Link, useHistory } from "react-router-dom";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Modal,
+  ScrollView,
+  SafeAreaView,
+  StyleSheet,
+} from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faEye,
+  faClock,
+  faMessage,
+  faMapMarkerAlt,
+  faFlag,
+} from "@fortawesome/free-solid-svg-icons";
+import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
-import RatingSeller from "../RatingSeller";
 import {
   getSellerAccount,
   getPaidAdDetail,
-  // togglePaidAdSave,
   trackPaidAdView,
-} from "../../actions/marketplaceSellerActions";
-// import Message from "../Message";
-// import Loader from "../Loader";
-import PromoTimer from "../PromoTimer";
-import ProductPrice from "../ProductPrice";
+} from "../../redux/actions/marketplaceSellerActions";
 import ReportPaidAd from "./ReportPaidAd";
 import TogglePaidAdSave from "./TogglePaidAdSave";
 import ReviewPaidAdSeller from "./ReviewPaidAdSeller";
-import { formatAmount } from "../FormatAmount";
+import { formatAmount } from "../../FormatAmount";
+import { formatCount } from "../../FormatCount";
+import PromoTimer from "../../PromoTimer";
+import RatingSeller from "../../RatingSeller";
 
 function AllPaidAdCard({ product }) {
   const dispatch = useDispatch();
-
-  const history = useHistory();
-
-  const userLogin = useSelector((state) => state.userLogin);
-  const { userInfo } = userLogin;
+  const navigation = useNavigation();
 
   const getPaidAdDetailState = useSelector(
     (state) => state.getPaidAdDetailState
   );
-  const {
-    sellerAvatarUrl,
-    // isSellerVerified,
-    sellerRating,
-    sellerReviewCount,
-  } = getPaidAdDetailState;
+  const { sellerAvatarUrl, sellerRating, sellerReviewCount } =
+    getPaidAdDetailState;
 
-  // const [reviewSellerModal, setReviewSellerModal] = useState(false);
-  // const handleReviewSellerOpen = () => {
-  //   setReviewSellerModal(true);
-  // };
-  // const handleReviewSellerClose = () => {
-  //   setReviewSellerModal(false);
-  // };
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
 
   const [reportAdModal, setReportAdModal] = useState(false);
 
   const handleReportAdOpen = () => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     } else {
       setReportAdModal(true);
     }
@@ -58,18 +58,6 @@ function AllPaidAdCard({ product }) {
   const handleReportAdClose = () => {
     setReportAdModal(false);
   };
-
-  // useEffect(() => {
-  //   if (
-  //     userInfo &&
-  //     userInfo.favorite_products &&
-  //     userInfo.favorite_products.includes(product.id)
-  //   ) {
-  //     setProductSaved(true);
-  //   } else {
-  //     setProductSaved(false);
-  //   }
-  // }, [userInfo, product.id]);
 
   useEffect(() => {
     const pk = product.id;
@@ -85,28 +73,16 @@ function AllPaidAdCard({ product }) {
 
   const viewProductHandler = () => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     } else {
       dispatch(trackPaidAdView(adData));
-      history.push(`/paid-ad-detail/${product.id}`);
+      navigation.navigate("Promoted Ad Detail", { id: product.id });
     }
   };
 
-  function formatCount(viewCount) {
-    if (viewCount >= 1000000) {
-      // Format as million
-      return (viewCount / 1000000).toFixed(1) + "m";
-    } else if (viewCount >= 1000) {
-      // Format as thousand
-      return (viewCount / 1000).toFixed(1) + "k";
-    } else {
-      return viewCount?.toString();
-    }
-  }
-
   const handleClickMessageSeller = () => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     } else {
       const queryParams = {
         id: product.id,
@@ -118,265 +94,193 @@ function AllPaidAdCard({ product }) {
         seller_username: product.seller_username,
         expiration_date: product.expiration_date,
         ad_rating: sellerRating,
-        // ad_rating: product.ad_rating,
       };
 
-      history.push({
-        pathname: `/buyer/paid/ad/message/${product.id}`,
-        search: `?${new URLSearchParams(queryParams).toString()}`,
-      });
+      navigation.navigate("MessageSeller", { queryParams });
     }
   };
 
   return (
-    <Row className="d-flex justify-content-center">
-      <Col>
-        <Card className="my-3 p-3 rounded">
-          <Link onClick={viewProductHandler}>
-            <Card.Img src={product.image1} />
-          </Link>
+    <View style={styles.card}>
+      <TouchableOpacity onPress={viewProductHandler}>
+        <Image source={{ uri: product.image1 }} style={styles.image} />
+      </TouchableOpacity>
 
-          <Card.Body>
-            <div className="d-flex justify-content-between py-2">
-              <Link onClick={viewProductHandler}>
-                <Card.Title as="div">
-                  <strong>{product.ad_name}</strong>
-                </Card.Title>
-              </Link>
-            </div>
+      <View style={styles.body}>
+        <TouchableOpacity onPress={viewProductHandler}>
+          <Text style={styles.title}>{product.ad_name}</Text>
+        </TouchableOpacity>
 
-            <div className="d-flex justify-content-between py-2">
-              <span>
-                <Button
-                  variant="outline-success"
-                  size="sm"
-                  className="rounded"
-                  disabled
-                >
-                  <i>Promoted</i>
-                </Button>
-              </span>
+        <View style={styles.ratingContainer}>
+          <RatingSeller
+            value={sellerRating}
+            text={`${formatCount(sellerReviewCount)} reviews `}
+            color={"green"}
+          />
+          <ReviewPaidAdSeller adId={product?.id} />
+        </View>
 
-              {/* <div>
-                <span>
-                  {sellerAccount?.is_seller_verified ? (
-                    <>
-                      <Button
-                        variant="outline-success"
-                        size="sm"
-                        className="rounded"
-                        disabled
-                      >
-                        <i className="fas fa-user-check"></i> <i>Verified ID</i>{" "}
-                        <i
-                          className="fas fa-check-circle"
-                          style={{ fontSize: "18px", color: "blue" }}
-                        ></i>
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        className="rounded"
-                        disabled
-                      >
-                        <i className="fas fa-user"></i> <i>ID Not Verified</i>{" "}
-                        <i
-                          // className="fas fa-check-circle"
-                          style={{ fontSize: "18px", color: "red" }}
-                        ></i>
-                      </Button>
-                    </>
-                  )}
-                </span>
-              </div> */}
-            </div>
+        <Text style={styles.views} onPress={viewProductHandler}>
+          <FontAwesomeIcon icon={faEye} size={16} />{" "}
+          {formatCount(product?.ad_view_count)} views
+        </Text>
 
-            <div className="d-flex justify-content-between">
-              <div as="div">
-                <div className="py-2">
-                  <RatingSeller
-                    value={sellerRating}
-                    text={`${formatCount(sellerReviewCount)} reviews `}
-                    color={"green"}
-                  />
+        <Text style={styles.price}>
+          {formatAmount(product?.price)} {product?.currency}{" "}
+          {product?.is_price_negotiable ? <Text>(Negotiable)</Text> : null}
+        </Text>
 
-                  {/* {userInfo ? (
-                    <>
-                      <Link onClick={handleReviewSellerOpen}>
-                        (Seller Reviews)
-                      </Link>
-                    </>
-                  ) : (
-                    <Link onClick={() => history.push("/login")}>
-                      (Seller Reviews)
-                    </Link>
-                  )} */}
-                  <ReviewPaidAdSeller adId={product?.id} />
-                </div>
-              </div>
+        <View style={styles.promoContainer}>
+          <Text style={styles.promoText}>
+            <FontAwesomeIcon icon={faClock} size={16} /> Expires in:{" "}
+            <PromoTimer expirationDate={product?.expiration_date} />
+          </Text>
+        </View>
 
-              <Card.Text as="div" className="py-2">
-                <span className="text-right" onClick={viewProductHandler}>
-                  <i className="fas fa-eye"></i>{" "}
-                  {formatCount(product?.ad_view_count)} views
-                </span>
-              </Card.Text>
-            </div>
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleClickMessageSeller}
+          >
+            <Text style={styles.buttonText}>
+              <FontAwesomeIcon icon={faMessage} size={16} /> Message Seller
+            </Text>
+          </TouchableOpacity>
+          <TogglePaidAdSave ad={product} />
+        </View>
 
-            <div className="d-flex justify-content-between">
-              <Card.Text as="h5" className="py-2">
-                <span>
-                  
-                  {product?.show_strike_through_promo_price ? (
-                    <>
-                      <ProductPrice
-                        price={product?.price}
-                        currency={product?.currency}
-                        altPrice={product?.usd_price}
-                        altCurrency={product?.usd_currency}
-                        discountPercentage={product?.discount_percentage}
-                      />
-                    </>
-                  ) : (
-                    <>
-                    {formatAmount(product?.price)} {product?.currency}{" "}
-                  {product?.usd_price ? (
-                    <span>
-                      {" "}
-                      / {formatAmount(product?.usd_price)}{" "}
-                      {product?.usd_currency}{" "}
-                    </span>
-                  ) : (
-                    <></>
-                  )}{" "}
-                    </>
-                  )}
-                  {product?.is_price_negotiable ? <i>(Negotiable)</i> : <></>}
-                </span>
-              </Card.Text>
-            </div>
+        <View style={styles.locationContainer}>
+          <Text style={styles.locationText}>
+            <FontAwesomeIcon icon={faMapMarkerAlt} size={16} /> {product?.city}{" "}
+            {product?.state_province}, {product?.country}.
+          </Text>
 
-            <div className="d-flex justify-content-end">
-              <span className="py-2">
-                {product?.promo_code ? (
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
-                    className="py-2 rounded"
-                    disabled
-                  >
-                    <i>
-                      Promo Code: {product?.promo_code}{" "}
-                      {product?.discount_percentage}% Off
-                    </i>
-                  </Button>
-                ) : (
-                  <></>
-                )}
-              </span>
-            </div>
+          <TouchableOpacity
+            style={styles.reportButton}
+            onPress={handleReportAdOpen}
+          >
+            <Text style={styles.buttonText}>
+              <FontAwesomeIcon icon={faFlag} size={16} /> Report Ad
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-            <div className="d-flex justify-content-between">
-              <span className="py-2">
-                <Button
-                  variant="outline-danger"
-                  size="sm"
-                  className="py-2 rounded"
-                  disabled
-                >
-                  <i className="fas fa-clock"></i> Expires in:{" "}
-                  <PromoTimer expirationDate={product?.expiration_date} />
-                </Button>
-              </span>
-            </div>
-
-            <div className="d-flex justify-content-between py-2">
-              <span className="py-2">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className="py-2 rounded"
-                  onClick={handleClickMessageSeller}
-                >
-                  <i className="fa fa-message"></i> Message Seller
-                </Button>
-              </span>
-
-              <div>
-                <TogglePaidAdSave ad={product} />
-              </div>
-            </div>
-
-            <div className="d-flex justify-content-between py-2">
-              <span>
-                <Button
-                  variant="outline-transparent"
-                  size="sm"
-                  className="py-2 rounded"
-                  disabled
-                >
-                  <i className="fas fa-map-marker-alt"></i> {product?.city}{" "}
-                  {product?.state_province}, {product?.country}.
-                </Button>
-              </span>
-
-              {/* <span>
-            <Button
-              variant="outline-transparent"
-              size="sm"
-              className="py-2 rounded"
-              disabled
-            >
-              <i className="fas fa-map-marker-alt"></i>{" "}
-              {getCityLabel(product?.city)},{" "}
-              {getStateLabel(product?.state_province)},{" "}
-              {getCountryLabel(product?.country)}.
-            </Button>
-          </span> */}
-
-              <span>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  className="rounded py-2"
-                  onClick={handleReportAdOpen}
-                  // disabled
-                >
-                  <i className="fa fa-flag"></i> Report Ad
-                </Button>
-              </span>
-            </div>
-          </Card.Body>
-        </Card>
-        <div className="d-flex justify-content-center py-2">
-          <Modal show={reportAdModal} onHide={handleReportAdClose}>
-            <Modal.Header closeButton>
-              <Modal.Title className="text-center w-100 py-2">
-                Report Ad
-              </Modal.Title>
-            </Modal.Header>
-            <Modal.Body className="d-flex justify-content-center py-2">
-              {reportAdModal && <ReportPaidAd adId={product?.id} />}
-            </Modal.Body>
-          </Modal>
-        </div>
-
-        {/* <Modal show={reviewSellerModal} onHide={handleReviewSellerClose}>
-          <Modal.Header closeButton>
-            <Modal.Title className="text-center w-100 py-2">
-              Seller Reviews
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body className="py-2 d-flex justify-content-center">
-            {reviewSellerModal && <ReviewPaidAdSeller adId={product?.id} />}
-          </Modal.Body>
-        </Modal> */}
-      </Col>
-    </Row>
+        <Modal visible={reportAdModal} transparent={true} animationType="slide">
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Report Ad</Text>
+              <ReportPaidAd adId={product?.id} />
+              <TouchableOpacity onPress={handleReportAdClose}>
+                <Text style={styles.closeButton}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    marginVertical: 10,
+    marginHorizontal: 15,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  image: {
+    width: "100%",
+    height: 200,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  body: {
+    padding: 10,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  views: {
+    color: "grey",
+    marginBottom: 5,
+  },
+  price: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  promoContainer: {
+    marginBottom: 5,
+  },
+  promoText: {
+    color: "green",
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  button: {
+    flex: 1,
+    padding: 10,
+    borderRadius: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 5,
+    backgroundColor: "#007bff",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  locationContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  locationText: {
+    color: "grey",
+    flex: 1,
+  },
+  reportButton: {
+    backgroundColor: "#dc3545",
+    borderRadius: 5,
+    padding: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+  },
+  closeButton: {
+    marginTop: 15,
+    color: "blue",
+    textAlign: "center",
+  },
+});
 
 export default AllPaidAdCard;

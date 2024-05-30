@@ -1,43 +1,47 @@
 // FreeAdProductDetail.js
-import React, { useState, useEffect } from "react";
-import { Link, useHistory } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  Row,
-  Col,
+  View,
+  Text,
   Image,
-  ListGroup,
+  StyleSheet,
+  ScrollView,
   Button,
-  Card,
-  // Form,
-  Container,
   Modal,
-} from "react-bootstrap";
-import RatingSeller from "../RatingSeller";
-import Loader from "../Loader";
-import Message from "../Message";
+  TouchableOpacity,
+  RefreshControl,
+  useWindowDimensions,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { getSellerAccount } from "../../actions/marketplaceSellerActions";
-import { getFreeAdDetail } from "../../actions/marketplaceSellerActions";
-import { Carousel } from "react-responsive-carousel";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
-import PromoTimer from "../PromoTimer";
-import DOMPurify from "dompurify";
-import ReportFreeAd from "./ReportFreeAd";
-import { formatAmount } from "../FormatAmount";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import {
+  getSellerAccount,
+  getFreeAdDetail,
+} from "../../redux/actions/marketplaceSellerActions";
+import RenderHtml from "react-native-render-html";
 import ToggleFreeAdSave from "./ToggleFreeAdSave";
 import ReviewFreeAdSeller from "./ReviewFreeAdSeller";
+import ReportFreeAd from "./ReportFreeAd";
+import Carousel from "react-native-reanimated-carousel";
+import Loader from "../../Loader";
+import Message from "../../Message";
+import RatingSeller from "../../RatingSeller";
+import PromoTimer from "../../PromoTimer";
+import { formatAmount } from "../../FormatAmount";
 
-function FreeAdProductDetail({ match }) {
-  // const [qty, setQty] = useState(1);
+const FreeAdProductDetail = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { id } = route.params;
+  const { width } = useWindowDimensions();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
   }, [userInfo]);
 
@@ -53,45 +57,32 @@ function FreeAdProductDetail({ match }) {
     sellerRating,
     sellerReviewCount,
   } = getFreeAdDetailState;
-  console.log("freeAd isSellerVerified", isSellerVerified);
-
-  // const getSellerAccountState = useSelector(
-  //   (state) => state.getSellerAccountState
-  // );
-  // const { sellerAccount } = getSellerAccountState;
 
   const [showPhoneNumber, setShowPhoneNumber] = useState(false);
-
-  const handleShowPhoneNumber = () => {
-    setShowPhoneNumber(!showPhoneNumber);
-  };
-
   const [expanded, setExpanded] = useState(false);
-
-  const handleClickMore = () => {
-    setExpanded(!expanded);
-  };
+  const [reportAdModal, setReportAdModal] = useState(false);
 
   useEffect(() => {
-    dispatch(getFreeAdDetail(match.params.id));
-
+    dispatch(getFreeAdDetail(id));
     dispatch(getSellerAccount());
-  }, [dispatch, match]);
+  }, [dispatch, id]);
 
-  const [reportAdModal, setReportAdModal] = useState(false);
-  const handleReportAdOpen = () => {
-    setReportAdModal(true);
-  };
-  const handleReportAdClose = () => {
-    setReportAdModal(false);
-  };
+  const handleShowPhoneNumber = () => setShowPhoneNumber(!showPhoneNumber);
+  const handleClickMore = () => setExpanded(!expanded);
+  const handleReportAdOpen = () => setReportAdModal(true);
+  const handleReportAdClose = () => setReportAdModal(false);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    dispatch(getFreeAdDetail(id));
+    setTimeout(() => setRefreshing(false), 2000);
+  }, [dispatch]);
 
   function formatCount(viewCount) {
     if (viewCount >= 1000000) {
-      // Format as million
       return (viewCount / 1000000).toFixed(1) + "m";
     } else if (viewCount >= 1000) {
-      // Format as thousand
       return (viewCount / 1000).toFixed(1) + "k";
     } else {
       return viewCount?.toString();
@@ -102,7 +93,6 @@ function FreeAdProductDetail({ match }) {
     const now = new Date();
     const joinedDate = new Date(joinedTimestamp);
     const duration = now - joinedDate;
-
     const seconds = Math.floor(duration / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
@@ -132,12 +122,9 @@ function FreeAdProductDetail({ match }) {
     const now = new Date();
     const lastLoginDate = new Date(lastLoginTimestamp);
     const duration = now - lastLoginDate;
-
     const days = Math.floor(duration / (24 * 60 * 60 * 1000));
     const weeks = Math.floor(days / 7);
     const months = Math.floor(days / 30);
-
-    console.log("days:", days);
 
     if (days < 3) {
       return "Last seen recently";
@@ -145,45 +132,10 @@ function FreeAdProductDetail({ match }) {
       return "Last seen within a week";
     } else if (months < 1) {
       return "Last seen within a month";
-      // } else if (months > 1) {
-      //   return "Last seen a long time ago";
     } else {
       return "Last seen a long time ago";
     }
   }
-
-  // function calculateDuration(joinedTimestamp) {
-  //   const now = new Date();
-  //   const joinedDate = new Date(joinedTimestamp);
-  //   const duration = now - joinedDate;
-
-  //   const days = Math.floor(duration / (24 * 60 * 60 * 1000));
-  //   const hours = Math.floor(
-  //     (duration % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)
-  //   );
-  //   const minutes = Math.floor((duration % (60 * 60 * 1000)) / (60 * 1000));
-  //   const seconds = Math.floor((duration % (60 * 1000)) / 1000);
-
-  //   const parts = [];
-
-  //   if (days > 0) {
-  //     parts.push(`${days} days`);
-  //   }
-
-  //   if (hours > 0) {
-  //     parts.push(`${hours} hours`);
-  //   }
-
-  //   if (minutes > 0) {
-  //     parts.push(`${minutes} minutes`);
-  //   }
-
-  //   if (seconds > 0) {
-  //     parts.push(`${seconds} seconds`);
-  //   }
-
-  //   return parts.join(", ");
-  // }
 
   const images = [ads?.image1, ads?.image2, ads?.image3].filter(Boolean);
 
@@ -198,344 +150,168 @@ function FreeAdProductDetail({ match }) {
       seller_username: ads.seller_username,
       expiration_date: ads.expiration_date,
       ad_rating: sellerRating,
-      // ad_rating: ads.ad_rating,
     };
 
-    history.push({
-      pathname: `/buyer/free/ad/message/${ads.id}`,
-      search: `?${new URLSearchParams(queryParams).toString()}`,
-    });
+    navigation.navigate("MessageSeller", { ...queryParams });
   };
 
   const handleSellerShopFront = () => {
-    history.push(`/seller-shop-front/${ads?.seller_username}/`);
+    navigation.navigate("SellerShopFront", { username: ads?.seller_username });
   };
 
   return (
-    <Container>
-      <Row>
-        <Col>
-          <Link to="/" className="btn btn-dark my-3">
-            {" "}
-            Go Back
-          </Link>
-
-          {loading ? (
-            <Loader />
-          ) : error ? (
-            <Message variant="danger">{error} </Message>
-          ) : (
-            <Row>
-              <Col md={6}>
-                {images.length > 0 ? (
-                  <Carousel
-                    // showArrows={true}
-                    // showIndicators={true}
-                    // showThumbs={true}
-                    useKeyboardArrows={true}
-                    // dynamicHeight={false}
-                  >
-                    {images.map((image, index) => (
-                      <div className="slide" key={index}>
-                        <Image src={image} alt={`Slide ${index + 1}`} fluid />
-                      </div>
-                    ))}
-                  </Carousel>
-                ) : (
-                  <></>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <Button title="Go Back" onPress={() => navigation.goBack()} />
+      {loading ? (
+        <Loader />
+      ) : error ? (
+        <Message>{error}</Message>
+      ) : (
+        <>
+          <View style={styles.details}>
+            {images.length > 0 && (
+              <Carousel
+                loop
+                width={300}
+                height={300}
+                autoPlay={false}
+                data={images}
+                scrollAnimationDuration={1000}
+                renderItem={({ item }) => (
+                  <Image source={{ uri: item }} style={styles.image} />
                 )}
-              </Col>
+              />
+            )}
+          </View>
 
-              <Col md={3}>
-                <ListGroup variant="flush">
-                  <ListGroup.Item>
-                    <ListGroup.Item>
-                      <h5>{ads?.ad_name}</h5>
-                    </ListGroup.Item>
+          <View style={styles.details}>
+            <Text style={styles.adName}>{ads?.ad_name}</Text>
+            {ads?.count_in_stock > 0 && (
+              <Text style={styles.stock}>
+                Quantity in Stock: {ads?.count_in_stock}
+              </Text>
+            )}
+            <View style={styles.card}>
+              <Text>
+                Expires in: <PromoTimer expirationDate={ads?.expiration_date} />
+              </Text>
+              <Text>
+                Price: {formatAmount(ads.price)} {ads.currency}
+              </Text>
+            </View>
 
-                    {ads?.count_in_stock > 0 && (
-                      <ListGroup.Item>
-                        Quantity in Stock: {ads?.count_in_stock}
-                      </ListGroup.Item>
-                    )}
-                  </ListGroup.Item>
-                </ListGroup>
-              </Col>
-              <Col md={3}>
-                <Card>
-                  <ListGroup variant="flush">
-                    <ListGroup.Item>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        className="py-2 rounded"
-                        disabled
-                      >
-                        <i className="fas fa-clock"></i> Expires in:{" "}
-                        <PromoTimer expirationDate={ads?.expiration_date} />
-                      </Button>
-                    </ListGroup.Item>
-                    <ListGroup.Item>
-                      <Row>
-                        <Col>Price:</Col>
-                        <Col>
-                          <strong>
-                            {formatAmount(ads.price)} {ads.currency}
-                          </strong>
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>
-                    <ListGroup.Item></ListGroup.Item>
+            <View style={styles.description}>
+              <Text>Ad Description:</Text>
+              <RenderHtml
+                contentWidth={width}
+                source={{ html: ads?.description }}
+                tagsStyles={{
+                  div: { height: expanded ? "auto" : 100, overflow: "hidden" },
+                }}
+              />
+              {ads?.description?.split(" ")?.length > 10 && (
+                <Button
+                  title={expanded ? "Less" : "More"}
+                  onPress={handleClickMore}
+                />
+              )}
+            </View>
 
-                    {/* {ads?.count_in_stock > 0 && (
-                      <ListGroup.Item>
-                        <Row>
-                          <Col>Qty</Col>
-                          <Col xs="auto" className="my-1">
-                            <Form.Control
-                              as="select"
-                              // value={qty}
-                              // onChange={(e) => setQty(e.target.value)}
-                            >
-                              {[...Array(ads?.count_in_stock).keys()].map(
-                                (x) => (
-                                  <option key={x + 1} value={x + 1}>
-                                    {x + 1}
-                                  </option>
-                                )
-                              )}
-                            </Form.Control>
-                          </Col>
-                        </Row>
-                      </ListGroup.Item>
-                    )} */}
-
-                    {/* <ListGroup.Item>
-                  <Button
-                    // className="btn-block"
-                    className="w-100 rounded"
-                    variant="success"
-                    // disabled={ads?.count_in_stock === 0}
-                    type="button"
-                    // onClick={addToCartHandler}
-                  >
-                    Pay With Paysofter Promise
-                  </Button>
-                </ListGroup.Item> */}
-                  </ListGroup>
-                </Card>
-              </Col>
-
-              <ListGroup className="py-2">
-                <ListGroup.Item>
-                  Ad Description:
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(
-                        expanded
-                          ? ads?.description
-                          : ads?.description
-                              ?.split(" ")
-                              .slice(0, 10)
-                              .join(" ") + " ..."
-                      ),
-                    }}
+            <View style={styles.sellerDetails}>
+              <TouchableOpacity onPress={handleSellerShopFront}>
+                <Text>Seller: {ads?.seller_username}</Text>
+                {sellerAvatarUrl && (
+                  <Image
+                    source={{ uri: sellerAvatarUrl }}
+                    style={styles.sellerAvatar}
                   />
-                  {ads?.description?.split(" ")?.length > 10 && (
-                    <Button variant="link" onClick={handleClickMore}>
-                      {expanded ? "Less" : "More"}
-                    </Button>
-                  )}
-                </ListGroup.Item>
-
-                <ListGroup.Item>
-                  <ListGroup.Item>Seller Details</ListGroup.Item>
-                  <ListGroup.Item>
-                    {/* <span className="d-flex justify-content-between py-2">
-                      {sellerAvatarUrl && (
-                        <img
-                          src={sellerAvatarUrl}
-                          alt="Seller"
-                          style={{
-                            maxWidth: "80px",
-                            maxHeight: "80px",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
-                      {ads?.seller_username}
-                    </span> */}
-                    <Row>
-                      <Col md={4}>
-                        <Link
-                          to={`/seller-shop-front/${ads?.seller_username}/`}
-                        >
-                          <span className="d-flex justify-content-between py-2">
-                            {sellerAvatarUrl && (
-                              <img
-                                src={sellerAvatarUrl}
-                                alt="Seller"
-                                style={{
-                                  maxWidth: "80px",
-                                  maxHeight: "80px",
-                                  borderRadius: "50%",
-                                }}
-                              />
-                            )}
-                            {ads?.seller_username}
-                          </span>
-                        </Link>
-                        {calculateLastSeen(ads?.user_last_login)}
-                      </Col>
-                      {/* <Col>Go to Seller Shopfront</Col> */}
-                    </Row>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                    <div>
-                      <span>
-                        {isSellerVerified ? (
-                          <>
-                            <Button
-                              variant="outline-success"
-                              size="sm"
-                              className="rounded"
-                              disabled
-                            >
-                              <i className="fas fa-user"></i> <i>Verified ID</i>{" "}
-                              <i
-                                className="fas fa-check-circle"
-                                style={{ fontSize: "18px", color: "blue" }}
-                              ></i>
-                            </Button>
-                          </>
-                        ) : (
-                          <>
-                            <Button
-                              variant="outline-danger"
-                              size="sm"
-                              className="rounded"
-                              disabled
-                            >
-                              <i className="fas fa-user"></i>{" "}
-                              <i>ID Not Verified</i>{" "}
-                              <i style={{ fontSize: "18px", color: "red" }}></i>
-                            </Button>
-                          </>
-                        )}
-                      </span>
-                    </div>
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    <span>
-                      <RatingSeller
-                        value={sellerRating}
-                        text={`${formatCount(sellerReviewCount)} reviews `}
-                        color={"green"}
-                      />
-                    </span>
-                    <span>
-                      {/* {userInfo ? (
-                        <Link to={`/review-list/${ads.id}`}>
-                          (Seller Reviews)
-                        </Link>
-                      ) : (
-                        <Link onClick={() => history.push("/login")}>
-                          (Seller Reviews)
-                        </Link>
-                      )} */}
-                      <ReviewFreeAdSeller adId={ads?.id} />
-                    </span>
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      className="py-2 rounded"
-                      onClick={handleShowPhoneNumber}
-                    >
-                      <i className="fa fa-phone"></i>{" "}
-                      {showPhoneNumber ? "Hide" : "Show"} Contact
-                    </Button>
-
-                    <p className="mt-2">
-                      {showPhoneNumber && <p>{ads?.seller_phone}</p>}
-                    </p>
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    <span className="d-flex justify-content-between py-2">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="py-2 rounded"
-                        onClick={handleClickMessageSeller}
-                      >
-                        <i className="fa fa-message"></i> Message Seller
-                      </Button>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="py-2 rounded"
-                        onClick={handleSellerShopFront}
-                      >
-                        <i className="fa fa-shopping-cart"></i> Go to Seller
-                        Shopfront
-                      </Button>
-                    </span>
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    Joined since {calculateDuration(ads?.seller_joined_since)}
-                  </ListGroup.Item>
-                </ListGroup.Item>
-              </ListGroup>
-            </Row>
-          )}
-          <div className="text-center mt-4 mb-2 text-muted">
-            <p style={{ color: "red" }}>
-              <strong>Disclaimer:</strong> Buyers are advised to exercise
-              caution and conduct thorough verification when dealing with
-              sellers. Ensure the authenticity of both the product and the
-              seller before proceeding with any transactions.
-            </p>
-          </div>
-
-          <div className="d-flex justify-content-between py-2">
-            <div className=" ">
-              <ToggleFreeAdSave ad={ads} />
-            </div>
-
-            <div className="d-flex justify-content-end">
+                )}
+              </TouchableOpacity>
+              <Text>{calculateLastSeen(ads?.user_last_login)}</Text>
+              <Text>
+                {isSellerVerified ? "Verified ID" : "ID Not Verified"}
+              </Text>
+              <RatingSeller
+                value={sellerRating}
+                text={`${formatCount(sellerReviewCount)} reviews`}
+                color="green"
+              />
+              <ReviewFreeAdSeller adId={ads?.id} />
               <Button
-                variant="danger"
-                size="sm"
-                className="rounded"
-                onClick={handleReportAdOpen}
-                // disabled
-              >
-                <i className="fa fa-flag"></i> Report Ad
-              </Button>
-            </div>
-          </div>
-
-          <div className="d-flex justify-content-center ">
-            <Modal show={reportAdModal} onHide={handleReportAdClose}>
-              <Modal.Header closeButton>
-                <Modal.Title className="text-center w-100 py-2">
-                  Report Ad
-                </Modal.Title>
-              </Modal.Header>
-              <Modal.Body className="d-flex justify-content-center py-2">
-                {reportAdModal && <ReportFreeAd adId={ads?.id} />}
-              </Modal.Body>
-            </Modal>
-          </div>
-        </Col>
-      </Row>
-    </Container>
+                title={showPhoneNumber ? "Hide Contact" : "Show Contact"}
+                onPress={handleShowPhoneNumber}
+              />
+              {showPhoneNumber && <Text>{ads?.seller_phone}</Text>}
+              <View style={styles.buttonGroup}>
+                <Button
+                  title="Message Seller"
+                  onPress={handleClickMessageSeller}
+                />
+                <Button
+                  title="Go to Seller Shopfront"
+                  onPress={handleSellerShopFront}
+                />
+              </View>
+              <Text>
+                Joined since {calculateDuration(ads?.seller_joined_since)}
+              </Text>
+            </View>
+          </View>
+          <Modal visible={reportAdModal} onRequestClose={handleReportAdClose}>
+            <ReportFreeAd adId={ads?.id} handleClose={handleReportAdClose} />
+          </Modal>
+        </>
+      )}
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  image: {
+    width: 300,
+    height: 300,
+    borderRadius: 10,
+  },
+  details: {
+    padding: 10,
+  },
+  adName: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  stock: {
+    fontSize: 16,
+    color: "green",
+  },
+  card: {
+    padding: 10,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 10,
+    marginVertical: 10,
+  },
+  description: {
+    marginVertical: 10,
+  },
+  sellerDetails: {
+    marginVertical: 10,
+  },
+  sellerAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  buttonGroup: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+});
 
 export default FreeAdProductDetail;

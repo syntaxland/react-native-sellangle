@@ -1,19 +1,25 @@
 // FilterBar.js
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Button } from "react-bootstrap";
-import Select from "react-select";
-import { ScrollMenu } from "react-horizontal-scrolling-menu";
-import "react-horizontal-scrolling-menu/dist/styles.css";
-import "./FilterBar.css";
+import {
+  View,
+  Text,
+  // Button,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Select from "react-native-picker-select";
 
 const AD_CATEGORY_CHOICES = [
   ["Home Appliances", "Home Appliances"],
+  ["Pets", "Pets"],
+  ["Fashion", "Fashion"],
+  ["Mobile Phones", "Mobile Phones"],
   ["Properties", "Properties"],
   ["Electronics", "Electronics"],
-  ["Fashion", "Fashion"],
   ["Vehicles", "Vehicles"],
   ["Services", "Services"],
-  ["Mobile Phones", "Mobile Phones"],
   ["Health & Beauty", "Health & Beauty"],
   ["Sports", "Sports"],
   ["Jobs", "Jobs"],
@@ -22,7 +28,6 @@ const AD_CATEGORY_CHOICES = [
   ["Repairs", "Repairs"],
   ["Equipment & Tools", "Equipment & Tools"],
   ["CVs", "CVs"],
-  ["Pets", "Pets"],
   ["Others", "Others"],
 ];
 
@@ -35,6 +40,12 @@ const AD_TYPE_CHOICES = {
     ["Air Conditioner", "Air Conditioner"],
     ["Solar", "Solar"],
     ["Kitchen Appliances", "Kitchen Appliances"],
+  ],
+  Pets: [
+    ["Dog", "Dog"],
+    ["Cat", "Cat"],
+    ["Fish", "Fish"],
+    ["Bird", "Bird"],
   ],
   Properties: [
     ["House", "House"],
@@ -116,16 +127,11 @@ const AD_TYPE_CHOICES = {
     ["Design", "Design"],
     ["Education", "Education"],
   ],
-  Pets: [
-    ["Dog", "Dog"],
-    ["Cat", "Cat"],
-    ["Fish", "Fish"],
-    ["Bird", "Bird"],
-  ],
+
   Others: [["Others", "Others"]],
 };
 
-function FilterBar({
+const FilterBar = ({
   freeAds,
   paidAds,
   selectedCategory,
@@ -134,13 +140,13 @@ function FilterBar({
   setSelectedType,
   onCategoryChange,
   onTypeChange,
-}) {
-  console.log("paidAds length:", paidAds?.length);
-  console.log("freeAds length:", freeAds?.length);
-
+}) => {
   const [categoryCounts, setCategoryCounts] = useState({});
   const [typeCounts, setTypeCounts] = useState({});
   const [selectedTypeLabel, setSelectedTypeLabel] = useState("");
+
+  console.log("paidAds length:", paidAds?.length);
+  console.log("freeAds length:", freeAds?.length);
 
   useEffect(() => {
     const categoryCountsObj = {};
@@ -173,16 +179,20 @@ function FilterBar({
   }, [freeAds, paidAds]);
 
   useEffect(() => {
-    const storedCategory = localStorage.getItem("selectedCategory");
-    const storedType = localStorage.getItem("selectedType");
+    const fetchData = async () => {
+      const storedCategory = await AsyncStorage.getItem("selectedCategory");
+      const storedType = await AsyncStorage.getItem("selectedType");
 
-    if (storedCategory && storedType) {
-      setSelectedCategory(storedCategory);
-      setSelectedType(storedType);
-    }
+      if (storedCategory && storedType) {
+        setSelectedCategory(storedCategory);
+        setSelectedType(storedType);
+      }
+    };
+
+    fetchData();
   }, [setSelectedCategory, setSelectedType]);
 
-  const handleCategoryChange = (category) => {
+  const handleCategoryChange = async (category) => {
     setSelectedCategory(category);
     setSelectedType(null);
 
@@ -194,13 +204,17 @@ function FilterBar({
     );
     onCategoryChange(category, filteredFreeAds, filteredPaidAds);
 
-    localStorage.setItem("selectedCategory", category);
-    localStorage.removeItem("selectedType");
+    await AsyncStorage.setItem("selectedCategory", category);
+    await AsyncStorage.removeItem("selectedType");
   };
 
-  const handleTypeChange = (type) => {
+  const handleTypeChange = async (type) => {
+    if (!type) {
+      return;
+    }
+
     setSelectedType(type);
-    setSelectedTypeLabel(type.label);
+    setSelectedTypeLabel(type?.label);
 
     const filteredFreeAds = freeAds?.filter(
       (ad) => ad.ad_category === selectedCategory && ad.ad_type === type.value
@@ -209,76 +223,80 @@ function FilterBar({
       (ad) => ad.ad_category === selectedCategory && ad.ad_type === type.value
     );
 
-    console.log("filteredFreeAds after type change:", filteredFreeAds);
-    console.log("filteredPaidAds after type change:", filteredPaidAds);
-
     onTypeChange(type.value, filteredFreeAds, filteredPaidAds);
-
-    // localStorage.setItem("selectedType", type.value);
   };
 
   return (
-    <Container>
-      <Row className="d-flex justify-content-center py-2">
-        <Col>
-          <div>
-            <ScrollMenu>
-              {AD_CATEGORY_CHOICES.map(([value, label]) => (
-                <div
-                  key={value}
-                  className={`category-item ${
-                    selectedCategory === value ? "active" : ""
-                  }`}
-                >
-                  <Button
-                    variant="outline-primary"
-                    className={`rounded ${
-                      selectedCategory === value ? "active" : ""
-                    }`}
-                    onClick={() => handleCategoryChange(value)}
-                  >
-                    {label} (
-                    {categoryCounts[value] &&
-                      categoryCounts[value].freeAdsCount +
-                        categoryCounts[value].paidAdsCount}
-                    )
-                  </Button>
-                </div>
-              ))}
-            </ScrollMenu>
-          </div>
-
-          <div className="d-flex justify-content-center text-center py-2">
-            <Row>
-              <Col md={12}>
-                {selectedCategory && (
-                  <div>
-                    <Select
-                      options={AD_TYPE_CHOICES[selectedCategory].map(
-                        ([value, label]) => ({
-                          value,
-                          label: `${label} (${typeCounts[value] &&
-                            typeCounts[value].freeAdsCount +
-                              typeCounts[value].paidAdsCount})`,
-                        })
-                      )}
-                      value={selectedType}
-                      onChange={(type) => {
-                        handleTypeChange(type);
-                      }}
-                      placeholder={`Select Type (${selectedTypeLabel})`}
-                      className="rounded py-2 mb-2"
-                      required
-                    />{" "}
-                  </div>
-                )}
-              </Col>
-            </Row>
-          </div>
-        </Col>
-      </Row>
-    </Container>
+    <View style={styles.container}>
+      <ScrollView
+        horizontal={true}
+        contentContainerStyle={styles.scrollContainer}
+      >
+        {AD_CATEGORY_CHOICES.map(([value, label]) => (
+          <TouchableOpacity
+            key={value}
+            style={[
+              styles.categoryItem,
+              selectedCategory === value ? styles.activeCategory : null,
+            ]}
+            onPress={() => handleCategoryChange(value)}
+          >
+            <Text style={styles.categoryText}>
+              {label} (
+              {categoryCounts[value] &&
+                categoryCounts[value].freeAdsCount +
+                  categoryCounts[value].paidAdsCount}
+              )
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+      {selectedCategory && (
+        <View style={styles.selectContainer}>
+          <Select
+            onValueChange={(type) => handleTypeChange(type)}
+            items={AD_TYPE_CHOICES[selectedCategory].map(([value, label]) => ({
+              value,
+              label: `${label} (${
+                typeCounts[value] &&
+                typeCounts[value].freeAdsCount + typeCounts[value].paidAdsCount
+              })`,
+            }))}
+            placeholder={{
+              label: `Select Type (${selectedTypeLabel})`,
+              value: null,
+            }}
+            value={selectedType}
+          />
+        </View>
+      )}
+    </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+  },
+  scrollContainer: {
+    flexDirection: "row",
+    paddingVertical: 10,
+  },
+  categoryItem: {
+    backgroundColor: "#ddd",
+    padding: 10,
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  activeCategory: {
+    backgroundColor: "#007bff",
+  },
+  categoryText: {
+    color: "#fff",
+  },
+  selectContainer: {
+    marginTop: 20,
+  },
+});
 
 export default FilterBar;

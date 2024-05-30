@@ -1,130 +1,106 @@
 // AllFreeAdScreen.js
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { Row, Col } from "react-bootstrap";
-// import { getAllFreeAd } from "../../actions/marketplaceSellerActions";
-
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllFreeAd } from "../../redux/actions/marketplaceSellerActions";
+import Message from "../../Message";
+import Loader from "../../Loader";
+import { Pagination } from "../../Pagination";
 import AllFreeAdCard from "./AllFreeAdCard";
-import Message from "../Message";
-import Loader from "../Loader";
 
-function AllFreeAdScreen({
-  freeAds,
-  // selectedCountry,
-  // selectedState,
-  // selectedCity,
-  // selectedCategory,
-  // selectedType,
-}) {
-  // const dispatch = useDispatch();
+const AllFreeAdScreen = () => {
+  const dispatch = useDispatch();
 
   const getAllFreeAdState = useSelector((state) => state.getAllFreeAdState);
-  const { loading, error } = getAllFreeAdState;
-  // console.log("All Free Ads:", freeAds);
+  const { loading, error, freeAds } = getAllFreeAdState;
 
-  // const freeAdLength = freeAds?.length;
-  // console.log("freeAdLength:", freeAdLength);
+  useEffect(() => {
+    dispatch(getAllFreeAd());
+  }, [dispatch]);
 
-  // useEffect(() => {
-  //   const adData = {
-  //     selected_country: selectedCountry,
-  //     selected_state: selectedState,
-  //     selected_city: selectedCity,
-  //     // selected_category: selectedCategory,
-  //     // selected_type: selectedType,
-  //   };
-  //   dispatch(getAllFreeAd(adData)); 
-  //   // eslint-disable-next-line
-  // }, [dispatch, selectedCountry, selectedState, selectedCity]); 
-
-  const [currentPage, setCurrentPage] = useState(1); 
+  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = freeAds?.slice(indexOfFirstItem, indexOfLastItem);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const totalPages = Math.ceil(freeAds?.length / itemsPerPage);
 
-  const pageNumbers = [];
-  for (let i = 1; i <= Math.ceil(freeAds?.length / itemsPerPage); i++) {
-    pageNumbers.push(i);
-  }
+  const handlePagination = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   return (
-    <div>
-      <Row>
-        <Col>
-          <hr />
-          <h1 className="text-center">Running Ads</h1>
-          <hr />
-          {loading ? ( 
-            <Loader />
-          ) : error ? (
-            <Message variant="danger">{error}</Message>
+    <View style={styles.container}>
+      <Text style={styles.title}>Running Ads</Text>
+      {loading ? (
+        <Loader />
+      ) : error ? (
+        <Message variant="danger">{error}</Message>
+      ) : (
+        <>
+          {currentItems?.length === 0 ? (
+            <Text style={styles.noData}>Running ads appear here.</Text>
           ) : (
-            <>
-              {currentItems?.length === 0 ? (
-                <div className="text-center">Running ads appear here.</div>
-              ) : (
-                <Row>
-                  {currentItems?.map((product) => (
-                    <Col key={product.id} xs={12} sm={12} md={6} lg={4} xl={4}>
-                      <AllFreeAdCard product={product} />
-                    </Col>
-                  ))}
-                </Row>
-              )}
-              <nav className="mt-4">
-                <ul className="pagination justify-content-center">
-                  <li
-                    className={`page-item ${
-                      currentPage === 1 ? "disabled" : ""
-                    }`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => paginate(currentPage - 1)}
-                    >
-                      Previous
-                    </button>
-                  </li>
-                  {pageNumbers.map((number) => (
-                    <li
-                      key={number}
-                      className={`page-item ${
-                        currentPage === number ? "active" : ""
-                      }`}
-                    >
-                      <button
-                        className="page-link"
-                        onClick={() => paginate(number)}
-                      >
-                        {number}
-                      </button>
-                    </li>
-                  ))}
-                  <li
-                    className={`page-item ${
-                      currentPage === pageNumbers.length ? "disabled" : ""
-                    }`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => paginate(currentPage + 1)}
-                    >
-                      Next
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            </>
+            <View style={styles.cardContainer}>
+              {currentItems?.map((product) => (
+                <View key={product.id} style={styles.card}>
+                  <AllFreeAdCard product={product} />
+                </View>
+              ))}
+            </View>
           )}
-          <hr />
-        </Col>
-      </Row>
-    </div>
+
+          <View style={styles.pagination}>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              paginate={handlePagination}
+            />
+          </View>
+        </>
+      )}
+    </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  scrollView: {
+    flexGrow: 1,
+  },
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 10,
+    textAlign: "center",
+  },
+  noData: {
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  cardContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
+  },
+  card: {
+    width: "100%",
+    // marginVertical: 10,
+    // padding: 10,
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+});
 
 export default AllFreeAdScreen;

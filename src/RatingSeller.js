@@ -1,47 +1,36 @@
 // RatingSeller.js
 import React from 'react';
+import { View, Text } from 'react-native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faStar, 
+    faStarHalfAlt,
+ } from '@fortawesome/free-solid-svg-icons';
+ import { faStar as faStarRegular  } from '@fortawesome/free-regular-svg-icons';
 
-function RatingSeller({value,text,color}) {
+function RatingSeller({ value, text, color }) {
+    const stars = [1, 2, 3, 4, 5].map((starValue) => (
+        <View key={starValue} style={{ marginRight: 5 }}>
+            <FontAwesomeIcon
+                icon={
+                    value >= starValue
+                        ? faStar
+                        : value >= starValue - 0.5
+                        ? faStarHalfAlt
+                        : faStarRegular 
+                }
+                color={color}
+                size={15}
+                style={{ marginRight: 2 }}
+            />
+        </View>
+    ));
+
     return (
-        <div className="rating">
-        <span>
-           <i style={{color}} className={
-               value >=1?'fas fa-star' 
-               :value>=0.5?'fas fa-star-half-alt':'far fa-star'
-           }></i>   
-              
-        </span>  
-        <span>
-           <i style={{color}} className={
-               value >=2?'fas fa-star' 
-               :value>=1.5?'fas fa-star-half-alt':'far fa-star'
-           }></i>   
-              
-        </span>  
-        <span>
-           <i style={{color}} className={
-               value >=3?'fas fa-star' 
-               :value>=2.5?'fas fa-star-half-alt':'far fa-star'
-           }></i>   
-              
-        </span>  
-        <span>
-           <i style={{color}} className={
-               value >=4?'fas fa-star' 
-               :value>=3.5?'fas fa-star-half-alt':'far fa-star'
-           }></i>   
-              
-        </span>  
-        <span>
-           <i style={{color}} className={
-               value >=5?'fas fa-star' 
-               :value>=4.5?'fas fa-star-half-alt':'far fa-star'
-           }></i>   
-              
-        </span>  
-        <span>{text && text}</span>
-        </div>
-    ) 
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {stars}
+            {text && <Text>{text}</Text>}
+        </View>
+    );
 }
 
-export default RatingSeller
+export default RatingSeller;

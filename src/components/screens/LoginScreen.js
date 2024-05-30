@@ -7,10 +7,11 @@ import {
   Button,
   SafeAreaView,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"; 
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faUser, faKey } from "@fortawesome/free-solid-svg-icons";
 import { login } from "../../redux/actions/userActions";
 import Loader from "../../Loader";
@@ -86,17 +87,30 @@ const LoginScreen = () => {
           </View>
 
           <View style={styles.buttonContainer}>
-            <Button
-              title="Login"
+            <TouchableOpacity
               onPress={submitHandler}
               disabled={loading || !email || !password}
-            />
+            >
+              <Text style={styles.roundedPrimaryBtn}>Login</Text>
+            </TouchableOpacity>
           </View>
+
           <View style={styles.buttonContainer}>
-            <Button
-              title="Register"
+            <TouchableOpacity
               onPress={() => navigation.navigate("Register")}
-            />
+              // disabled={loading}
+            >
+              <Text style={styles.roundedSuccessBtn}>Register</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <Text style={styles.primaryText}>Forgot Password? </Text>
+            <TouchableOpacity
+            // onPress={() => navigation.navigate("Reset Password")}
+            >
+              <Text style={styles.roundedDangerBtn}>Reset Password</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>

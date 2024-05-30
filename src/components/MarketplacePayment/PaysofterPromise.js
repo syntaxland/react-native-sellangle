@@ -1,21 +1,28 @@
 // PaysofterPromise.js
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Container, Row, Col, Form, Button, Modal } from "react-bootstrap";
-// import { clearCart } from "../../actions/cartActions";
-// import {
-//   createPayment,
-//   createPaysofterPayment,
-//   debitPaysofterAccountFundPromise,
-// } from "../../actions/paymentActions";
-import Message from "../Message";
-import Loader from "../Loader";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import RNPickerSelect from "react-native-picker-select";
+import { useSelector } from "react-redux";
 import PaysofterAccountFundPromise from "./PaysofterAccountFundPromise";
 import PaysofterUsdAccountFundPromise from "./PaysofterUsdAccountFundPromise";
-import Select from "react-select";
+import { useNavigation } from "@react-navigation/native";
+import Message from "../../Message";
+import Loader from "../../Loader";
+import { PAYMENT_DURATION_CHOICES } from "../../constants";
 
 const PaysofterPromise = ({
-  history,
   buyerEmail,
   currency,
   amount,
@@ -23,96 +30,76 @@ const PaysofterPromise = ({
   paymentData,
   reference,
 }) => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
-  }, [userInfo]);
+  }, [userInfo, navigation]);
 
   const debitPaysofterAccountState = useSelector(
     (state) => state.debitPaysofterAccountState
   );
   const { loading, success, error } = debitPaysofterAccountState;
+  const [durationChoices, setDurationChoices] = useState([]);
 
-  // const CURRENCY_CHOICES = [
-  //   ["NGN", "NGN"],
-  //   ["USD", "USD"],
-  // ];
+  useEffect(() => {
+    setDurationChoices(PAYMENT_DURATION_CHOICES);
+  }, []);
 
   const [duration, setDuration] = useState("Within 1 day");
-  // const [currency, setCurrency] = useState("");
-  // const [paymenthMethod, setPaymenthMethod] = useState("Paysofter Promise");
-  // const [paymentProvider, setPaymentProvider] = useState("Paysofter");
-  // const createdAt = new Date().toISOString();
   const [showInfoModal, setShowInfoModal] = useState(false);
-  const [
-    showPaysofterAccountFundPromise,
-    setShowPaysofterAccountFundPromise,
-  ] = useState(false);
+  const [showPaysofterAccountFundPromise, setShowPaysofterAccountFundPromise] =
+    useState(false);
 
-  const handleShowPaysofterAccountFundPromise = () => {
+  const handleShowPaysofterAccountFundPromise = useCallback(() => {
     setShowPaysofterAccountFundPromise(true);
-  };
+  }, []);
 
-  const handleInfoModalShow = () => {
+  const handleInfoModalShow = useCallback(() => {
     setShowInfoModal(true);
-  };
+  }, []);
 
-  const handleInfoModalClose = () => {
+  const handleInfoModalClose = useCallback(() => {
     setShowInfoModal(false);
-  };
+  }, []);
 
-  // const paysofterPaymentData = {
-  //   payment_id: reference,
-  //   email: buyerEmail,
-  //   amount: amount,
-  //   public_api_key: sellerApiKey,
-  //   created_at: createdAt,
-  // };
-
-  // const debitAccountData = {
-  //   currency: currency,
-  //   amount: amount,
-  //   // account_id: accountId,
-  // };
-
-  const submitHandler = (e) => {
-    e.preventDefault();
-    // try {
-    //   // dispatch(debitPaysofterAccountFundPromise(debitAccountData));
-    // } catch (error) {
-    //   console.log(error);
-    // }
-  };
+  const submitHandler = useCallback(
+    (e) => {
+      e.preventDefault();
+      handleShowPaysofterAccountFundPromise();
+    },
+    [handleShowPaysofterAccountFundPromise]
+  );
 
   useEffect(() => {
     if (success) {
-      // dispatch(createPaysofterPayment(paysofterPaymentData));
-      // dispatch(createPayment(paymentData));
-      // dispatch(clearCart());
-      const timer = setTimeout(() => {
-        // history.push("/dashboard");
-        // window.location.href = "/dashboard";
-        // window.location.reload();
-      }, 3000);
+      const timer = setTimeout(() => {}, 3000);
       return () => clearTimeout(timer);
     }
-    // console.log("// eslint-disable-next-line");
-    // eslint-disable-next-line
-  }, [dispatch, success, history]);
+  }, [success]);
+
+  const handleFieldChange = (field, value) => {
+    if (field === "duration") {
+      setDuration(value);
+    }
+  };
+  const handleLearnMore = () => {
+    Linking.openURL("https://paysofter.com/");
+  };
 
   return (
-    <Container>
-      {showPaysofterAccountFundPromise ? (
-        <>
-          {currency === "USD" ? (
-            <>
-              <PaysofterUsdAccountFundPromise 
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        {showPaysofterAccountFundPromise ? (
+          <>
+            {currency === "USD" ? (
+              <PaysofterUsdAccountFundPromise
                 currency={currency}
                 amount={amount}
                 buyerEmail={buyerEmail}
@@ -121,9 +108,7 @@ const PaysofterPromise = ({
                 reference={reference}
                 duration={duration}
               />
-            </>
-          ) : (
-            <>
+            ) : (
               <PaysofterAccountFundPromise
                 currency={currency}
                 amount={amount}
@@ -133,160 +118,191 @@ const PaysofterPromise = ({
                 reference={reference}
                 duration={duration}
               />
-            </>
-          )}
-
-          {/* {currency === "USD" && (
-            <PaysofterUsdAccountFundPromise
-              currency={currency}
-              amount={amount}
-              buyerEmail={buyerEmail}
-              sellerApiKey={sellerApiKey}
-              paymentData={paymentData}
-              reference={reference}
-              duration={duration}
-            />
-          )} */}
-
-          {/* {currency === "NGN" && (
-            <PaysofterAccountFundPromise
-              currency={currency}
-              amount={amount}
-              buyerEmail={buyerEmail}
-              sellerApiKey={sellerApiKey}
-              paymentData={paymentData}
-              reference={reference}
-              duration={duration}
-            />
-          )} */}
-
-          {/* {currency !== "USD" && currency !== "NGN" && (
-            <div className="text-center py-2 mt-2">
-              <h3 className="py-2">
-                <i
-                  className="fa fa-info-circle"
-                  style={{ fontSize: "16px" }}
-                ></i>{" "}
-                Noticification
-              </h3>
-              <p>
-                Paysofter currently supports transactions in USD and NGN. Kindly
-                contact the seller to add the USD (or NGN) main price for
-                Paysofter Promise checkout.
-              </p>
-              <p>Thank you.</p>
-            </div>
-          )} */}
-        </>
-      ) : (
-        <Row className="justify-content-center">
-          <Col>
-            <Row className="text-center py-2">
-              <Col md={10}>
-                <h2 className="py-2 text-center">Paysofter Promise</h2>
-              </Col>
-              <Col md={2}>
-                <Button
-                  variant="outline"
-                  onClick={handleInfoModalShow}
-                  data-toggle="tooltip"
-                  data-placement="top"
-                  title="Paysofter Promise option escrows or places in custody the received payment until a specified condition has been fulfilled before payment is transferred to the seller."
-                >
-                  <i className="fa fa-info-circle"> </i>
-                </Button>
-
-                <Modal show={showInfoModal} onHide={handleInfoModalClose}>
-                  <Modal.Header closeButton>
-                    <Modal.Title className="text-center w-100 py-2">
-                      Paysofter Promise
-                    </Modal.Title>
-                  </Modal.Header>
-                  <Modal.Body>
-                    <p className="text-center">
-                      Paysofter Promise option escrows or places in custody the
-                      payment made to a seller (using the payer's funded
-                      Paysofter Account Fund) until a specified condition has
-                      been fulfilled.{" "}
-                      <a
-                        href="https://paysofter.com/promise/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {" "}
-                        <span>
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            className="text-center py-2"
-                          >
-                            Learn more
-                          </Button>
-                        </span>
-                      </a>
-                    </p>
-                  </Modal.Body>
-                </Modal>
-              </Col>
-            </Row>
+            )}
+          </>
+        ) : (
+          <View style={styles.container}>
+            <View style={styles.headerContainer}>
+              <View style={styles.labelContainer}>
+                <Text style={styles.headerText}>Paysofter Promise </Text>
+                <TouchableOpacity onPress={handleInfoModalShow}>
+                  <FontAwesomeIcon
+                    icon={faInfoCircle}
+                    size={16}
+                    style={styles.icon}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+            <Modal
+              visible={showInfoModal}
+              onRequestClose={handleInfoModalClose}
+              transparent={true}
+              animationType="slide"
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>Paysofter Promise</Text>
+                  <Text style={styles.modalText}>
+                    Paysofter Promise option escrows or places in custody the
+                    payment made to a seller (using the payer's funded Paysofter
+                    Account Fund) until a specified condition has been
+                    fulfilled.
+                  </Text>
+                  <View style={styles.learnMoreBtn}>
+                    <Button title="Learn more" onPress={handleLearnMore} />
+                  </View>
+                  <Button title="Close" onPress={handleInfoModalClose} />
+                </View>
+              </View>
+            </Modal>
 
             {success && (
               <Message variant="success">Payment made successfully.</Message>
             )}
-
             {error && <Message variant="danger">{error}</Message>}
             {loading && <Loader />}
 
-            <Form onSubmit={submitHandler}>
-              {/* <Form.Group controlId="currency">
-                  <Form.Label>Currency</Form.Label>
-                  <Form.Control as="select" value={currency} readOnly>
-                    <option>{currency}</option>
-                  </Form.Control>
-                </Form.Group> */}
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Currency</Text>
+              <TextInput
+                style={styles.input}
+                value={currency}
+                editable={false}
+              />
+            </View>
 
-              <Form.Group controlId="currency">
-                <Form.Label>Currency</Form.Label>
-                <Select
-                  value={{ value: currency, label: currency }}
-                  isDisabled
-                />
-              </Form.Group>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Expected Settlement Duration</Text>
+              <RNPickerSelect
+                onValueChange={(value) => handleFieldChange("duration", value)}
+                items={durationChoices?.map(([value, label]) => ({
+                  label,
+                  value,
+                }))}
+                style={pickerSelectStyles}
+                value={duration}
+              />
+            </View>
 
-              <Form.Group controlId="duration">
-                <Form.Label>Expected Settlement Duration</Form.Label>
-                <Form.Control
-                  as="select"
-                  readOnly
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                >
-                  <option value="Within 1 day">Within 1 day</option>
-                  <option value="2 days">Less than 2 days</option>
-                  <option value="3 days">Less than 3 days</option>
-                  <option value="5 days">Less than 5 days</option>
-                  <option value="1 week">Less than 1 week</option>
-                  <option value="2 weeks">Less than 2 weeks</option>
-                  <option value="1 month">Less than 1 month</option>
-                </Form.Control>
-              </Form.Group>
-
-              <div className="py-3 text-center">
-                <Button
-                  className="w-100 rounded"
-                  type="submit"
-                  variant="primary"
-                  onClick={handleShowPaysofterAccountFundPromise}
-                >
-                  Submit{" "}
-                </Button>
-              </div>
-            </Form>
-          </Col>
-        </Row>
-      )}
-    </Container>
+            <View style={styles.formGroup}>
+              <TouchableOpacity onPress={submitHandler}>
+                <Text style={styles.roundedPrimaryBtn}>Submit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+  },
+  scrollViewContainer: {
+    padding: 2,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 5,
+  },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  formGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  input: {
+    borderColor: "#ced4da",
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: "#e9ecef",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  labelContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  label: {
+    marginBottom: 8,
+    fontSize: 16,
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  learnMoreBtn: {
+    padding: 5,
+    marginBottom: 10,
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 4,
+    color: "black",
+    paddingRight: 30, // to ensure the text is never behind the icon
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 0.5,
+    borderColor: "purple",
+    borderRadius: 8,
+    color: "black",
+    paddingRight: 30, // to ensure the text is never behind the icon
+  },
+});
 
 export default PaysofterPromise;

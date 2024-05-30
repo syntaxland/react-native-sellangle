@@ -1,63 +1,50 @@
 // PaidAdProductDetail.js
-import React, { useState, useEffect } from "react";
-import { Link, useHistory } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  Row,
-  Col,
+  View,
+  Text,
   Image,
-  ListGroup,
+  StyleSheet,
+  ScrollView,
   Button,
-  Card,
-  Container,
   Modal,
-} from "react-bootstrap";
-import RatingSeller from "../RatingSeller";
-import Loader from "../Loader";
-import Message from "../Message";
+  TouchableOpacity,
+  RefreshControl,
+  useWindowDimensions,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   getSellerAccount,
   getPaidAdDetail,
-} from "../../actions/marketplaceSellerActions";
-// import { getPaidAdDetail } from "../../actions/marketplaceSellerActions";
-import { Carousel } from "react-responsive-carousel";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
-import Paysofter from "../MarketplacePayment/Paysofter";
-import PromoTimer from "../PromoTimer";
-import DOMPurify from "dompurify";
+} from "../../redux/actions/marketplaceSellerActions";
+import RenderHtml from "react-native-render-html";
 import ReportPaidAd from "./ReportPaidAd";
-import { formatAmount } from "../FormatAmount";
 import TogglePaidAdSave from "./TogglePaidAdSave";
 import ReviewPaidAdSeller from "./ReviewPaidAdSeller";
+import Carousel from "react-native-reanimated-carousel";
+import Paysofter from "../MarketplacePayment/Paysofter";
+import Loader from "../../Loader";
+import Message from "../../Message";
+import RatingSeller from "../../RatingSeller";
+import PromoTimer from "../../PromoTimer";
+import { formatAmount } from "../../FormatAmount";
 
-function PaidAdProductDetail({ match }) {
+const PaidAdProductDetail = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { id } = route.params;
+  const { width } = useWindowDimensions();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
   }, [userInfo]);
-
-  // const getSellerAccountState = useSelector(
-  //   (state) => state.getSellerAccountState
-  // );
-  // const { sellerAccount } = getSellerAccountState;
-  const [showPaysofterOption, setShowPaysofterOption] = useState(false);
-
-  const handlePaysofterOption = () => {
-    setShowPaysofterOption(!showPaysofterOption);
-  };
-
-  const [showPhoneNumber, setShowPhoneNumber] = useState(false);
-
-  const handleShowPhoneNumber = () => {
-    setShowPhoneNumber(!showPhoneNumber);
-  };
 
   const getPaidAdDetailState = useSelector(
     (state) => state.getPaidAdDetailState
@@ -72,47 +59,45 @@ function PaidAdProductDetail({ match }) {
     sellerRating,
     sellerReviewCount,
   } = getPaidAdDetailState;
-  console.log("isSellerVerified:", isSellerVerified);
-  console.log("promo_code:", ads?.promo_code);
 
+  const [showPhoneNumber, setShowPhoneNumber] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [reportAdModal, setReportAdModal] = useState(false);
+  const [showPaysofterOption, setShowPaysofterOption] = useState(false);
 
-  const handleClickMore = () => {
-    setExpanded(!expanded);
-  };
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    dispatch(getPaidAdDetail(id));
+    setTimeout(() => setRefreshing(false), 2000);
+  }, [dispatch]);
 
   useEffect(() => {
-    dispatch(getPaidAdDetail(match.params.id));
+    dispatch(getPaidAdDetail(id));
     dispatch(getSellerAccount());
-  }, [dispatch, match]);
+  }, [dispatch, id]);
 
-  const images = [ads?.image1, ads?.image2, ads?.image3].filter(Boolean);
+  const handleShowPhoneNumber = () => setShowPhoneNumber(!showPhoneNumber);
+  const handleClickMore = () => setExpanded(!expanded);
+  const handleReportAdOpen = () => setReportAdModal(true);
+  const handleReportAdClose = () => setReportAdModal(false);
+  const handlePaysofterOption = () =>
+    setShowPaysofterOption(!showPaysofterOption);
 
   function formatCount(viewCount) {
     if (viewCount >= 1000000) {
-      // Format as million
       return (viewCount / 1000000).toFixed(1) + "m";
     } else if (viewCount >= 1000) {
-      // Format as thousand
       return (viewCount / 1000).toFixed(1) + "k";
     } else {
       return viewCount?.toString();
     }
   }
 
-  const [reportAdModal, setReportAdModal] = useState(false);
-  const handleReportAdOpen = () => {
-    setReportAdModal(true);
-  };
-  const handleReportAdClose = () => {
-    setReportAdModal(false);
-  };
-
   function calculateDuration(joinedTimestamp) {
     const now = new Date();
     const joinedDate = new Date(joinedTimestamp);
     const duration = now - joinedDate;
-
     const seconds = Math.floor(duration / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
@@ -142,12 +127,9 @@ function PaidAdProductDetail({ match }) {
     const now = new Date();
     const lastLoginDate = new Date(lastLoginTimestamp);
     const duration = now - lastLoginDate;
-
     const days = Math.floor(duration / (24 * 60 * 60 * 1000));
     const weeks = Math.floor(days / 7);
     const months = Math.floor(days / 30);
-
-    console.log('days:', days, 'ads?.user_last_login', ads?.user_last_login)
 
     if (days < 3) {
       return "Last seen recently";
@@ -155,12 +137,12 @@ function PaidAdProductDetail({ match }) {
       return "Last seen within a week";
     } else if (months < 1) {
       return "Last seen within a month";
-    // } else if (months > 1) {
-    //   return "Last seen a long time ago";
     } else {
       return "Last seen a long time ago";
     }
   }
+
+  const images = [ads?.image1, ads?.image2, ads?.image3].filter(Boolean);
 
   const handleClickMessageSeller = () => {
     const queryParams = {
@@ -173,374 +155,276 @@ function PaidAdProductDetail({ match }) {
       seller_username: ads.seller_username,
       expiration_date: ads.expiration_date,
       ad_rating: sellerRating,
-      // ad_rating: ads.ad_rating,
     };
 
-    history.push({
-      pathname: `/buyer/paid/ad/message/${ads.id}`,
-      search: `?${new URLSearchParams(queryParams).toString()}`,
-    });
+    navigation.navigate("MessageSeller", { ...queryParams });
   };
 
   const handleSellerShopFront = () => {
-    history.push(`/seller-shop-front/${ads?.seller_username}/`);
+    navigation.navigate("SellerShopFront", { username: ads?.seller_username });
+  };
+
+  const descriptionHtml = {
+    html: ads?.description || "<div>No description available.</div>",
   };
 
   return (
-    <Container>
-      <Row>
-        <Col>
-          <Link to="/" className="btn btn-dark my-3">
-            {" "}
-            Go Back
-          </Link>
-
-          {loading ? (
-            <Loader />
-          ) : error ? (
-            <Message variant="danger">{error} </Message>
-          ) : (
-            <Row>
-              <Col md={6}>
-                {images.length > 0 ? (
-                  <Carousel
-                    // showArrows={true}
-                    // showIndicators={true}
-                    // showThumbs={true}
-                    useKeyboardArrows={true}
-                    // dynamicHeight={false}
-                  >
-                    {images.map((image, index) => (
-                      <div className="slide" key={index}>
-                        <Image src={image} alt={`Slide ${index + 1}`} fluid />
-                      </div>
-                    ))}
-                  </Carousel>
-                ) : (
-                  <></>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <Button title="Go Back" onPress={() => navigation.goBack()} />
+      {loading ? (
+        <Loader />
+      ) : error ? (
+        <Message variant="danger">{error}</Message>
+      ) : (
+        <>
+          <View style={styles.details}>
+            {images.length > 0 && (
+              <Carousel
+                loop
+                width={300}
+                height={300}
+                autoPlay={false}
+                data={images}
+                scrollAnimationDuration={1000}
+                renderItem={({ item }) => (
+                  <Image source={{ uri: item }} style={styles.image} />
                 )}
-              </Col>
+              />
+            )}
+          </View>
 
-              <Col md={3}>
-                <ListGroup variant="flush">
-                  <ListGroup.Item>
-                    <h3>{ads?.ad_name}</h3>
-                  </ListGroup.Item>
+          <View style={styles.details}>
+            <Text style={styles.adName}>{ads?.ad_name}</Text>
+            <Button
+              title="Promoted"
+              color="green"
+              disabled
+              style={styles.promotedButton}
+            />
+            <Text>
+              Promo Code: {ads?.promo_code} ({ads?.discount_percentage}% Off)
+            </Text>
+            <View style={styles.card}>
+              <Text>
+                Expires in: <PromoTimer expirationDate={ads?.expiration_date} />
+              </Text>
+              <Text>
+                Price: {formatAmount(ads.price)} {ads.currency}
+              </Text>
+              {ads?.usd_price && (
+                <Text>
+                  / {formatAmount(ads?.usd_price)} {ads?.usd_currency}
+                </Text>
+              )}
+              {ads?.count_in_stock > 0 && (
+                <Text>Quantity in Stock: {ads?.count_in_stock}</Text>
+              )}
+            </View>
 
-                  <ListGroup.Item>
-                    <span>
-                      <Button
-                        variant="outline-success"
-                        size="sm"
-                        className="rounded"
-                        disabled
-                      >
-                        <i>Promoted</i>
-                      </Button>
-                    </span>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                    {/* <Button
-                      variant="outline-primary"
-                      size="sm"
-                      className="py-2 rounded"
-                      disabled
-                    > */}
-                    <ListGroup.Item>
-                      Promo Code:{" "}
-                      <strong>
-                        <i>{ads?.promo_code}</i>
-                      </strong>{" "}
-                      ({ads?.discount_percentage}% Off)
-                    </ListGroup.Item>
-                    {/* </Button> */}
-                  </ListGroup.Item>
-                </ListGroup>
-              </Col>
-              <Col md={3}>
-                <Card>
-                  <ListGroup variant="flush">
-                    <ListGroup.Item>
-                      <Row>
-                        <Col>Price:</Col>
-                        <Col>
-                          <strong>
-                            {formatAmount(ads?.price)} {ads?.currency}
-                          </strong>
-                          <strong>
-                            {ads?.usd_price ? (
-                              <span>
-                                {" "}
-                                / {formatAmount(ads?.usd_price)}{" "}
-                                {ads?.usd_currency}{" "}
-                              </span>
-                            ) : (
-                              <></>
-                            )}{" "}
-                          </strong>
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>
-
-                    <ListGroup.Item>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        className="py-2 rounded"
-                        disabled
-                      >
-                        <i className="fas fa-clock"></i> Expires in:{" "}
-                        <PromoTimer expirationDate={ads?.expiration_date} />
-                      </Button>
-                    </ListGroup.Item>
-
-                    {ads?.count_in_stock > 0 && (
-                      <ListGroup.Item>
-                        Quantity in Stock: {ads?.count_in_stock}
-                      </ListGroup.Item>
-                    )}
-                  </ListGroup>
-                </Card>
-              </Col>
-              <ListGroup className="py-2">
-                <ListGroup.Item>
-                  Ad Description:
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(
-                        expanded
-                          ? ads?.description
-                          : ads?.description
-                              ?.split(" ")
-                              .slice(0, 10)
-                              .join(" ") + " ..."
-                      ),
-                    }}
-                  />
-                  {ads?.description?.split(" ").length > 10 && (
-                    <Button variant="link" onClick={handleClickMore}>
-                      {expanded ? "Less" : "More"}
-                    </Button>
-                  )}
-                </ListGroup.Item>
-
-                <ListGroup.Item>
-                  <ListGroup.Item>Seller Details</ListGroup.Item>
-                  <ListGroup.Item>
-                    <Row>
-                      <Col md={4}>
-                        <Link
-                          to={`/seller-shop-front/${ads?.seller_username}/`}
-                        >
-                          <span className="d-flex justify-content-between py-2">
-                            {sellerAvatarUrl && (
-                              <img
-                                src={sellerAvatarUrl}
-                                alt="Seller"
-                                style={{
-                                  maxWidth: "80px",
-                                  maxHeight: "80px",
-                                  borderRadius: "50%",
-                                }}
-                              />
-                            )}
-                            {ads?.seller_username}
-                          </span>
-                        </Link>
-                        {calculateLastSeen(ads?.user_last_login)}
-                      </Col>
-                    </Row>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                    <div>
-                      <span>
-                        {isSellerVerified ? (
-                          <>
-                            <Button
-                              variant="outline-success"
-                              size="sm"
-                              className="rounded"
-                              disabled
-                            >
-                              <i className="fas fa-user"></i> <i>Verified ID</i>{" "}
-                              <i
-                                className="fas fa-check-circle"
-                                style={{ fontSize: "18px", color: "blue" }}
-                              ></i>
-                            </Button>
-                          </>
-                        ) : (
-                          <>
-                            <Button
-                              variant="outline-danger"
-                              size="sm"
-                              className="rounded"
-                              disabled
-                            >
-                              <i className="fas fa-user"></i>{" "}
-                              <i>ID Not Verified</i>{" "}
-                              <i style={{ fontSize: "18px", color: "red" }}></i>
-                            </Button>
-                          </>
-                        )}
-                      </span>
-                    </div>
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    <span>
-                      <RatingSeller
-                        value={sellerRating}
-                        text={`${formatCount(sellerReviewCount)} reviews `}
-                        color={"green"}
-                      />
-                    </span>
-
-                    <span>
-                      {/* {userInfo ? (
-                        <Link to={`/review-list/${ads.id}`}>
-                          (Seller Reviews)
-                        </Link>
-                      ) : (
-                        <Link onClick={() => history.push("/login")}>
-                          (Seller Reviews)
-                        </Link>
-                      )} */}
-                      <ReviewPaidAdSeller adId={ads?.id} />
-                    </span>
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      className="py-2 rounded"
-                      onClick={handleShowPhoneNumber}
-                    >
-                      <i className="fa fa-phone"></i>{" "}
-                      {showPhoneNumber ? "Hide" : "Show"} Contact
-                    </Button>
-                    <p className="mt-2">
-                      {showPhoneNumber && <p>{ads?.seller_phone}</p>}
-                    </p>
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    <span className="d-flex justify-content-between py-2">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="py-2 rounded"
-                        onClick={handleClickMessageSeller}
-                      >
-                        <i className="fa fa-message"></i> Message Seller
-                      </Button>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="py-2 rounded"
-                        onClick={handleSellerShopFront}
-                      >
-                        <i className="fa fa-shopping-cart"></i> Go to Seller
-                        Shopfront
-                      </Button>
-                    </span>
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    Joined since {calculateDuration(ads?.seller_joined_since)}
-                  </ListGroup.Item>
-                </ListGroup.Item>
-                <Row className="d-flex justify-content-center py-2">
-                  <Col md={6}>
-                    <ListGroup.Item>
-                      <Button
-                        className="w-100 rounded"
-                        variant="success"
-                        type="button"
-                        onClick={handlePaysofterOption}
-                      >
-                        Pay With Paysofter Promise
-                      </Button>
-                    </ListGroup.Item>
-                  </Col>
-                </Row>
-              </ListGroup>
-            </Row>
-          )}
-
-          <Row className="d-flex justify-content-center">
-            <Col>
-              {showPaysofterOption && (
-                <Paysofter
-                  promoCode={ads?.promo_code}
-                  adId={ads?.id}
-                  buyerEmail={userInfo?.email}
-                  currency={ads?.currency}
-                  usdPrice={ads?.usd_price}
-                  amount={ads?.price}
-                  sellerApiKey={sellerApiKey}
+            <View style={styles.description}>
+              <Text>Ad Description:</Text>
+              <RenderHtml
+                contentWidth={width}
+                source={{ html: ads?.description }}
+                tagsStyles={{
+                  div: { height: expanded ? "auto" : 100, overflow: "hidden" },
+                }}
+              />
+              {ads?.description?.split(" ")?.length > 10 && (
+                <Button
+                  title={expanded ? "Less" : "More"}
+                  onPress={handleClickMore}
                 />
               )}
-            </Col>
-          </Row>
+            </View>
 
-          <div className="text-center mt-4 mb-2 text-muted">
-            <p style={{ color: "red" }}>
-              <strong>Disclaimer:</strong> Buyers are advised to exercise
-              caution and conduct thorough verification when dealing with
-              sellers. Ensure the authenticity of both the product and the
-              seller before proceeding with any transactions.
-            </p>
-          </div>
-
-          <div className="d-flex justify-content-between py-2">
-            <div className=" ">
-              <TogglePaidAdSave ad={ads} />
-            </div>
-
-            <div className="d-flex justify-content-end">
+            <View style={styles.sellerDetails}>
+              <TouchableOpacity onPress={handleSellerShopFront}>
+                <Text>Seller: {ads?.seller_username}</Text>
+                {sellerAvatarUrl && (
+                  <Image
+                    source={{ uri: sellerAvatarUrl }}
+                    style={styles.sellerAvatar}
+                  />
+                )}
+              </TouchableOpacity>
+              <Text>{calculateLastSeen(ads?.user_last_login)}</Text>
+              <Text>
+                {isSellerVerified ? "Verified ID" : "ID Not Verified"}
+              </Text>
+              <RatingSeller
+                value={sellerRating}
+                text={`${formatCount(sellerReviewCount)} reviews`}
+                color="green"
+              />
+              <ReviewPaidAdSeller adId={ads?.id} />
               <Button
-                variant="danger"
-                size="sm"
-                className="rounded"
-                onClick={handleReportAdOpen}
-                // disabled
-              >
-                <i className="fa fa-flag"></i> Report Ad
-              </Button>
-            </div>
-          </div>
+                title={showPhoneNumber ? "Hide Contact" : "Show Contact"}
+                onPress={handleShowPhoneNumber}
+              />
+              {showPhoneNumber && <Text>{ads?.seller_phone}</Text>}
+              <View style={styles.spaceBtwGroup}>
+                <Button
+                  title="Message Seller"
+                  onPress={handleClickMessageSeller}
+                />
+                <Button
+                  title="Go to Seller Shopfront"
+                  onPress={handleSellerShopFront}
+                />
+              </View>
+            </View>
+          </View>
 
-          {/* <div className="d-flex justify-content-between py-2">
-            <TogglePaidAdSave ad={ads} /> 
-            <Button
-              variant="danger"
-              size="sm"
-              className="rounded"
-              onClick={handleReportAdOpen}
-              // disabled
-            >
-              <i className="fa fa-flag"></i> Report Ad
-            </Button>
-          </div> */}
+          <View style={styles.formGroup}>
+            <TouchableOpacity onPress={handlePaysofterOption}>
+              <Text style={styles.roundedPrimaryBtn}>
+                Pay With Paysofter Promise
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-          <div className="d-flex justify-content-center py-2">
-            <Modal show={reportAdModal} onHide={handleReportAdClose}>
-              <Modal.Header closeButton>
-                <Modal.Title className="text-center w-100 py-2">
-                  Report Ad
-                </Modal.Title>
-              </Modal.Header>
-              <Modal.Body className="d-flex justify-content-center py-2">
-                {reportAdModal && <ReportPaidAd adId={ads?.id} />}
-              </Modal.Body>
-            </Modal>
-          </div>
-        </Col>
-      </Row>
-    </Container>
+          {showPaysofterOption && (
+            <Paysofter
+              promoCode={ads?.promo_code}
+              adId={ads?.id}
+              buyerEmail={userInfo?.email}
+              currency={ads?.currency}
+              usdPrice={ads?.usd_price}
+              amount={ads?.price}
+              sellerApiKey={sellerApiKey}
+            />
+          )}
+
+          <Modal
+            visible={reportAdModal}
+            animationType="slide"
+            onRequestClose={handleReportAdClose}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalLabelTitle}>
+                  Pay With Paysofter Promise
+                </Text>
+                <View style={styles.modalLabelBody}>
+                  <ReportPaidAd adId={ads?.id} />
+                </View>
+
+                <Button title="Close" onPress={handleReportAdClose} />
+              </View>
+            </View>
+          </Modal>
+
+          <View style={styles.buttonGroup}>
+            <View style={styles.spaceBtwElement}>
+              <TogglePaidAdSave adId={ads?.id} />
+            </View>
+
+            <View style={styles.spaceBtwElement}>
+              <Button title="Report Ad" onPress={handleReportAdOpen} />
+            </View>
+          </View>
+        </>
+      )}
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 10,
+  },
+  image: {
+    width: 300,
+    height: 300,
+    marginVertical: 10,
+  },
+  details: {
+    padding: 10,
+  },
+  adName: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  promotedButton: {
+    marginVertical: 5,
+  },
+  card: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    marginVertical: 10,
+  },
+  description: {
+    marginVertical: 10,
+  },
+  sellerDetails: {
+    marginVertical: 10,
+  },
+  sellerAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  buttonGroup: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 10,
+  },
+  spaceBtwGroup: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 10,
+  },
+  spaceBtwElement: {
+    padding: 10,
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 10,
+    width: "80%",
+    alignItems: "center",
+  },
+  modalLabelBody: {
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    padding: 10,
+  },
+  modalLabelTitle: {
+    fontWeight: "bold",
+    fontSize: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    padding: 10,
+  },
+  icon: {
+    marginLeft: 10,
+    color: "#007bff",
+  },
+});
 
 export default PaidAdProductDetail;

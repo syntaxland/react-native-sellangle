@@ -1,27 +1,74 @@
 // PostPaidAd.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Button, Container, Row, Col, Modal } from "react-bootstrap";
-import { postPaidAd } from "../../actions/marketplaceSellerActions";
-import Message from "../Message";
-import Loader from "../Loader";
-import LoaderButton from "../LoaderButton";
-import Select from "react-select";
+import { useNavigation } from "@react-navigation/native";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  RefreshControl,
+  Image,
+  Modal,
+} from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import * as ImagePicker from "expo-image-picker";
+import { postPaidAd } from "../../redux/actions/marketplaceSellerActions";
+import { Picker } from "@react-native-picker/picker";
+import RNPickerSelect from "react-native-picker-select";
+import { Checkbox } from "react-native-paper";
 import { Country, State, City } from "country-state-city";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import {
+  actions,
+  RichEditor,
+  RichToolbar,
+} from "react-native-pell-rich-editor";
+import Message from "../../Message";
+import Loader from "../../Loader";
+// import LoaderButton from "../../LoaderButton";
+import {
+  PAID_AD_DURATION_CHOICES,
+  AD_CONDITION_CHOICES,
+  AD_CATEGORY_CHOICES,
+  AD_TYPE_CHOICES,
+  CURRENCY_CHOICES,
+  MAIN_CURRENCY_CHOICES,
+} from "../../constants";
 
-function PostPaidAd({ history }) {
+function PostPaidAd() {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
+
+  const [durationChoices, setDurationChoices] = useState([]);
+  const [adConditionChoices, setAdConditionChoices] = useState([]);
+  const [adCategoryChoices, setAdCategoryChoices] = useState([]);
+  const [adTypeChoices, setAdTypeChoices] = useState([]);
+  const [currencyChoices, setCurrencyChoices] = useState([]);
+  const [mainCurrencyChoices, setMainCurrencyChoices] = useState([]);
+
+  useEffect(() => {
+    setDurationChoices(PAID_AD_DURATION_CHOICES);
+    setAdConditionChoices(AD_CONDITION_CHOICES);
+    setAdCategoryChoices(AD_CATEGORY_CHOICES);
+    setAdTypeChoices(AD_TYPE_CHOICES);
+    setCurrencyChoices(CURRENCY_CHOICES);
+    setMainCurrencyChoices(MAIN_CURRENCY_CHOICES);
+  }, []);
+
+  const richText = useRef();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     }
-  }, [userInfo, history]);
+  }, [userInfo, navigation]);
 
   const postPaidAdState = useSelector((state) => state.postPaidAdState);
   const { success, error, loading } = postPaidAdState;
@@ -86,10 +133,8 @@ function PostPaidAd({ history }) {
   const [isPriceNegotiable, setIsPriceNegotiable] = useState("");
   const [isAutoRenewal, setIsAutoRenewal] = useState("");
 
-  const [
-    showStrikethroughPromoPrice,
-    setShowStrikethroughPromoPrice,
-  ] = useState("");
+  const [showStrikethroughPromoPrice, setShowStrikethroughPromoPrice] =
+    useState("");
 
   const [formError, setFormError] = useState("");
 
@@ -97,47 +142,12 @@ function PostPaidAd({ history }) {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
 
-  useEffect(() => {
-    setCountries(Country.getAllCountries());
-  }, []);
-
-  useEffect(() => {
-    if (country) {
-      setStates(State.getStatesOfCountry(country.isoCode));
-    } else {
-      setStates([]);
-    }
-  }, [country, country.isoCode]);
-
-  useEffect(() => {
-    if (stateProvince) {
-      setCities(City.getCitiesOfState(country.isoCode, stateProvince.isoCode));
-    } else {
-      setCities([]);
-    }
-  }, [stateProvince, country.isoCode]);
-
-  const handleCategoryChange = (selectedOption) => {
-    setAdCategory(selectedOption.value);
-    setAdCategoryError("");
-    setAdType("");
-  };
-
-  const handleTypeChange = (selectedOption) => {
-    setAdType(selectedOption.value);
-    setAdTypeError("");
-  };
-
-  const [showMainCurrencyInfoModal, setShowMainCurrencyInfoModal] = useState(
-    false
-  );
-  const [showAltCurrencyInfoModal, setShowAltCurrencyInfoModal] = useState(
-    false
-  );
-  const [
-    showLineThrougPriceInfoModal,
-    setShowLineThrougPriceInfoModal,
-  ] = useState(false); 
+  const [showMainCurrencyInfoModal, setShowMainCurrencyInfoModal] =
+    useState(false);
+  const [showAltCurrencyInfoModal, setShowAltCurrencyInfoModal] =
+    useState(false);
+  const [showLineThrougPriceInfoModal, setShowLineThrougPriceInfoModal] =
+    useState(false);
 
   const handleMainCurrencyInfoModalShow = () => {
     setShowMainCurrencyInfoModal(true);
@@ -162,28 +172,70 @@ function PostPaidAd({ history }) {
     setShowLineThrougPriceInfoModal(false);
   };
 
-  const modules = {
-    toolbar: [
-      [{ header: "1" }, { header: "2" }, { font: [] }],
-      [{ list: "ordered" }, { list: "bullet" }],
-      ["bold", "italic", "underline"],
-      [{ align: [] }],
-      ["link", "image"],
-      ["clean"],
-    ],
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setAdNameError("");
+    setAdName("");
+    setAdCategoryError("");
+    setAdCategory("");
+    setAdTypeError("");
+    setAdType("");
+    setCountryError("");
+    setCountry({});
+    setStateProvinceError("");
+    setStateProvince({});
+    setCityError("");
+    setCity({});
+    setCondition("");
+    setPrice("");
+    setCurrencyError("");
+    setCurrency("");
+    setPriceError("");
+    setBrand("");
+    setDescription("");
+    setDescriptionError("");
+    setCountInStock("");
+    setYoutubeLink("");
+    setImage1("");
+    setImage1Error("");
+    setImage2("");
+    setImage3("");
+    setDuration("");
+    setDurationError("");
+    setTimeout(() => setRefreshing(false), 2000);
+  }, [dispatch]);
+
+  useEffect(() => {
+    setCountries(Country.getAllCountries());
+  }, []);
+
+  useEffect(() => {
+    if (country) {
+      setStates(State.getStatesOfCountry(country.isoCode));
+    } else {
+      setStates([]);
+    }
+  }, [country, country.isoCode]);
+
+  useEffect(() => {
+    if (stateProvince) {
+      setCities(City.getCitiesOfState(country.isoCode, stateProvince.isoCode));
+    } else {
+      setCities([]);
+    }
+  }, [stateProvince, country.isoCode]);
+
+  const handleCategoryChange = (value) => {
+    setAdCategory(value);
+    setAdCategoryError("");
+    setAdType("");
   };
 
-  const formats = [
-    "header",
-    "font",
-    "list",
-    "bold",
-    "italic",
-    "underline",
-    "align",
-    "link",
-    "image",
-  ];
+  const handleTypeChange = (value) => {
+    setAdType(value);
+    setAdTypeError("");
+  };
 
   const handleFieldChange = (fieldName, value) => {
     switch (fieldName) {
@@ -306,313 +358,10 @@ function PostPaidAd({ history }) {
     }
   };
 
-  const DURATION_CHOICES = [
-    ["1 day", "1 day (28.8 cps)"],
-    ["2 days", "2 days (57.6 cps)"],
-    ["3 days", "3 days (86.4 cps)"],
-    ["5 days", "5 days (144.0 cps)"],
-    ["1 week", "1 week (201.6 cps)"],
-    ["2 weeks", "2 weeks (432.0 cps)"],
-    ["1 month", "1 month (864.0 cps)"],
-  ];
-
-  const AD_CONDITION_CHOICES = [
-    ["Brand New", "Brand New"],
-    ["Fairly Used", "Fairly Used"],
-  ];
-
-  const AD_CATEGORY_CHOICES = [
-    ["Home Appliances", "Home Appliances"],
-    ["Properties", "Properties"],
-    ["Electronics", "Electronics"],
-    ["Fashion", "Fashion"],
-    ["Vehicles", "Vehicles"],
-    ["Services", "Services"],
-    ["Mobile Phones", "Mobile Phones"],
-    ["Health & Beauty", "Health & Beauty"],
-    ["Sports", "Sports"],
-    ["Jobs", "Jobs"],
-    ["Babies and Kids", "Babies and Kids"],
-    ["Agric & Food", "Agric & Food"],
-    ["Repairs", "Repairs"],
-    ["Equipment & Tools", "Equipment & Tools"],
-    ["CVs", "CVs"],
-    ["Pets", "Pets"],
-    ["Others", "Others"],
-  ];
-
-  const AD_TYPE_CHOICES = {
-    "Home Appliances": [
-      ["Washing Machine", "Washing Machine"],
-      ["Refrigerator", "Refrigerator"],
-      ["Microwave", "Microwave"],
-      ["Coffee Machine", "Coffee Machine"],
-      ["Air Conditioner", "Air Conditioner"],
-      ["Solar", "Solar"],
-      ["Kitchen Appliances", "Kitchen Appliances"],
-    ],
-    Properties: [
-      ["House", "House"],
-      ["Apartment", "Apartment"],
-      ["Land", "Land"],
-      ["Commercial Property", "Commercial Property"],
-    ],
-    Electronics: [
-      ["Laptop", "Laptop"],
-      ["Smartphone", "Smartphone"],
-      ["Camera", "Camera"],
-      ["Headphones", "Headphones"],
-      ["Television", "Television"],
-    ],
-    Fashion: [
-      ["Clothing", "Clothing"],
-      ["Shoes", "Shoes"],
-      ["Accessories", "Accessories"],
-    ],
-    Vehicles: [
-      ["Car", "Car"],
-      ["Motorcycle", "Motorcycle"],
-      ["Bicycle", "Bicycle"],
-    ],
-    Services: [
-      ["Cleaning", "Cleaning"],
-      ["Plumbing", "Plumbing"],
-      ["Electrician", "Electrician"],
-      ["Catering", "Catering"],
-      ["Tutoring", "Tutoring"],
-    ],
-    "Mobile Phones": [
-      ["iPhone", "iPhone"],
-      ["Samsung", "Samsung"],
-      ["Google Pixel", "Google Pixel"],
-      ["OnePlus", "OnePlus"],
-    ],
-    "Health & Beauty": [
-      ["Skincare", "Skincare"],
-      ["Haircare", "Haircare"],
-      ["Makeup", "Makeup"],
-      ["Fitness Equipment", "Fitness Equipment"],
-    ],
-    Sports: [
-      ["Soccer", "Soccer"],
-      ["Basketball", "Basketball"],
-      ["Tennis", "Tennis"],
-      ["Golf", "Golf"],
-    ],
-    Jobs: [
-      ["IT", "IT"],
-      ["Sales", "Sales"],
-      ["Marketing", "Marketing"],
-      ["Administrative", "Administrative"],
-    ],
-    "Babies and Kids": [
-      ["Toys", "Toys"],
-      ["Clothing Kids", "Clothing"],
-      ["Strollers", "Strollers"],
-    ],
-    "Agric & Food": [
-      ["Farm Products", "Farm Products"],
-      ["Processed Food", "Processed Food"],
-      ["Beverages", "Beverages"],
-    ],
-    Repairs: [
-      ["Electronic Repair", "Electronic Repair"],
-      ["Appliance Repair", "Appliance Repair"],
-      ["Car Repair", "Car Repair"],
-    ],
-    "Equipment & Tools": [
-      ["Power Tools", "Power Tools"],
-      ["Hand Tools", "Hand Tools"],
-      ["Kitchen Tools", "Kitchen Tools"],
-    ],
-    CVs: [
-      ["Engineering", "Engineering"],
-      ["Marketing CVs", "Marketing"],
-      ["Design", "Design"],
-      ["Education", "Education"],
-    ],
-    Pets: [
-      ["Dog", "Dog"],
-      ["Cat", "Cat"],
-      ["Fish", "Fish"],
-      ["Bird", "Bird"],
-    ],
-    Others: [["Others", "Others"]],
-  };
-
-  const MAIN_CURRENCY_CHOICES = [
-    ["NGN", "Nigerian Naira"],
-    ["USD", "United States Dollar"],
-  ];
-
-  const EQUIVALENT_CURRENCY_CHOICES = [
-    ["NGN", "Nigerian Naira"],
-    ["USD", "United States Dollar"],
-    ["CAD", "Canadian Dollar"],
-    ["EUR", "Euro"],
-    ["GBP", "British Pound Sterling"],
-    ["INR", "Indian Rupee"],
-    ["ZAR", "South African Rand"],
-    ["GHS", "Ghanaian Cedi"],
-    ["CNY", "Chinese Yuan"],
-    ["AED", "United Arab Emirates Dirham"],
-    ["AUD", "Australian Dollar"],
-    ["BRL", "Brazilian Real"],
-    ["JPY", "Japanese Yen"],
-    ["KES", "Kenyan Shilling"],
-    ["SAR", "Saudi Riyal"],
-    // Additional currencies
-    ["AFN", "Afghan Afghani"],
-    ["ALL", "Albanian Lek"],
-    ["AMD", "Armenian Dram"],
-    ["ANG", "Netherlands Antillean Guilder"],
-    ["AOA", "Angolan Kwanza"],
-    ["ARS", "Argentine Peso"],
-    ["AWG", "Aruban Florin"],
-    ["AZN", "Azerbaijani Manat"],
-    ["BAM", "Bosnia-Herzegovina Convertible Mark"],
-    ["BBD", "Barbadian Dollar"],
-    ["BDT", "Bangladeshi Taka"],
-    ["BGN", "Bulgarian Lev"],
-    ["BHD", "Bahraini Dinar"],
-    ["BIF", "Burundian Franc"],
-    ["BMD", "Bermudian Dollar"],
-    ["BND", "Brunei Dollar"],
-    ["BOB", "Bolivian Boliviano"],
-    ["BSD", "Bahamian Dollar"],
-    ["BTN", "Bhutanese Ngultrum"],
-    ["BWP", "Botswanan Pula"],
-    ["BYN", "Belarusian Ruble"],
-    ["BZD", "Belize Dollar"],
-    ["CDF", "Congolese Franc"],
-    ["CHF", "Swiss Franc"],
-    ["CLP", "Chilean Peso"],
-    ["CNY", "Chinese Yuan"],
-    ["COP", "Colombian Peso"],
-    ["CRC", "Costa Rican Colón"],
-    ["CUP", "Cuban Peso"],
-    ["CVE", "Cape Verdean Escudo"],
-    ["CZK", "Czech Republic Koruna"],
-    ["DJF", "Djiboutian Franc"],
-    ["DKK", "Danish Krone"],
-    ["DOP", "Dominican Peso"],
-    ["DZD", "Algerian Dinar"],
-    ["EGP", "Egyptian Pound"],
-    ["ERN", "Eritrean Nakfa"],
-    ["ETB", "Ethiopian Birr"],
-    ["FJD", "Fijian Dollar"],
-    ["FKP", "Falkland Islands Pound"],
-    ["FOK", "Faroe Islands Króna"],
-    ["GEL", "Georgian Lari"],
-    ["GGP", "Guernsey Pound"],
-    ["GIP", "Gibraltar Pound"],
-    ["GMD", "Gambian Dalasi"],
-    ["GNF", "Guinean Franc"],
-    ["GTQ", "Guatemalan Quetzal"],
-    ["GYD", "Guyanaese Dollar"],
-    ["HKD", "Hong Kong Dollar"],
-    ["HNL", "Honduran Lempira"],
-    ["HRK", "Croatian Kuna"],
-    ["HTG", "Haitian Gourde"],
-    ["HUF", "Hungarian Forint"],
-    ["IDR", "Indonesian Rupiah"],
-    ["ILS", "Israeli New Shekel"],
-    ["IMP", "Isle of Man Pound"],
-    ["IQD", "Iraqi Dinar"],
-    ["IRR", "Iranian Rial"],
-    ["ISK", "Icelandic Króna"],
-    ["JEP", "Jersey Pound"],
-    ["JMD", "Jamaican Dollar"],
-    ["JOD", "Jordanian Dinar"],
-    ["KGS", "Kyrgystani Som"],
-    ["KHR", "Cambodian Riel"],
-    ["KID", "Kiribati Dollar"],
-    ["KWD", "Kuwaiti Dinar"],
-    ["KYD", "Cayman Islands Dollar"],
-    ["KZT", "Kazakhstani Tenge"],
-    ["LAK", "Laotian Kip"],
-    ["LBP", "Lebanese Pound"],
-    ["LKR", "Sri Lankan Rupee"],
-    ["LRD", "Liberian Dollar"],
-    ["LSL", "Lesotho Loti"],
-    ["LYD", "Libyan Dinar"],
-    ["MAD", "Moroccan Dirham"],
-    ["MDL", "Moldovan Leu"],
-    ["MGA", "Malagasy Ariary"],
-    ["MKD", "Macedonian Denar"],
-    ["MMK", "Myanma Kyat"],
-    ["MNT", "Mongolian Tugrik"],
-    ["MOP", "Macanese Pataca"],
-    ["MRU", "Mauritanian Ouguiya"],
-    ["MUR", "Mauritian Rupee"],
-    ["MVR", "Maldivian Rufiyaa"],
-    ["MWK", "Malawian Kwacha"],
-    ["MXN", "Mexican Peso"],
-    ["MYR", "Malaysian Ringgit"],
-    ["MZN", "Mozambican Metical"],
-    ["NAD", "Namibian Dollar"],
-    ["NIO", "Nicaraguan Córdoba"],
-    ["NOK", "Norwegian Krone"],
-    ["NPR", "Nepalese Rupee"],
-    ["NZD", "New Zealand Dollar"],
-    ["OMR", "Omani Rial"],
-    ["PAB", "Panamanian Balboa"],
-    ["PEN", "Peruvian Nuevo Sol"],
-    ["PGK", "Papua New Guinean Kina"],
-    ["PHP", "Philippine Peso"],
-    ["PKR", "Pakistani Rupee"],
-    ["PLN", "Polish Złoty"],
-    ["PYG", "Paraguayan Guarani"],
-    ["QAR", "Qatari Rial"],
-    ["RON", "Romanian Leu"],
-    ["RSD", "Serbian Dinar"],
-    ["RUB", "Russian Ruble"],
-    ["RWF", "Rwandan Franc"],
-    ["SBD", "Solomon Islands Dollar"],
-    ["SCR", "Seychellois Rupee"],
-    ["SDG", "Sudanese Pound"],
-    ["SEK", "Swedish Krona"],
-    ["SGD", "Singapore Dollar"],
-    ["SHP", "Saint Helena Pound"],
-    ["SLL", "Sierra Leonean Leone"],
-    ["SOS", "Somali Shilling"],
-    ["SRD", "Surinamese Dollar"],
-    ["SSP", "South Sudanese Pound"],
-    ["STN", "São Tomé and Príncipe Dobra"],
-    ["SYP", "Syrian Pound"],
-    ["SZL", "Swazi Lilangeni"],
-    ["TJS", "Tajikistani Somoni"],
-    ["TMT", "Turkmenistani Manat"],
-    ["TND", "Tunisian Dinar"],
-    ["TOP", "Tongan Paʻanga"],
-    ["TRY", "Turkish Lira"],
-    ["TTD", "Trinidad and Tobago Dollar"],
-    ["TVD", "Tuvaluan Dollar"],
-    ["TWD", "New Taiwan Dollar"],
-    ["TZS", "Tanzanian Shilling"],
-    ["UAH", "Ukrainian Hryvnia"],
-    ["UGX", "Ugandan Shilling"],
-    ["UYU", "Uruguayan Peso"],
-    ["UZS", "Uzbekistan Som"],
-    ["VES", "Venezuelan Bolívar"],
-    ["VND", "Vietnamese Đồng"],
-    ["VUV", "Vanuatu Vatu"],
-    ["WST", "Samoan Tala"],
-    ["XAF", "Central African CFA Franc"],
-    ["XCD", "Eastern Caribbean Dollar"],
-    ["XDR", "Special Drawing Rights"],
-    ["XOF", "West African CFA franc"],
-    ["XPF", "CFP Franc"],
-    ["YER", "Yemeni Rial"],
-    ["ZMW", "Zambian Kwacha"],
-  ];
-
   const sellerData = new FormData();
   sellerData.append("ad_name", adName);
   sellerData.append("ad_category", adCategory);
   sellerData.append("ad_type", adType);
-  // sellerData.append("country", country.name);
-  // sellerData.append("state_province", stateProvince.name);
   sellerData.append("country", country.isoCode);
   sellerData.append("state_province", stateProvince.isoCode);
   sellerData.append("city", city.name);
@@ -638,15 +387,7 @@ function PostPaidAd({ history }) {
   );
   sellerData.append("is_auto_renewal", isAutoRenewal);
 
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => {
-        // history.push("/seller/bank");
-        window.location.reload();
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [dispatch, success, history]);
+  // console.log("sellerData:", sellerData);
 
   const handlePostPaidAd = (e) => {
     e.preventDefault(e);
@@ -759,545 +500,861 @@ function PostPaidAd({ history }) {
     }
   };
 
-  return (
-    <Container>
-      <Row className="justify-content-center py-2">
-        <Col xs={12} md={6}>
-          <h2 className="text-center py-2">Promoted Ad</h2>
-          {loading && <Loader />}
+  const pickImage = async (field, useLibrary) => {
+    let result;
+    const options = {
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    };
 
-          {success && (
-            <Message variant="success" fixed>
-              Ad created successfully.
-            </Message>
+    if (useLibrary) {
+      result = await ImagePicker.launchImageLibraryAsync(options);
+    } else {
+      await ImagePicker.requestCameraPermissionsAsync();
+      result = await ImagePicker.launchCameraAsync(options);
+    }
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      const file = {
+        uri: uri,
+        name: uri.split("/").pop(),
+        type: `image/${uri.split(".").pop()}`,
+      };
+
+      switch (field) {
+        case "image1":
+          setImage1(file);
+          break;
+        case "image2":
+          setImage2(file);
+          break;
+        case "image3":
+          setImage3(file);
+          break;
+        default:
+          break;
+      }
+    }
+  };
+
+  const removeImage = (imageType) => {
+    if (imageType === "image1") setImage1(null);
+    if (imageType === "image2") setImage2(null);
+    if (imageType === "image3") setImage3(null);
+  };
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        onRefresh();
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success, onRefresh]);
+
+  return (
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <View style={styles.container}>
+        <Text style={styles.heading}>Post Paid Ad</Text>
+        <Text style={styles.note}>
+          * All fields marked with asterisks are required
+        </Text>
+
+        {error && (
+          <Message fixed style={styles.errorText}>
+            {error}
+          </Message>
+        )}
+        {success && (
+          <Message fixed>
+            <Text>Ad Posted successfully</Text>
+          </Message>
+        )}
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Ad Title *</Text>
+          <TextInput
+            style={styles.input}
+            value={adName}
+            onChangeText={(text) => handleFieldChange("adName", text)}
+            placeholder="Enter ad name..."
+          />
+          {adNameError && <Text style={styles.errorText}>{adNameError}</Text>}
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Category *</Text>
+          <View style={styles.formContainer}>
+            <RNPickerSelect
+              onValueChange={(value) => handleCategoryChange(value)}
+              items={adCategoryChoices?.map(([value, label]) => ({
+                label,
+                value,
+              }))}
+              style={pickerSelectStyles}
+            />
+            {adCategoryError && (
+              <Text style={styles.errorText}>{adCategoryError}</Text>
+            )}
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Type *</Text>
+          <View style={styles.formContainer}>
+            <RNPickerSelect
+              onValueChange={(value) => handleTypeChange(value)}
+              items={
+                adTypeChoices[adCategory]?.map(([value, label]) => ({
+                  label,
+                  value,
+                })) || []
+              }
+              style={pickerSelectStyles}
+            />
+            {adTypeError && <Text style={styles.errorText}>{adTypeError}</Text>}
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Country *</Text>
+          <View style={styles.locationContainer}>
+            <Picker
+              selectedValue={country}
+              onValueChange={(value) => handleFieldChange("country", value)}
+            >
+              <Picker.Item label="Select Country" value="" />
+              {countries.map((country) => (
+                <Picker.Item
+                  key={country.isoCode}
+                  label={country.name}
+                  value={country}
+                />
+              ))}
+            </Picker>
+            {countryError ? (
+              <Text style={styles.error}>{countryError}</Text>
+            ) : null}
+          </View>
+        </View>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>State/Province *</Text>
+          <View style={styles.locationContainer}>
+            <Picker
+              selectedValue={stateProvince}
+              onValueChange={(value) =>
+                handleFieldChange("stateProvince", value)
+              }
+              enabled={states.length > 0}
+            >
+              <Picker.Item label="Select State/Province" value="" />
+              {states.map((state) => (
+                <Picker.Item
+                  key={state.isoCode}
+                  label={state.name}
+                  value={state}
+                />
+              ))}
+            </Picker>
+            {stateProvinceError ? (
+              <Text style={styles.error}>{stateProvinceError}</Text>
+            ) : null}
+          </View>
+        </View>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>City *</Text>
+          <View style={styles.locationContainer}>
+            <Picker
+              selectedValue={city}
+              onValueChange={(value) => handleFieldChange("city", value)}
+              enabled={cities.length > 0}
+            >
+              <Picker.Item label="Select City" value="" />
+              {cities.map((city) => (
+                <Picker.Item key={city.name} label={city.name} value={city} />
+              ))}
+            </Picker>
+            {cityError ? <Text style={styles.error}>{cityError}</Text> : null}
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Condition</Text>
+          <View style={styles.formContainer}>
+            <RNPickerSelect
+              onValueChange={(value) => handleFieldChange("condition", value)}
+              items={adConditionChoices?.map(([value, label]) => ({
+                label,
+                value,
+              }))}
+              style={pickerSelectStyles}
+            />
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <View style={styles.labelContainer}>
+            <Text style={styles.label}>Currency *</Text>
+            <TouchableOpacity
+              onPress={() => setShowMainCurrencyInfoModal(true)}
+            >
+              <FontAwesomeIcon
+                icon={faInfoCircle}
+                size={16}
+                style={styles.icon}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.formContainer}>
+            <RNPickerSelect
+              onValueChange={(value) => handleFieldChange("currency", value)}
+              items={mainCurrencyChoices?.map(([value, label]) => ({
+                label,
+                value,
+              }))}
+              style={pickerSelectStyles}
+            />
+
+            <Modal
+              visible={showMainCurrencyInfoModal}
+              transparent={true}
+              animationType="slide"
+              onRequestClose={() => setShowMainCurrencyInfoModal(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalLabelTitle}>Main Currency Info</Text>
+                  <Text style={styles.modalLabelBody}>
+                    This is the main currency price that can be used for
+                    Paysofter Promise checkout.
+                  </Text>
+                  <Button
+                    title="Close"
+                    onPress={() => setShowMainCurrencyInfoModal(false)}
+                  />
+                </View>
+              </View>
+            </Modal>
+          </View>
+          {currencyError && (
+            <Text style={styles.errorText}>{currencyError}</Text>
+          )}
+        </View>
+
+        {currency && (
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Price *</Text>
+            <TextInput
+              style={styles.input}
+              value={price}
+              onChangeText={(text) => handleFieldChange("price", text)}
+              keyboardType="numeric"
+              placeholder="Enter ad price..."
+            />
+            {priceError && <Text style={styles.errorText}>{priceError}</Text>}
+          </View>
+        )}
+
+        <View style={styles.formGroup}>
+          <View style={styles.labelContainer}>
+            <Text style={styles.label}>Alternative Currency</Text>
+            <TouchableOpacity onPress={() => setShowAltCurrencyInfoModal(true)}>
+              <FontAwesomeIcon
+                icon={faInfoCircle}
+                size={16}
+                style={styles.icon}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.formContainer}>
+            <RNPickerSelect
+              onValueChange={(value) => handleFieldChange("usdCurrency", value)}
+              items={currencyChoices?.map(([value, label]) => ({
+                label,
+                value,
+              }))}
+              style={pickerSelectStyles}
+            />
+
+            <Modal
+              visible={showAltCurrencyInfoModal}
+              transparent={true}
+              animationType="slide"
+              onRequestClose={() => setShowAltCurrencyInfoModal(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalLabelTitle}>
+                    Alternative Currency Info
+                  </Text>
+                  <Text style={styles.modalLabelBody}>
+                    This is optional and could be the alternative currency.
+                  </Text>
+                  <Button
+                    title="Close"
+                    onPress={() => setShowAltCurrencyInfoModal(false)}
+                  />
+                </View>
+              </View>
+            </Modal>
+          </View>
+        </View>
+
+        {usdCurrency && (
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Price Alternative</Text>
+            <TextInput
+              style={styles.input}
+              value={usdPrice}
+              onChangeText={(text) => handleFieldChange("usdPrice", text)}
+              keyboardType="numeric"
+              placeholder="Enter alternative ad price..."
+            />
+            {priceError && <Text style={styles.errorText}>{priceError}</Text>}
+          </View>
+        )}
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Promo Code</Text>
+          <TextInput
+            style={styles.input}
+            value={promoCode}
+            onChangeText={(text) => handleFieldChange("promoCode", text)}
+            placeholder="Enter ad promo code..."
+          />
+          {promoCodeError && (
+            <Text style={styles.errorText}>{promoCodeError}</Text>
+          )}
+        </View>
+
+        {promoCode && (
+          <>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Discount Percentage*</Text>
+              <View style={styles.formContainer}>
+                <TextInput
+                  value={discountPercentage}
+                  onChangeText={(value) =>
+                    handleFieldChange("discountPercentage", value)
+                  }
+                  placeholder="Enter ad discount percentage"
+                  keyboardType="numeric"
+                  maxLength={4}
+                />
+              </View>
+            </View>
+
+            <View style={styles.formGroup}>
+              <View style={styles.labelContainer}>
+                <Text style={styles.label}>Strike Through Old Price</Text>
+                <TouchableOpacity
+                  onPress={() => setShowLineThrougPriceInfoModal(true)}
+                >
+                  <FontAwesomeIcon
+                    icon={faInfoCircle}
+                    size={16}
+                    style={styles.icon}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.formContainer}>
+                <Checkbox.Item
+                  label="Show strike through promo price?"
+                  status={showStrikethroughPromoPrice ? "checked" : "unchecked"}
+                  onPress={() =>
+                    handleFieldChange(
+                      "showStrikethroughPromoPrice",
+                      !showStrikethroughPromoPrice
+                    )
+                  }
+                />
+              </View>
+
+              <Modal
+                visible={showLineThrougPriceInfoModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowLineThrougPriceInfoModal(false)}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalLabelTitle}>
+                      Show Strike Through Price
+                    </Text>
+                    <Text style={styles.modalLabelBody}>
+                      This shows the line through price. E.g. 100 USD ad price
+                      at 5% discount rate will display thus:
+                      <Text style={{ textDecorationLine: "line-through" }}>
+                        100 USD
+                      </Text>{" "}
+                      95 USD (5% Off).
+                    </Text>
+                    <Button
+                      title="Close"
+                      onPress={() => setShowLineThrougPriceInfoModal(false)}
+                    />
+                  </View>
+                </View>
+              </Modal>
+            </View>
+          </>
+        )}
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Brand</Text>
+          <TextInput
+            style={styles.input}
+            value={brand}
+            onChangeText={(text) => handleFieldChange("brand", text)}
+            placeholder="Enter ad brand..."
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>YouTube Link</Text>
+          <TextInput
+            style={styles.input}
+            value={youtubeLink}
+            onChangeText={(text) => handleFieldChange("youtubeLink", text)}
+            placeholder="Enter ad youtube link..."
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Count in Stock</Text>
+          <TextInput
+            style={styles.input}
+            value={countInStock}
+            onChangeText={(text) => handleFieldChange("countInStock", text)}
+            keyboardType="numeric"
+            placeholder="Enter number of ads in stock ..."
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Image 1 *</Text>
+          <View style={styles.imgContainer}>
+            <TouchableOpacity
+              style={styles.imagePicker}
+              onPress={() => pickImage("image1", true)}
+            >
+              <Text style={styles.uploadText}>
+                {image1 ? "Change Image 1" : "Select Image 1"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.imagePicker}
+              onPress={() => pickImage("image1", false)}
+            >
+              <Text style={styles.uploadText}>Capture Image 1</Text>
+            </TouchableOpacity>
+            {image1 ? (
+              <>
+                <Image
+                  source={{ uri: image1.uri }}
+                  style={styles.imagePreview}
+                />
+                <TouchableOpacity
+                  style={styles.removeButton}
+                  onPress={() => removeImage("image1")}
+                >
+                  <Text style={styles.removeButtonText}>Remove Image 1</Text>
+                </TouchableOpacity>
+              </>
+            ) : null}
+          </View>
+          {image1Error && <Text style={styles.errorText}>{image1Error}</Text>}
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Image 2</Text>
+          <View style={styles.imgContainer}>
+            <TouchableOpacity
+              style={styles.imagePicker}
+              onPress={() => pickImage("image2", true)}
+            >
+              <Text style={styles.uploadText}>
+                {image2 ? "Change Image 2" : "Select Image 2"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.imagePicker}
+              onPress={() => pickImage("image2", false)}
+            >
+              <Text style={styles.uploadText}>Capture Image 2</Text>
+            </TouchableOpacity>
+            {image2 ? (
+              <>
+                <Image
+                  source={{ uri: image2.uri }}
+                  style={styles.imagePreview}
+                />
+                <TouchableOpacity
+                  style={styles.removeButton}
+                  onPress={() => removeImage("image2")}
+                >
+                  <Text style={styles.removeButtonText}>Remove Image 2</Text>
+                </TouchableOpacity>
+              </>
+            ) : null}
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Image 3</Text>
+          <View style={styles.imgContainer}>
+            <TouchableOpacity
+              style={styles.imagePicker}
+              onPress={() => pickImage("image3", true)}
+            >
+              <Text style={styles.uploadText}>
+                {image3 ? "Change Image 3" : "Select Image 3"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.imagePicker}
+              onPress={() => pickImage("image3", false)}
+            >
+              <Text style={styles.uploadText}>Capture Image 3</Text>
+            </TouchableOpacity>
+            {image3 ? (
+              <>
+                <Image
+                  source={{ uri: image3.uri }}
+                  style={styles.imagePreview}
+                />
+                <TouchableOpacity
+                  style={styles.removeButton}
+                  onPress={() => removeImage("image3")}
+                >
+                  <Text style={styles.removeButtonText}>Remove Image 3</Text>
+                </TouchableOpacity>
+              </>
+            ) : null}
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Duration *</Text>
+          <View style={styles.formContainer}>
+            <RNPickerSelect
+              onValueChange={(value) => handleFieldChange("duration", value)}
+              items={durationChoices?.map(([value, label]) => ({
+                label,
+                value,
+              }))}
+              style={pickerSelectStyles}
+            />
+          </View>
+          {durationError && (
+            <Text style={styles.errorText}>{durationError}</Text>
+          )}
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Auto-Renewal</Text>
+          <View style={styles.formContainer}>
+            <Checkbox.Item
+              label="Renew Automatically?"
+              status={isAutoRenewal ? "checked" : "unchecked"}
+              onPress={() => handleFieldChange("isAutoRenewal", !isAutoRenewal)}
+            />
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Description *</Text>
+          <View style={styles.descContainer}>
+            <RichToolbar
+              editor={richText}
+              actions={[
+                actions.insertImage,
+                actions.setBold,
+                actions.setItalic,
+                actions.insertBulletsList,
+                actions.insertOrderedList,
+                actions.insertLink,
+                actions.setUnderline,
+                actions.setStrikethrough,
+                actions.undo,
+                actions.redo,
+              ]}
+            />
+            <RichEditor
+              ref={richText}
+              editorStyle={styles.editor}
+              onChange={(text) => handleFieldChange("description", text)}
+              placeholder="Enter ad description..."
+              initialContentHTML={description}
+            />
+          </View>
+          {descriptionError && (
+            <Text style={styles.errorText}>{descriptionError}</Text>
+          )}
+        </View>
+
+        <View style={styles.formGroup}>
+          {loading && <Loader />}
+          {formError && (
+            <View style={styles.message}>
+              <Message fixed style={styles.errorText}>
+                {formError}
+              </Message>
+            </View>
           )}
           {error && (
-            <Message variant="danger" fixed>
-              {error}
-            </Message>
+            <View style={styles.message}>
+              <Message style={styles.errorText}>{error}</Message>
+            </View>
           )}
-          {formError && (
-            <Message variant="danger" fixed>
-              {formError}
-            </Message>
+          {success && (
+            <View style={styles.message}>
+              <Message fixed>
+                <Text>Ad Posted successfully</Text>
+              </Message>
+            </View>
           )}
+        </View>
 
-          <Form>
-            <Form.Group>
-              <Form.Label>Ad Name*</Form.Label>
-              <Form.Control
-                type="text"
-                value={adName}
-                onChange={(e) => handleFieldChange("adName", e.target.value)}
-                placeholder="Enter the ad name"
-                className="rounded py-2 mb-2"
-                required
-                maxLength={100}
-              />
-              <Form.Text className="text-danger">{adNameError}</Form.Text>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Ad Category*</Form.Label>
-              <Select
-                options={AD_CATEGORY_CHOICES.map(([value, label]) => ({
-                  value,
-                  label,
-                }))}
-                value={{ value: adCategory, label: adCategory }}
-                onChange={handleCategoryChange}
-                placeholder="Select Category"
-                className="rounded py-2 mb-2"
-                required
-              />
-              <Form.Text className="text-danger">{adCategoryError}</Form.Text>
-            </Form.Group>
-
-            {adCategory && (
-              <Form.Group>
-                <Form.Label>Ad Type*</Form.Label>
-                <Select
-                  options={AD_TYPE_CHOICES[adCategory].map(
-                    ([value, label]) => ({
-                      value,
-                      label,
-                    })
-                  )}
-                  value={{ value: adType, label: adType }}
-                  onChange={handleTypeChange}
-                  placeholder="Select Type"
-                  className="rounded py-2 mb-2"
-                  required
-                />
-                <Form.Text className="text-danger">{adTypeError}</Form.Text>
-              </Form.Group>
-            )}
-
-            <Form.Group>
-              <Form.Label>Ad Country*</Form.Label>
-              <Select
-                options={countries.map((country) => ({
-                  value: country.isoCode,
-                  label: country.name,
-                }))}
-                value={{ value: country.isoCode, label: country.name }}
-                onChange={(selectedOption) => {
-                  handleFieldChange("country", {
-                    isoCode: selectedOption.value,
-                    name: selectedOption.label,
-                  });
-                }}
-                placeholder="Select Country"
-                className="rounded py-2 mb-2"
-                required
-              />
-              <Form.Text className="text-danger">{countryError}</Form.Text>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Ad State/Province*</Form.Label>
-              <Select
-                options={states.map((state) => ({
-                  value: state.isoCode,
-                  label: state.name,
-                }))}
-                value={{
-                  value: stateProvince.isoCode,
-                  label: stateProvince.name,
-                }}
-                onChange={(selectedOption) => {
-                  handleFieldChange("stateProvince", {
-                    isoCode: selectedOption.value,
-                    name: selectedOption.label,
-                  });
-                }}
-                placeholder="Select State/Province"
-                className="rounded py-2 mb-2"
-                required
-              />
-              <Form.Text className="text-danger">
-                {stateProvinceError}
-              </Form.Text>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Ad City*</Form.Label>
-              <Select
-                options={cities.map((city) => ({
-                  value: city.name,
-                  label: city.name,
-                }))}
-                value={{ value: city.name, label: city.name }}
-                onChange={(selectedOption) => {
-                  handleFieldChange("city", {
-                    name: selectedOption.label,
-                  });
-                }}
-                placeholder="Select City"
-                className="rounded py-2 mb-2"
-                required
-              />
-              <Form.Text className="text-danger">{cityError}</Form.Text>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Ad Condition</Form.Label>
-              <Form.Control
-                as="select"
-                value={condition}
-                onChange={(e) => handleFieldChange("condition", e.target.value)}
-                className="rounded py-2 mb-2"
-                required
-              >
-                <option value="">Select Ad Condition</option>
-                {AD_CONDITION_CHOICES.map((type) => (
-                  <option key={type[0]} value={type[0]}>
-                    {type[1]}
-                  </option>
-                ))}
-              </Form.Control>
-              {/* <Form.Text className="text-danger">{conditionError}</Form.Text> */}
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Currency*</Form.Label>
-              <Row className="py-2">
-                <Col md={10}>
-                  <Select
-                    value={{ value: currency, label: currency }}
-                    onChange={(selectedOption) =>
-                      handleFieldChange("currency", selectedOption.value)
-                    }
-                    options={MAIN_CURRENCY_CHOICES.map((type) => ({
-                      value: type[0],
-                      label: type[1],
-                    }))}
-                  />
-                </Col>
-                <Col md={2}>
-                  <Button
-                    variant="outline"
-                    onClick={handleMainCurrencyInfoModalShow}
-                    data-toggle="tooltip"
-                    data-placement="top"
-                    title="This is the main currency price that can be used for Paysofter Promise checkout."
-                  >
-                    <i className="fa fa-info-circle"> </i>
-                  </Button>
-
-                  <Modal
-                    show={showMainCurrencyInfoModal}
-                    onHide={handleMainCurrencyInfoModalClose}
-                  >
-                    <Modal.Header closeButton>
-                      <Modal.Title className="text-center w-100 py-2">
-                        Main Currency Info
-                      </Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                      <p className="text-center">
-                        This is the main currency price that can be used for
-                        Paysofter Promise checkout.{" "}
-                      </p>
-                    </Modal.Body>
-                  </Modal>
-                </Col>
-              </Row>
-
-              <Form.Text className="text-danger">{currencyError}</Form.Text>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Price*</Form.Label>
-              <Form.Control
-                type="number"
-                value={price}
-                onChange={(e) => handleFieldChange("price", e.target.value)}
-                placeholder="Enter price"
-                className="rounded py-2 mb-2"
-                required
-              />
-              <Form.Text className="text-danger">{priceError}</Form.Text>
-            </Form.Group>
-
-            <Form.Group controlId="usdCurrency">
-              <Form.Label>Alternative Currency</Form.Label>
-              <Row className="py-2">
-                <Col md={10}>
-                  <Select
-                    value={{ value: usdCurrency, label: usdCurrency }}
-                    onChange={(selectedOption) =>
-                      handleFieldChange("usdCurrency", selectedOption.value)
-                    }
-                    options={EQUIVALENT_CURRENCY_CHOICES.map((type) => ({
-                      value: type[0],
-                      label: type[1],
-                    }))}
-                  />
-                </Col>
-                <Col md={2}>
-                  <Button
-                    variant="outline"
-                    onClick={handleAltCurrencyInfoModalShow}
-                    data-toggle="tooltip"
-                    data-placement="top"
-                    title="This is optional and could be the alternative currency."
-                  >
-                    <i className="fa fa-info-circle"> </i>
-                  </Button>
-
-                  <Modal
-                    show={showAltCurrencyInfoModal}
-                    onHide={handleAltCurrencyInfoModalClose}
-                  >
-                    <Modal.Header closeButton>
-                      <Modal.Title className="text-center w-100 py-2">
-                        Alternative Currency Info
-                      </Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                      <p className="text-center">
-                        This is optional and could be the alternative currency.{" "}
-                      </p>
-                    </Modal.Body>
-                  </Modal>
-                </Col>
-              </Row>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Price Alternative</Form.Label>
-              <Form.Control
-                type="number"
-                value={usdPrice}
-                onChange={(e) => handleFieldChange("usdPrice", e.target.value)}
-                placeholder="Enter price alternative"
-                className="rounded py-2 mb-2"
-              />
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Check
-                type="checkbox"
-                label="Is Price Negotiable?"
-                checked={isPriceNegotiable}
-                onChange={(e) =>
-                  handleFieldChange("isPriceNegotiable", e.target.checked)
-                }
-                className="rounded py-2 mb-2"
-              />
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Promo Code</Form.Label>
-              <Form.Control
-                type="text"
-                value={promoCode}
-                onChange={(e) => handleFieldChange("promoCode", e.target.value)}
-                placeholder="Enter ad promo code"
-                className="rounded py-2 mb-2"
-                maxLength={10}
-              />
-              <Form.Text className="text-danger">{promoCodeError}</Form.Text>
-            </Form.Group>
-
-            {promoCode && (
-              <>
-                <Form.Group>
-                  <Form.Label>Discount Percentage*</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={discountPercentage}
-                    onChange={(e) =>
-                      handleFieldChange("discountPercentage", e.target.value)
-                    }
-                    placeholder="Enter ad discount percentage"
-                    className="rounded py-2 mb-2"
-                    maxLength={4}
-                    required
-                  />
-                  <Form.Text className="text-danger">
-                    {discountPercentageError}
-                  </Form.Text>
-                </Form.Group>
-
-                <Form.Group>
-                  <Row className="py-2">
-                    <Col md={10}>
-                      <Form.Check
-                        type="checkbox"
-                        label="Show strike through promo price?"
-                        checked={showStrikethroughPromoPrice}
-                        onChange={(e) =>
-                          handleFieldChange(
-                            "showStrikethroughPromoPrice",
-                            e.target.checked
-                          )
-                        }
-                        className="rounded py-2 mb-2"
-                      />
-                    </Col>
-                    <Col md={2}>
-                      <Button
-                        variant="outline"
-                        onClick={handleLineThrougPriceInfoModalShow}
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        title="This displays the strike through price."
-                      >
-                        <i className="fa fa-info-circle"> </i>
-                      </Button>
-
-                      <Modal
-                        show={showLineThrougPriceInfoModal}
-                        onHide={handleLineThrougPriceInfoModalClose}
-                      >
-                        <Modal.Header closeButton>
-                          <Modal.Title className="text-center w-100 py-2">
-                            Show Strike Through Price
-                          </Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                          <p className="text-center">
-                            This shows the line through price. E.g. 100 USD ad
-                            price at 5% discount rate will display thus: `
-                            <span style={{ textDecoration: "line-through" }}>
-                              100 USD
-                            </span>{" "}
-                            95 USD (5% Off)`.{" "}
-                          </p>
-                        </Modal.Body>
-                      </Modal>
-                    </Col>
-                  </Row>
-                </Form.Group>
-              </>
-            )}
-
-            <Form.Group>
-              <Form.Label>Brand</Form.Label>
-              <Form.Control
-                type="text"
-                value={brand}
-                onChange={(e) => handleFieldChange("brand", e.target.value)}
-                placeholder="Enter ad brand"
-                className="rounded py-2 mb-2"
-                maxLength={100}
-              />
-              {/* <Form.Text className="text-danger">{brandError}</Form.Text> */}
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Youtube Link</Form.Label>
-              <Form.Control
-                type="text"
-                value={youtubeLink}
-                onChange={(e) =>
-                  handleFieldChange("youtubeLink", e.target.value)
-                }
-                placeholder="Enter ad Youtube link"
-                className="rounded py-2 mb-2"
-                maxLength={225}
-              />
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Number In Stock</Form.Label>
-              <Form.Control
-                type="number"
-                value={countInStock}
-                onChange={(e) =>
-                  handleFieldChange("countInStock", e.target.value)
-                }
-                placeholder="Enter number of ad in stock"
-                className="rounded py-2 mb-2"
-                maxLength={100}
-              />
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Image 1</Form.Label>
-              <Form.Control
-                type="file"
-                onChange={(e) => handleFieldChange("image1", e.target.files[0])}
-                placeholder="Upload the ID Card Photo"
-                className="rounded py-2 mb-2"
-              />
-              <Form.Text className="text-danger">{image1Error}</Form.Text>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Image 2</Form.Label>
-              <Form.Control
-                type="file"
-                onChange={(e) => handleFieldChange("image2", e.target.files[0])}
-                placeholder="Upload the ID Card Photo"
-                className="rounded py-2 mb-2"
-                maxLength={100}
-              />
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Image 3</Form.Label>
-              <Form.Control
-                type="file"
-                onChange={(e) => handleFieldChange("image3", e.target.files[0])}
-                placeholder="Upload proof of address"
-                className="rounded py-2 mb-2"
-                maxLength={100}
-              />
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Duration*</Form.Label>
-              <Form.Control
-                as="select"
-                value={duration}
-                onChange={(e) => handleFieldChange("duration", e.target.value)}
-                className="rounded py-2 mb-2"
-                required
-              >
-                <option value="">Select Ad Duration</option>
-                {DURATION_CHOICES.map((type) => (
-                  <option key={type[0]} value={type[0]}>
-                    {type[1]}
-                  </option>
-                ))}
-              </Form.Control>
-              <Form.Text className="text-danger">{durationError}</Form.Text>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Check
-                type="checkbox"
-                label="Renew Automatically?"
-                checked={isAutoRenewal}
-                onChange={(e) =>
-                  handleFieldChange("isAutoRenewal", e.target.checked)
-                }
-                className="rounded py-2 mb-2"
-              />
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Description*</Form.Label>
-              {/* <Form.Control
-                // type="text"
-                as="textarea"
-                rows={2}
-                value={description}
-                onChange={(e) =>
-                  handleFieldChange("description", e.target.value)
-                }
-                placeholder="Enter ad description"
-                className="rounded py-2 mb-2"
-                required
-                maxLength={2000}
-              /> */}
-
-              <ReactQuill
-                value={description}
-                onChange={(value) => handleFieldChange("description", value)}
-                placeholder="Enter ad description"
-                className="rounded py-2 mb-2"
-                modules={modules}
-                formats={formats}
-                maxLength={4000}
-                required
-              />
-
-              {/* <ReactQuill
-                value={description}
-                // onChange={setMessage}
-                onChange={(e) =>
-                  handleFieldChange("description", e.target.value)
-                }
-                modules={modules} 
-                formats={formats}
-                placeholder="Enter ad description"
-                maxLength={2000}
-                required
-              /> */}
-              <Form.Text className="text-danger">{descriptionError}</Form.Text>
-            </Form.Group>
-          </Form>
-          <div className="py-2">
-            <Button
-              variant="success"
-              onClick={handlePostPaidAd}
-              className="rounded py-2 mb-2 text-center w-100"
-              disabled={loading || success}
-            >
-              <div className="d-flex justify-content-center">
-                <span className="py-1">Post Ad</span>
-                {loading && <LoaderButton />}
-              </div>
-            </Button>
-          </div>
-        </Col>
-      </Row>
-    </Container>
-  );
+        <View style={styles.formGroup}>
+          <TouchableOpacity onPress={handlePostPaidAd}>
+            <Text style={styles.roundedPrimaryBtn}>Post Paid Ad</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
+  );  
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#fff",
+  },
+  descContainer: {
+    width: "100%",
+    minHeight: 120,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    marginBottom: 20,
+  },
+  formContainer: {
+    width: "100%",
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  locationContainer: {
+    width: "100%",
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+  },
+
+  imgContainer: {
+    width: "100%",
+    minHeight: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  heading: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  note: {
+    fontSize: 12,
+    color: "gray",
+    marginBottom: 20,
+  },
+  formGroup: {
+    marginBottom: 20,
+    justifyContent: "center",
+    textAlign: "center",
+  },
+  labelContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  label: {
+    marginBottom: 8,
+    fontSize: 16,
+  },
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+  },
+  editor: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 20,
+    borderRadius: 5,
+    minHeight: 400,
+  },
+  message: {
+    padding: 10,
+  },
+  errorText: {
+    color: "red",
+    marginTop: 8,
+  },
+  uploadText: {
+    color: "#007BFF",
+    textDecorationLine: "underline",
+  },
+  imagePreview: {
+    width: 100,
+    height: 100,
+    marginTop: 10,
+  },
+  removeButton: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#ff0000",
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  removeButtonText: {
+    color: "#fff",
+  },
+  paidAdText: {
+    marginTop: 20,
+    textAlign: "center",
+    color: "#007BFF",
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  roundedDangerBtn: {
+    backgroundColor: "#dc3545",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  roundedInfoBtn: {
+    backgroundColor: "#17a2b8",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  roundedSecBtn: {
+    backgroundColor: "#6c757d",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  roundedSuccessBtn: {
+    backgroundColor: "#28a745)",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  checkBox: {
+    backgroundColor: "white",
+    borderWidth: 0,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+    alignItems: "center",
+  },
+  modalLabelBody: {
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    padding: 10,
+  },
+  modalLabelTitle: {
+    fontWeight: "bold",
+    fontSize: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    padding: 10,
+  },
+  icon: {
+    marginLeft: 10,
+    color: "#007bff",
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  // inputIOS: {
+  //   fontSize: 16,
+  //   paddingVertical: 12,
+  //   paddingHorizontal: 10,
+  //   borderWidth: 1,
+  //   borderColor: "gray",
+  //   borderRadius: 4,
+  //   color: "black",
+  //   paddingRight: 30,
+  // },
+  // inputAndroid: {
+  //   fontSize: 16,
+  //   paddingHorizontal: 10,
+  //   paddingVertical: 8,
+  //   borderWidth: 0.5,
+  //   borderColor: "purple",
+  //   borderRadius: 8,
+  //   color: "black",
+  //   paddingRight: 30,
+  // },
+});
 
 export default PostPaidAd;

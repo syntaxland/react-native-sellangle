@@ -10,7 +10,7 @@ import GetUsdBuyCreditPoint from "../CreditPoint/GetUsdBuyCreditPoint";
 import GetSellCreditPoint from "../CreditPoint/GetSellCreditPoint";
 import GetBuyerCreditPoint from "../CreditPoint/GetBuyerCreditPoint";
 import GetAdCpsCharges from "../CreditPoint/GetAdCpsCharges";
-import GetUserCpsBonuses from "../CreditPoint/GetUserCpsBonuses";
+import GetUserCpsBonuses from "../CreditPoint/GetUserCpsBonuses"; 
 
 const CreditPoint = () => {
   // const dispatch = useDispatch();

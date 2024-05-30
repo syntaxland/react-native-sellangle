@@ -24,11 +24,7 @@ import { listProducts } from "../../redux/actions/productAction";
 import { styles } from "../screenStyles";
 
 function HomeScreen() {
-  // const navigation = useNavigation();
   const dispatch = useDispatch();
-
-  // const userLogin = useSelector((state) => state.userLogin);
-  // const { userInfo } = userLogin;
 
   const quotes = [
     "At this angle, sells are quick ...",
@@ -116,7 +112,7 @@ function HomeScreen() {
     wait(2000).then(() => setRefreshing(false));
   }, []);
 
-  console.log("Hey Sellangle!");
+  // console.log("Hey Sellangle!");
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -127,15 +123,7 @@ function HomeScreen() {
         }
       >
         <View style={styles.container}>
-          {/* <Header /> */}
-
-          <View
-            style={
-              {
-                // padding: 20,
-              }
-            }
-          >
+          <View>
             <Carousel
               loop
               width={Dimensions.get("window").width}
@@ -144,15 +132,8 @@ function HomeScreen() {
               data={quotes}
               scrollAnimationDuration={3000}
               renderItem={renderQuoteItem}
-              // onSnapToItem={(index) => console.log("current index:", index)}
             />
           </View>
-
-          {/* <GetProductScreen /> */}
-
-          {/* <View style={{ padding: 10 }}>
-        {userInfo ? <RecommendedProducts /> : null}
-      </View> */}
         </View>
       </ScrollView>
     </SafeAreaView>

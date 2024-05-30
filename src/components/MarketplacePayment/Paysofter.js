@@ -1,19 +1,27 @@
 // Paysofter.js
+// Paysofter.js
 import React, { useState, useEffect } from "react";
-import { Row, Col, ListGroup } from "react-bootstrap";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ScrollView,
+  Button,
+  Modal,
+  TouchableOpacity,
+} from "react-native";
 import { useSelector } from "react-redux";
-import "react-datepicker/dist/react-datepicker.css";
 import PaysofterButton from "./PaysofterButton";
 import ApplyPromoCode from "../marketplace/ApplyPromoCode";
-import LoaderPaysofter from "../LoaderPaysofter";
-import Message from "../Message";
-import "./Paysofter.css";
-import { formatAmount } from "../FormatAmount";
+import Loader from "../../Loader";
+import Message from "../../Message";
+import { formatAmount } from "../../FormatAmount";
 
-function Paysofter({
+const Paysofter = ({
   adId,
   promoCode,
-  buyerEmail, 
+  buyerEmail,
   amount,
   sellerApiKey,
   currency,
@@ -23,33 +31,24 @@ function Paysofter({
   userEmail,
   adsPrice,
   finalItemsPrice,
-}) {
-  // const paymentCreate = useSelector((state) => state.paymentCreate);
-  // const { loading, error } = paymentCreate;
-
+}) => {
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
   }, [userInfo]);
 
-  const getPaidAdDetailState = useSelector(
-    (state) => state.getPaidAdDetailState
-  );
+  const getPaidAdDetailState = useSelector((state) => state.getPaidAdDetailState);
   const { ads, loading, error } = getPaidAdDetailState;
 
-  const applyPomoCodeState = useSelector((state) => state.applyPomoCodeState);
-  const { discountPercentage, promoDiscount } = applyPomoCodeState;
+  const applyPromoCodeState = useSelector((state) => state.applyPromoCodeState);
+  const { discountPercentage, promoDiscount } = applyPromoCodeState;
 
   console.log("promoCode:", promoCode, "adId:", adId);
-  console.log(
-    "promoDiscount:",
-    promoDiscount,
-    "discountPercentage:",
-    discountPercentage
-  );
+  console.log("promoDiscount:", promoDiscount, "discountPercentage:", discountPercentage);
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const createdAt = new Date().toISOString();
@@ -61,7 +60,6 @@ function Paysofter({
     ad_id: ad_id,
     amount: totalPrice,
     email: userEmail,
-
     ads_amount: adsPrice,
     final_ads_amount: finalItemsPrice,
     promo_code_discount_amount: promoDiscount,
@@ -70,95 +68,94 @@ function Paysofter({
   };
 
   return (
-    <>
-      <Row>
-        <div className="d-flex justify-content-center ">
-          <Col md={8}>
-            <h1 className="text-center py-3">Paysofter Promise Option</h1>
-            {loading && <LoaderPaysofter />}
-            {error && <Message variant="danger">{error}</Message>}
-            <ListGroup variant="flush">
-              <ListGroup.Item>
-                <Row>
-                  <Col md={4}>
-                    <img
-                      src={ads?.image1}
-                      alt={ads?.ad_name}
-                      className="img-fluid"
-                    />
-                  </Col>
-                  <Col md={8}>
-                    <p>{ads?.ad_name}</p>
-                    {/* <p>
-                        {ads?.qty} x NGN {ads?.ad_price} = NGN{" "}
-                        {ads?.qty * ads?.ad_price}
-                      </p> */}
-                  </Col>
-                </Row>
-              </ListGroup.Item>
-
-              <ListGroup.Item>
-                Total Amount: {formatAmount(ads?.price)} {currency}
-              </ListGroup.Item>
-
-              {promoCode && (
-                <div className="py-2">
-                  <ListGroup.Item>
-                    <ApplyPromoCode
-                      adId={adId}
-                      // promoCode={promoCode}
-                      // currency={currency}
-                      // totalPrice={totalPrice}
-                      // promoTotalPrice={promoTotalPrice}
-                    />
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    Promo Discount Amount:{" "}
-                    {promoDiscount ? (
-                      <span>
-                        {currency} {formatAmount(promoDiscount)} (
-                        {discountPercentage}% )
-                      </span>
-                    ) : (
-                      <span>0</span>
-                    )}
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    Final Total Amount: {currency}{" "}
-                    {promoTotalPrice ? (
-                      <span>
-                        {formatAmount(promoTotalPrice)} 
-                      </span>
-                    ) : (
-                      <span>{formatAmount(totalPrice)}</span>
-                    )}
-                  </ListGroup.Item>
-                </div>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.header}>Paysofter Promise Option</Text>
+      {loading && <Loader />}
+      {error && <Message variant="danger">{error}</Message>}
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <Image source={{ uri: ads?.image1 }} style={styles.image} />
+          <Text style={styles.adName}>{ads?.ad_name}</Text>
+        </View>
+        <Text>Total Amount: {formatAmount(ads?.price)} {currency}</Text>
+        {promoCode && (
+          <View style={styles.promoSection}>
+            <ApplyPromoCode adId={adId} />
+            <Text>
+              Promo Discount Amount:{" "}
+              {promoDiscount ? (
+                <Text>
+                  {currency} {formatAmount(promoDiscount)} ({discountPercentage}% )
+                </Text>
+              ) : (
+                <Text>0</Text>
               )}
-
-              <ListGroup.Item>Timestamp: {createdAt}</ListGroup.Item>
-            </ListGroup>
-
-            <div>
-              <PaysofterButton
-                showPaymentModal={showPaymentModal}
-                setShowPaymentModal={setShowPaymentModal}
-                paymentData={paymentData}
-                reference={reference}
-                buyerEmail={buyerEmail}
-                currency={currency}
-                usdPrice={usdPrice}
-                amount={promoTotalPrice}
-                sellerApiKey={sellerApiKey}
-              />
-            </div>
-          </Col>
-        </div>
-      </Row>
-    </>
+            </Text>
+            <Text>
+              Final Total Amount: {currency}{" "}
+              {promoTotalPrice ? (
+                <Text>{formatAmount(promoTotalPrice)}</Text>
+              ) : (
+                <Text>{formatAmount(totalPrice)}</Text>
+              )}
+            </Text>
+          </View>
+        )}
+        <Text>Timestamp: {createdAt}</Text>
+      </View>
+      <View style={styles.buttonContainer}>
+        <PaysofterButton
+          showPaymentModal={showPaymentModal}
+          setShowPaymentModal={setShowPaymentModal}
+          paymentData={paymentData}
+          reference={reference}
+          buyerEmail={buyerEmail}
+          currency={currency}
+          usdPrice={usdPrice}
+          amount={promoTotalPrice}
+          sellerApiKey={sellerApiKey}
+        />
+      </View>
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  card: {
+    backgroundColor: "#f8f9fa",
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    marginRight: 20,
+  },
+  adName: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  promoSection: {
+    marginTop: 20,
+  },
+  buttonContainer: {
+    alignItems: "center",
+  },
+});
 
 export default Paysofter;

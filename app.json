@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sellangle",
     "slug": "sellangle",
-    "version": "2.0.3",
+    "version": "2.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -19,6 +19,14 @@
     },
     "plugins": [
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "custom photos permission",
+          "cameraPermission": "Allow Sellangle to open the camera",
+          "microphonePermission": false
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {
@@ -27,7 +35,7 @@
               "foregroundImage": "./assets/adaptive-icon.png",
               "backgroundColor": "#ffffff"
             },
-            "versionCode": 6,
+            "versionCode": 7,
             "package": "com.jondebosco.sellangle"
           },
           "ios": {

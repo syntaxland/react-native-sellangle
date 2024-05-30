@@ -1,20 +1,22 @@
 // ToggleFreeAdSave.js
-import React, {
-  useState,
-  // useEffect
-} from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toggleFreeAdSave } from "../../redux/actions/marketplaceSellerActions";
 import {
-  toggleFreeAdSave,
-} from "../../actions/marketplaceSellerActions";
-import { Container, Row, Col } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
-// import Message from "../Message";
-import LoaderButton from "../LoaderButton"; 
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faHeart as fasHeart } from "@fortawesome/free-solid-svg-icons";
+import { faHeart as farHeart } from "@fortawesome/free-regular-svg-icons";
 
-function ToggleFreeAdSave({ ad }) {
+const ToggleFreeAdSave = ({ ad }) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -25,12 +27,12 @@ function ToggleFreeAdSave({ ad }) {
 
   const handleToggleFreeAdSave = async () => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     } else {
       setToggleAdSaveLoading(true);
 
       const toggleData = {
-        ad_id: ad.id, 
+        ad_id: ad.id,
       };
 
       try {
@@ -43,44 +45,58 @@ function ToggleFreeAdSave({ ad }) {
     }
   };
 
-  function formatCount(saveCount) {
+  const formatCount = (saveCount) => {
     if (saveCount >= 1000000) {
-      // Format as million
       return (saveCount / 1000000).toFixed(1) + "m";
     } else if (saveCount >= 1000) {
-      // Format as thousand
       return (saveCount / 1000).toFixed(1) + "k";
     } else {
       return saveCount?.toString();
     }
-  }
- 
-  return (
-    <Container>
-      <Row className="justify-content-center">
-        <Col>
-          {/* {success && <Message variant="success">Success!</Message>} */}
-          {/* {error && <Message variant="danger">{error}</Message>} */}
-          {toggleAdSaveLoading && <LoaderButton />}
+  };
 
-          <div
-            className={`d-flex justify-content-center flex-column align-items-center ${
-              adIsSaved ? "text-danger" : "text-outline-danger"
-            }`}
-            onClick={handleToggleFreeAdSave}
-            style={{ cursor: "pointer" }}
-          >
-            <i
-              className={`mt-auto ${adIsSaved ? "fas" : "far"} fa-heart`}
-              style={{ fontSize: "28px" }}
-            ></i>{" "}
-            {/* <p className="text-muted">{formatCount(ad?.ad_save_count)}</p> */}
-            <p className="text-muted">{formatCount(adSaveCount)}</p>
-          </div>
-        </Col>
-      </Row>
-    </Container>
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.saveButton}
+        onPress={handleToggleFreeAdSave}
+        disabled={toggleAdSaveLoading}
+      >
+        {toggleAdSaveLoading ? (
+          <ActivityIndicator size="small" color="#0000ff" />
+        ) : (
+          <>
+            <FontAwesomeIcon
+              icon={adIsSaved ? fasHeart : farHeart}
+              style={adIsSaved ? styles.savedIcon : styles.unsavedIcon}
+              size={28}
+            />
+            <Text style={styles.saveCountText}>{formatCount(adSaveCount)}</Text>
+          </>
+        )}
+      </TouchableOpacity>
+    </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  saveButton: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  savedIcon: {
+    color: "red",
+  },
+  unsavedIcon: {
+    color: "gray",
+  },
+  saveCountText: {
+    color: "gray",
+  },
+});
 
 export default ToggleFreeAdSave;

@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   productListReducers,
   productDetailsReducers,
-  // productTrackSaveReducer,
+  // productTrackSaveReducer, 
   saveProductReducer,
   userFavoriteProductsReducer,
   userViewedProductsReducer,
@@ -233,7 +233,7 @@ const rootReducer = combineReducers({
   buyCreditPointState: buyCreditPointReducer,
   sellCreditPointState: sellCreditPointReducer,
   getBuyCreditPointState: getBuyCreditPointReducer,
-  getBuyerCreditPointState: getBuyerCreditPointReducer,
+  getBuyerCreditPointState: getBuyerCreditPointReducer, 
   buyUsdCreditPointState: buyUsdCreditPointReducer,
   getUsdBuyCreditPointState: getUsdBuyCreditPointReducer,
   getAdCpsChargesState: getAdCpsChargesReducer,
@@ -391,7 +391,7 @@ const rootReducer = combineReducers({
   GetActiveBuyerFreeAdMessageState: GetActiveBuyerFreeAdMessagesReducer,
   GetActiveBuyerPaidAdMessageState: GetActiveBuyerPaidAdMessagesReducer,
 
-  applyPomoCodeState: applyPomoCodeReducer,
+  applyPromoCodeState: applyPomoCodeReducer,
 });
 
 // Function to initialize the store asynchronously

@@ -20,10 +20,34 @@ import { parseISO } from "date-fns";
 import Select from "react-select";
 // import PhoneInput from "react-phone-number-input";
 // import "react-phone-number-input/style.css";
+import {
+  ID_TYPE_CHOICES,
+  COUNTRY_CHOICES,
+  BUSINESS_TYPE_CHOICES,
+  STAFF_SIZE_CHOICES,
+  BUSINESS_INDUSTRY_CHOICES,
+  BUSINESS_CATEGORY_CHOICES,
+} from "../../constants";
 
 function SellerProfile() {
   const dispatch = useDispatch();
   // const [selectedCountry] = useState("US");
+
+  const [idTypeChoices, setIdTypeChoices] = useState([]);
+  const [countryChoices, setCountryChoices] = useState([]);
+  const [businessTypeChoices, setBusinessTypeChoices] = useState([]);
+  const [staffSizeChoices, setStaffSizeChoices] = useState([]);
+  const [industryChoices, setIndustryChoices] = useState([]);
+  const [businessCategoryChoices, setBusinessCategoryChoices] = useState([]);
+
+  useEffect(() => {
+    setIdTypeChoices(ID_TYPE_CHOICES);
+    setCountryChoices(COUNTRY_CHOICES);
+    setBusinessTypeChoices(BUSINESS_TYPE_CHOICES);
+    setStaffSizeChoices(STAFF_SIZE_CHOICES);
+    setIndustryChoices(BUSINESS_INDUSTRY_CHOICES);
+    setBusinessCategoryChoices(BUSINESS_CATEGORY_CHOICES);
+  }, []);
 
   const getSellerAccountState = useSelector(
     (state) => state.getSellerAccountState
@@ -80,277 +104,6 @@ function SellerProfile() {
       window.location.href = "/login";
     }
   }, [userInfo]);
-
-  const ID_TYPE_CHOICES = [
-    // ["NIN", "NIN"],
-    ["Intl Passport", "Int'l Passport"],
-    ["Driving License", "Driving License"],
-    ["Govt Issued ID", "Govt Issued ID"],
-  ];
-
-  const COUNTRY_CHOICES = [
-    ["Afghanistan", "Afghanistan"],
-    ["Albania", "Albania"],
-    ["Algeria", "Algeria"],
-    ["Andorra", "Andorra"],
-    ["Angola", "Angola"],
-    ["Antigua and Barbuda", "Antigua and Barbuda"],
-    ["Argentina", "Argentina"],
-    ["Armenia", "Armenia"],
-    ["Australia", "Australia"],
-    ["Austria", "Austria"],
-    ["Azerbaijan", "Azerbaijan"],
-    ["Bahamas", "Bahamas"],
-    ["Bahrain", "Bahrain"],
-    ["Bangladesh", "Bangladesh"],
-    ["Barbados", "Barbados"],
-    ["Belarus", "Belarus"],
-    ["Belgium", "Belgium"],
-    ["Belize", "Belize"],
-    ["Benin", "Benin"],
-    ["Bhutan", "Bhutan"],
-    ["Bolivia", "Bolivia"],
-    ["Bosnia and Herzegovina", "Bosnia and Herzegovina"],
-    ["Botswana", "Botswana"],
-    ["Brazil", "Brazil"],
-    ["Brunei", "Brunei"],
-    ["Bulgaria", "Bulgaria"],
-    ["Burkina Faso", "Burkina Faso"],
-    ["Burundi", "Burundi"],
-    ["Cabo Verde", "Cabo Verde"],
-    ["Cambodia", "Cambodia"],
-    ["Cameroon", "Cameroon"],
-    ["Canada", "Canada"],
-    ["Central African Republic", "Central African Republic"],
-    ["Chad", "Chad"],
-    ["Chile", "Chile"],
-    ["China", "China"],
-    ["Colombia", "Colombia"],
-    ["Comoros", "Comoros"],
-    ["Congo", "Congo"],
-    ["Costa Rica", "Costa Rica"],
-    ["Croatia", "Croatia"],
-    ["Cuba", "Cuba"],
-    ["Cyprus", "Cyprus"],
-    ["Czech Republic", "Czech Republic"],
-    ["Denmark", "Denmark"],
-    ["Djibouti", "Djibouti"],
-    ["Dominica", "Dominica"],
-    ["Dominican Republic", "Dominican Republic"],
-    ["Ecuador", "Ecuador"],
-    ["Egypt", "Egypt"],
-    ["El Salvador", "El Salvador"],
-    ["Equatorial Guinea", "Equatorial Guinea"],
-    ["Eritrea", "Eritrea"],
-    ["Estonia", "Estonia"],
-    ["Eswatini", "Eswatini"],
-    ["Ethiopia", "Ethiopia"],
-    ["Fiji", "Fiji"],
-    ["Finland", "Finland"],
-    ["France", "France"],
-    ["Gabon", "Gabon"],
-    ["Gambia", "Gambia"],
-    ["Georgia", "Georgia"],
-    ["Germany", "Germany"],
-    ["Ghana", "Ghana"],
-    ["Greece", "Greece"],
-    ["Grenada", "Grenada"],
-    ["Guatemala", "Guatemala"],
-    ["Guinea", "Guinea"],
-    ["Guinea-Bissau", "Guinea-Bissau"],
-    ["Guyana", "Guyana"],
-    ["Haiti", "Haiti"],
-    ["Honduras", "Honduras"],
-    ["Hungary", "Hungary"],
-    ["Iceland", "Iceland"],
-    ["India", "India"],
-    ["Indonesia", "Indonesia"],
-    ["Iran", "Iran"],
-    ["Iraq", "Iraq"],
-    ["Ireland", "Ireland"],
-    ["Israel", "Israel"],
-    ["Italy", "Italy"],
-    ["Jamaica", "Jamaica"],
-    ["Japan", "Japan"],
-    ["Jordan", "Jordan"],
-    ["Kazakhstan", "Kazakhstan"],
-    ["Kenya", "Kenya"],
-    ["Kiribati", "Kiribati"],
-    ["Korea, North", "Korea, North"],
-    ["Korea, South", "Korea, South"],
-    ["Kosovo", "Kosovo"],
-    ["Kuwait", "Kuwait"],
-    ["Kyrgyzstan", "Kyrgyzstan"],
-    ["Laos", "Laos"],
-    ["Latvia", "Latvia"],
-    ["Lebanon", "Lebanon"],
-    ["Lesotho", "Lesotho"],
-    ["Liberia", "Liberia"],
-    ["Libya", "Libya"],
-    ["Liechtenstein", "Liechtenstein"],
-    ["Lithuania", "Lithuania"],
-    ["Luxembourg", "Luxembourg"],
-    ["Madagascar", "Madagascar"],
-    ["Malawi", "Malawi"],
-    ["Malaysia", "Malaysia"],
-    ["Maldives", "Maldives"],
-    ["Mali", "Mali"],
-    ["Malta", "Malta"],
-    ["Marshall Islands", "Marshall Islands"],
-    ["Mauritania", "Mauritania"],
-    ["Mauritius", "Mauritius"],
-    ["Mexico", "Mexico"],
-    ["Micronesia", "Micronesia"],
-    ["Moldova", "Moldova"],
-    ["Monaco", "Monaco"],
-    ["Mongolia", "Mongolia"],
-    ["Montenegro", "Montenegro"],
-    ["Morocco", "Morocco"],
-    ["Mozambique", "Mozambique"],
-    ["Myanmar", "Myanmar"],
-    ["Namibia", "Namibia"],
-    ["Nauru", "Nauru"],
-    ["Nepal", "Nepal"],
-    ["Netherlands", "Netherlands"],
-    ["New Zealand", "New Zealand"],
-    ["Nicaragua", "Nicaragua"],
-    ["Niger", "Niger"],
-    ["Nigeria", "Nigeria"],
-    ["North Macedonia", "North Macedonia"],
-    ["Norway", "Norway"],
-    ["Oman", "Oman"],
-    ["Pakistan", "Pakistan"],
-    ["Palau", "Palau"],
-    ["Panama", "Panama"],
-    ["Papua New Guinea", "Papua New Guinea"],
-    ["Paraguay", "Paraguay"],
-    ["Peru", "Peru"],
-    ["Philippines", "Philippines"],
-    ["Poland", "Poland"],
-    ["Portugal", "Portugal"],
-    ["Qatar", "Qatar"],
-    ["Romania", "Romania"],
-    ["Russia", "Russia"],
-    ["Rwanda", "Rwanda"],
-    ["Saint Kitts and Nevis", "Saint Kitts and Nevis"],
-    ["Saint Lucia", "Saint Lucia"],
-    ["Saint Vincent and the Grenadines", "Saint Vincent and the Grenadines"],
-    ["Samoa", "Samoa"],
-    ["San Marino", "San Marino"],
-    ["Sao Tome and Principe", "Sao Tome and Principe"],
-    ["Saudi Arabia", "Saudi Arabia"],
-    ["Senegal", "Senegal"],
-    ["Serbia", "Serbia"],
-    ["Seychelles", "Seychelles"],
-    ["Sierra Leone", "Sierra Leone"],
-    ["Singapore", "Singapore"],
-    ["Slovakia", "Slovakia"],
-    ["Slovenia", "Slovenia"],
-    ["Solomon Islands", "Solomon Islands"],
-    ["Somalia", "Somalia"],
-    ["South Africa", "South Africa"],
-    ["South Sudan", "South Sudan"],
-    ["Spain", "Spain"],
-    ["Sri Lanka", "Sri Lanka"],
-    ["Sudan", "Sudan"],
-    ["Suriname", "Suriname"],
-    ["Sweden", "Sweden"],
-    ["Switzerland", "Switzerland"],
-    ["Syria", "Syria"],
-    ["Taiwan", "Taiwan"],
-    ["Tajikistan", "Tajikistan"],
-    ["Tanzania", "Tanzania"],
-    ["Thailand", "Thailand"],
-    ["Timor-Leste", "Timor-Leste"],
-    ["Togo", "Togo"],
-    ["Tonga", "Tonga"],
-    ["Trinidad and Tobago", "Trinidad and Tobago"],
-    ["Tunisia", "Tunisia"],
-    ["Turkey", "Turkey"],
-    ["Turkmenistan", "Turkmenistan"],
-    ["Tuvalu", "Tuvalu"],
-    ["Uganda", "Uganda"],
-    ["Ukraine", "Ukraine"],
-    ["United Arab Emirates", "United Arab Emirates"],
-    ["United Kingdom", "United Kingdom"],
-    ["United States", "United States"],
-    ["Uruguay", "Uruguay"],
-    ["Uzbekistan", "Uzbekistan"],
-    ["Vanuatu", "Vanuatu"],
-    ["Vatican City", "Vatican City"],
-    ["Venezuela", "Venezuela"],
-    ["Vietnam", "Vietnam"],
-    ["Yemen", "Yemen"],
-    ["Zambia", "Zambia"],
-    ["Zimbabwe", "Zimbabwe"],
-  ];
-
-  const BUSINESS_TYPE_CHOICES = [
-    ["Registered", "Registered"],
-    ["Unregistered", "Unregistered"],
-  ];
-
-  const STAFF_SIZE_CHOICES = [
-    ["Small", "Small (1-50 employees)"],
-    ["Medium", "Medium (51-250 employees)"],
-    ["Large", "Large (251+ employees)"],
-  ];
-
-  const BUSINESS_INDUSTRY_CHOICES = [
-    ["Information Technology", "Information Technology"],
-    ["Healthcare", "Healthcare"],
-    ["Finance", "Finance"],
-    ["Education", "Education"],
-    ["Retail", "Retail"],
-    ["Manufacturing", "Manufacturing"],
-    ["Services", "Services"],
-    ["Entertainment", "Entertainment"],
-    ["Food & Beverage", "Food & Beverage"],
-    ["Travel & Tourism", "Travel & Tourism"],
-    ["Real Estate", "Real Estate"],
-    ["Construction", "Construction"],
-    ["Automotive", "Automotive"],
-    ["Agriculture", "Agriculture"],
-    ["Energy", "Energy"],
-    ["Environmental", "Environmental"],
-    ["Government", "Government"],
-    ["Nonprofit", "Nonprofit"],
-    ["Others", "Others"],
-  ];
-
-  const BUSINESS_CATEGORY_CHOICES = [
-    ["Startup", "Startup"],
-    ["Small Business", "Small Business"],
-    ["Medium Business", "Medium Business"],
-    ["Large Business", "Large Business"],
-    ["Corporation", "Corporation"],
-    ["Sole Proprietorship", "Sole Proprietorship"],
-    ["Partnership", "Partnership"],
-    ["Franchise", "Franchise"],
-    ["Family Owned", "Family Owned"],
-    ["Online Business", "Online Business"],
-    ["Brick and Mortar", "Brick and Mortar"],
-    ["Service Provider", "Service Provider"],
-    ["Retailer", "Retailer"],
-    ["Wholesaler", "Wholesaler"],
-    ["Manufacturer", "Manufacturer"],
-    ["Restaurant", "Restaurant"],
-    ["Hospitality", "Hospitality"],
-    ["Healthcare", "Healthcare"],
-    ["Education", "Education"],
-    ["Tech", "Tech"],
-    ["Creative", "Creative"],
-    ["Entertainment", "Entertainment"],
-    ["Travel", "Travel"],
-    ["Construction", "Construction"],
-    ["Automotive", "Automotive"],
-    ["Agriculture", "Agriculture"],
-    ["Energy", "Energy"],
-    ["Environmental", "Environmental"],
-    ["Government", "Government"],
-    ["Nonprofit", "Nonprofit"],
-    ["Others", "Others"],
-  ];
 
   const [businessDataChanges, setBusinessDataChanges] = useState(false);
   const [photoDataChanges, setPhotoDataChanges] = useState(false);
@@ -664,7 +417,7 @@ function SellerProfile() {
                       onChange={handleBusinessDataChanges}
                     >
                       <option value="">Select Business Status</option>
-                      {BUSINESS_TYPE_CHOICES.map((type) => (
+                      {businessTypeChoices.map((type) => (
                         <option key={type[0]} value={type[0]}>
                           {type[1]}
                         </option>
@@ -709,7 +462,7 @@ function SellerProfile() {
                       onChange={handleBusinessDataChanges}
                     >
                       <option value="">Select Staff Size</option>
-                      {STAFF_SIZE_CHOICES.map((size) => (
+                      {staffSizeChoices.map((size) => (
                         <option key={size[0]} value={size[0]}>
                           {size[1]}
                         </option>
@@ -726,7 +479,7 @@ function SellerProfile() {
                       onChange={handleBusinessDataChanges}
                     >
                       <option value="">Select Business Industry</option>
-                      {BUSINESS_INDUSTRY_CHOICES.map((industry) => (
+                      {industryChoices.map((industry) => (
                         <option key={industry[0]} value={industry[0]}>
                           {industry[1]}
                         </option>
@@ -743,7 +496,7 @@ function SellerProfile() {
                       onChange={handleBusinessDataChanges}
                     >
                       <option value="">Select Business Category</option>
-                      {BUSINESS_CATEGORY_CHOICES.map((category) => (
+                      {businessCategoryChoices.map((category) => (
                         <option key={category[0]} value={category[0]}>
                           {category[1]}
                         </option>
@@ -830,7 +583,7 @@ function SellerProfile() {
                           },
                         })
                       }
-                      options={COUNTRY_CHOICES?.map((type) => ({
+                      options={countryChoices?.map((type) => ({
                         value: type[0],
                         label: type[1],
                       }))}
@@ -846,7 +599,7 @@ function SellerProfile() {
                       onChange={handleBusinessDataChanges}
                     >
                       <option value="">ID Type</option>
-                      {ID_TYPE_CHOICES.map((type) => (
+                      {idTypeChoices.map((type) => (
                         <option key={type[0]} value={type[0]}>
                           {type[1]}
                         </option>

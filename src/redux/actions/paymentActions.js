@@ -300,8 +300,7 @@ export const debitPaysofterAccountFund = (debitAccountData) => async (
       type: DEBIT_PAYSOFTER_ACCOUNT_SUCCESS,
       payload: data,
     });
-    // window.location.reload();
-    // window.location.href = "/verify-account-fund-otp";
+
   } catch (error) {
     dispatch({
       type: DEBIT_PAYSOFTER_ACCOUNT_FAIL,

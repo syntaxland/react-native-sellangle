@@ -1,34 +1,67 @@
 // CreateMarketplaceSeller.js
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
-import { createMarketplaceSeller } from "../../actions/marketplaceSellerActions";
-import Message from "../Message";
-import Loader from "../Loader";
-import DatePicker from "react-datepicker";
-import LoaderButton from "../LoaderButton";
-import Select from "react-select";
-// import PhoneInput from "react-phone-number-input";
-// import "react-phone-number-input/style.css";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  ScrollView,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { createMarketplaceSeller } from "../../redux/actions/marketplaceSellerActions";
+import * as ImagePicker from "expo-image-picker";
+import DatePicker from "react-native-date-picker";
+import PhoneInput from "react-native-phone-input";
+import RNPickerSelect from "react-native-picker-select";
+import Message from "../../Message";
+import Loader from "../../Loader";
+import {
+  ID_TYPE_CHOICES,
+  COUNTRY_CHOICES,
+  BUSINESS_TYPE_CHOICES,
+  STAFF_SIZE_CHOICES,
+  BUSINESS_INDUSTRY_CHOICES,
+  BUSINESS_CATEGORY_CHOICES,
+} from "../../constants";
 
-function CreateMarketplaceSeller({ history }) {
+const CreateMarketplaceSeller = () => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
+
+  const [idTypeChoices, setIdTypeChoices] = useState([]);
+  const [countryChoices, setCountryChoices] = useState([]);
+  const [businessTypeChoices, setBusinessTypeChoices] = useState([]);
+  const [staffSizeChoices, setStaffSizeChoices] = useState([]);
+  const [industryChoices, setIndustryChoices] = useState([]);
+  const [businessCategoryChoices, setBusinessCategoryChoices] = useState([]);
+
+  useEffect(() => {
+    setIdTypeChoices(ID_TYPE_CHOICES);
+    setCountryChoices(COUNTRY_CHOICES);
+    setBusinessTypeChoices(BUSINESS_TYPE_CHOICES);
+    setStaffSizeChoices(STAFF_SIZE_CHOICES);
+    setIndustryChoices(BUSINESS_INDUSTRY_CHOICES);
+    setBusinessCategoryChoices(BUSINESS_CATEGORY_CHOICES);
+  }, []);
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     }
-  }, [userInfo, history]);
+  }, [userInfo, navigation]);
 
   const marketplaceSellerState = useSelector(
     (state) => state.marketplaceSellerState
   );
   const { success, error, loading } = marketplaceSellerState;
 
-  // const [selectedCountry] = useState("US");
   const [businessName, setBusinessName] = useState("");
   const [businessRegNum, setBusinessRegNum] = useState("");
   const [businessAddress, setBusinessAddress] = useState("");
@@ -61,8 +94,9 @@ function CreateMarketplaceSeller({ history }) {
   const [idCardImage, setIdCardImage] = useState("");
   const [idCardImageError, setIdCardImageError] = useState("");
 
-  const [dob, setDob] = useState("");
-  const [dobError, setDobError] = useState("");
+  const [dob, setDob] = useState(new Date());
+  // const [dobError, setDobError] = useState("");
+  const [open, setOpen] = useState(false);
 
   const [address, setAddress] = useState("");
   const [addressError, setAddressError] = useState("");
@@ -75,16 +109,13 @@ function CreateMarketplaceSeller({ history }) {
         setBusinessName(value);
         setBusinessNameError("");
         break;
-
       case "businessRegNum":
         setBusinessRegNum(value);
         break;
-
       case "businessAddress":
         setBusinessAddress(value);
         setBusinessAddressError("");
         break;
-
       case "businessType":
         setBusinessType(value);
         setBusinessTypeError("");
@@ -101,22 +132,24 @@ function CreateMarketplaceSeller({ history }) {
         setBusinessCategory(value);
         setBusinessCategoryError("");
         break;
-
+      case "businessDescription":
+        setBusinessDescription(value);
+        break;
       case "businessPhone":
         setBusinessPhone(value);
         setBusinessPhoneError("");
         break;
-
+      case "businessWebsite":
+        setBusinessWebsite(value);
+        break;
       case "country":
         setCountry(value);
         setCountryError("");
         break;
-
       case "idType":
         setIdType(value);
         setIdTypeError("");
         break;
-
       case "idNumber":
         setIdNumber(value);
         setIdNumberError("");
@@ -127,288 +160,16 @@ function CreateMarketplaceSeller({ history }) {
         break;
       case "dob":
         setDob(value);
-        setDobError("");
+        // setDobError("");
         break;
       case "address":
         setAddress(value);
         setAddressError("");
         break;
-
       default:
         break;
     }
   };
-
-  const BUSINESS_TYPE_CHOICES = [
-    ["Registered", "Registered"],
-    ["Unregistered", "Unregistered"],
-  ];
-
-  const STAFF_SIZE_CHOICES = [
-    ["Small", "Small (1-50 employees)"],
-    ["Medium", "Medium (51-250 employees)"],
-    ["Large", "Large (251+ employees)"],
-  ];
-
-  const BUSINESS_INDUSTRY_CHOICES = [
-    ["Information Technology", "Information Technology"],
-    ["Healthcare", "Healthcare"],
-    ["Finance", "Finance"],
-    ["Education", "Education"],
-    ["Retail", "Retail"],
-    ["Manufacturing", "Manufacturing"],
-    ["Services", "Services"],
-    ["Entertainment", "Entertainment"],
-    ["Food & Beverage", "Food & Beverage"],
-    ["Travel & Tourism", "Travel & Tourism"],
-    ["Real Estate", "Real Estate"],
-    ["Construction", "Construction"],
-    ["Automotive", "Automotive"],
-    ["Agriculture", "Agriculture"],
-    ["Energy", "Energy"],
-    ["Environmental", "Environmental"],
-    ["Government", "Government"],
-    ["Nonprofit", "Nonprofit"],
-    ["Others", "Others"],
-  ];
-
-  const BUSINESS_CATEGORY_CHOICES = [
-    ["Startup", "Startup"],
-    ["Small Business", "Small Business"],
-    ["Medium Business", "Medium Business"],
-    ["Large Business", "Large Business"],
-    ["Corporation", "Corporation"],
-    ["Sole Proprietorship", "Sole Proprietorship"],
-    ["Partnership", "Partnership"],
-    ["Franchise", "Franchise"],
-    ["Family Owned", "Family Owned"],
-    ["Online Business", "Online Business"],
-    ["Brick and Mortar", "Brick and Mortar"],
-    ["Service Provider", "Service Provider"],
-    ["Retailer", "Retailer"],
-    ["Wholesaler", "Wholesaler"],
-    ["Manufacturer", "Manufacturer"],
-    ["Restaurant", "Restaurant"],
-    ["Hospitality", "Hospitality"],
-    ["Healthcare", "Healthcare"],
-    ["Education", "Education"],
-    ["Tech", "Tech"],
-    ["Creative", "Creative"],
-    ["Entertainment", "Entertainment"],
-    ["Travel", "Travel"],
-    ["Construction", "Construction"],
-    ["Automotive", "Automotive"],
-    ["Agriculture", "Agriculture"],
-    ["Energy", "Energy"],
-    ["Environmental", "Environmental"],
-    ["Government", "Government"],
-    ["Nonprofit", "Nonprofit"],
-    ["Others", "Others"],
-  ];
-
-  const ID_TYPE_CHOICES = [
-    // ["NIN", "NIN"],
-    ["Intl Passport", "Int'l Passport"],
-    ["Driving License", "Driving License"],
-    ["Govt Issued ID", "Govt Issued ID"],
-  ];
-
-  const COUNTRY_CHOICES = [
-    ["Afghanistan", "Afghanistan"],
-    ["Albania", "Albania"],
-    ["Algeria", "Algeria"],
-    ["Andorra", "Andorra"],
-    ["Angola", "Angola"],
-    ["Antigua and Barbuda", "Antigua and Barbuda"],
-    ["Argentina", "Argentina"],
-    ["Armenia", "Armenia"],
-    ["Australia", "Australia"],
-    ["Austria", "Austria"],
-    ["Azerbaijan", "Azerbaijan"],
-    ["Bahamas", "Bahamas"],
-    ["Bahrain", "Bahrain"],
-    ["Bangladesh", "Bangladesh"],
-    ["Barbados", "Barbados"],
-    ["Belarus", "Belarus"],
-    ["Belgium", "Belgium"],
-    ["Belize", "Belize"],
-    ["Benin", "Benin"],
-    ["Bhutan", "Bhutan"],
-    ["Bolivia", "Bolivia"],
-    ["Bosnia and Herzegovina", "Bosnia and Herzegovina"],
-    ["Botswana", "Botswana"],
-    ["Brazil", "Brazil"],
-    ["Brunei", "Brunei"],
-    ["Bulgaria", "Bulgaria"],
-    ["Burkina Faso", "Burkina Faso"],
-    ["Burundi", "Burundi"],
-    ["Cabo Verde", "Cabo Verde"],
-    ["Cambodia", "Cambodia"],
-    ["Cameroon", "Cameroon"],
-    ["Canada", "Canada"],
-    ["Central African Republic", "Central African Republic"],
-    ["Chad", "Chad"],
-    ["Chile", "Chile"],
-    ["China", "China"],
-    ["Colombia", "Colombia"],
-    ["Comoros", "Comoros"],
-    ["Congo", "Congo"],
-    ["Costa Rica", "Costa Rica"],
-    ["Croatia", "Croatia"],
-    ["Cuba", "Cuba"],
-    ["Cyprus", "Cyprus"],
-    ["Czech Republic", "Czech Republic"],
-    ["Denmark", "Denmark"],
-    ["Djibouti", "Djibouti"],
-    ["Dominica", "Dominica"],
-    ["Dominican Republic", "Dominican Republic"],
-    ["Ecuador", "Ecuador"],
-    ["Egypt", "Egypt"],
-    ["El Salvador", "El Salvador"],
-    ["Equatorial Guinea", "Equatorial Guinea"],
-    ["Eritrea", "Eritrea"],
-    ["Estonia", "Estonia"],
-    ["Eswatini", "Eswatini"],
-    ["Ethiopia", "Ethiopia"],
-    ["Fiji", "Fiji"],
-    ["Finland", "Finland"],
-    ["France", "France"],
-    ["Gabon", "Gabon"],
-    ["Gambia", "Gambia"],
-    ["Georgia", "Georgia"],
-    ["Germany", "Germany"],
-    ["Ghana", "Ghana"],
-    ["Greece", "Greece"],
-    ["Grenada", "Grenada"],
-    ["Guatemala", "Guatemala"],
-    ["Guinea", "Guinea"],
-    ["Guinea-Bissau", "Guinea-Bissau"],
-    ["Guyana", "Guyana"],
-    ["Haiti", "Haiti"],
-    ["Honduras", "Honduras"],
-    ["Hungary", "Hungary"],
-    ["Iceland", "Iceland"],
-    ["India", "India"],
-    ["Indonesia", "Indonesia"],
-    ["Iran", "Iran"],
-    ["Iraq", "Iraq"],
-    ["Ireland", "Ireland"],
-    ["Israel", "Israel"],
-    ["Italy", "Italy"],
-    ["Jamaica", "Jamaica"],
-    ["Japan", "Japan"],
-    ["Jordan", "Jordan"],
-    ["Kazakhstan", "Kazakhstan"],
-    ["Kenya", "Kenya"],
-    ["Kiribati", "Kiribati"],
-    ["Korea, North", "Korea, North"],
-    ["Korea, South", "Korea, South"],
-    ["Kosovo", "Kosovo"],
-    ["Kuwait", "Kuwait"],
-    ["Kyrgyzstan", "Kyrgyzstan"],
-    ["Laos", "Laos"],
-    ["Latvia", "Latvia"],
-    ["Lebanon", "Lebanon"],
-    ["Lesotho", "Lesotho"],
-    ["Liberia", "Liberia"],
-    ["Libya", "Libya"],
-    ["Liechtenstein", "Liechtenstein"],
-    ["Lithuania", "Lithuania"],
-    ["Luxembourg", "Luxembourg"],
-    ["Madagascar", "Madagascar"],
-    ["Malawi", "Malawi"],
-    ["Malaysia", "Malaysia"],
-    ["Maldives", "Maldives"],
-    ["Mali", "Mali"],
-    ["Malta", "Malta"],
-    ["Marshall Islands", "Marshall Islands"],
-    ["Mauritania", "Mauritania"],
-    ["Mauritius", "Mauritius"],
-    ["Mexico", "Mexico"],
-    ["Micronesia", "Micronesia"],
-    ["Moldova", "Moldova"],
-    ["Monaco", "Monaco"],
-    ["Mongolia", "Mongolia"],
-    ["Montenegro", "Montenegro"],
-    ["Morocco", "Morocco"],
-    ["Mozambique", "Mozambique"],
-    ["Myanmar", "Myanmar"],
-    ["Namibia", "Namibia"],
-    ["Nauru", "Nauru"],
-    ["Nepal", "Nepal"],
-    ["Netherlands", "Netherlands"],
-    ["New Zealand", "New Zealand"],
-    ["Nicaragua", "Nicaragua"],
-    ["Niger", "Niger"],
-    ["Nigeria", "Nigeria"],
-    ["North Macedonia", "North Macedonia"],
-    ["Norway", "Norway"],
-    ["Oman", "Oman"],
-    ["Pakistan", "Pakistan"],
-    ["Palau", "Palau"],
-    ["Panama", "Panama"],
-    ["Papua New Guinea", "Papua New Guinea"],
-    ["Paraguay", "Paraguay"],
-    ["Peru", "Peru"],
-    ["Philippines", "Philippines"],
-    ["Poland", "Poland"],
-    ["Portugal", "Portugal"],
-    ["Qatar", "Qatar"],
-    ["Romania", "Romania"],
-    ["Russia", "Russia"],
-    ["Rwanda", "Rwanda"],
-    ["Saint Kitts and Nevis", "Saint Kitts and Nevis"],
-    ["Saint Lucia", "Saint Lucia"],
-    ["Saint Vincent and the Grenadines", "Saint Vincent and the Grenadines"],
-    ["Samoa", "Samoa"],
-    ["San Marino", "San Marino"],
-    ["Sao Tome and Principe", "Sao Tome and Principe"],
-    ["Saudi Arabia", "Saudi Arabia"],
-    ["Senegal", "Senegal"],
-    ["Serbia", "Serbia"],
-    ["Seychelles", "Seychelles"],
-    ["Sierra Leone", "Sierra Leone"],
-    ["Singapore", "Singapore"],
-    ["Slovakia", "Slovakia"],
-    ["Slovenia", "Slovenia"],
-    ["Solomon Islands", "Solomon Islands"],
-    ["Somalia", "Somalia"],
-    ["South Africa", "South Africa"],
-    ["South Sudan", "South Sudan"],
-    ["Spain", "Spain"],
-    ["Sri Lanka", "Sri Lanka"],
-    ["Sudan", "Sudan"],
-    ["Suriname", "Suriname"],
-    ["Sweden", "Sweden"],
-    ["Switzerland", "Switzerland"],
-    ["Syria", "Syria"],
-    ["Taiwan", "Taiwan"],
-    ["Tajikistan", "Tajikistan"],
-    ["Tanzania", "Tanzania"],
-    ["Thailand", "Thailand"],
-    ["Timor-Leste", "Timor-Leste"],
-    ["Togo", "Togo"],
-    ["Tonga", "Tonga"],
-    ["Trinidad and Tobago", "Trinidad and Tobago"],
-    ["Tunisia", "Tunisia"],
-    ["Turkey", "Turkey"],
-    ["Turkmenistan", "Turkmenistan"],
-    ["Tuvalu", "Tuvalu"],
-    ["Uganda", "Uganda"],
-    ["Ukraine", "Ukraine"],
-    ["United Arab Emirates", "United Arab Emirates"],
-    ["United Kingdom", "United Kingdom"],
-    ["United States", "United States"],
-    ["Uruguay", "Uruguay"],
-    ["Uzbekistan", "Uzbekistan"],
-    ["Vanuatu", "Vanuatu"],
-    ["Vatican City", "Vatican City"],
-    ["Venezuela", "Venezuela"],
-    ["Vietnam", "Vietnam"],
-    ["Yemen", "Yemen"],
-    ["Zambia", "Zambia"],
-    ["Zimbabwe", "Zimbabwe"],
-  ];
 
   const sellerData = new FormData();
   sellerData.append("business_name", businessName);
@@ -426,22 +187,20 @@ function CreateMarketplaceSeller({ history }) {
   sellerData.append("id_number", idNumber);
   sellerData.append("id_card_image", idCardImage);
   sellerData.append("dob", dob);
+  // sellerData.append("dob", dob.toISOString().split("T")[0]);
   sellerData.append("home_address", address);
-
-  console.log("businessPhone:", businessPhone);
 
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
-        history.push("/seller/photo");
-        window.location.reload();
+        navigation.navigate("Seller Photo");
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [dispatch, success, history]);
+  }, [dispatch, success, navigation]);
 
   const handleCreateMarketplaceSeller = (e) => {
-    e.preventDefault(e);
+    e.preventDefault();
 
     if (!businessName) {
       setBusinessNameError("Please enter the business name.");
@@ -479,12 +238,6 @@ function CreateMarketplaceSeller({ history }) {
       setBusinessCategoryError("");
     }
 
-    // if (!businessPhone) {
-    //   setBusinessPhoneError("Please enter the business phone.");
-    // } else {
-    //   setBusinessPhoneError("");
-    // }
-
     if (!businessPhone) {
       setBusinessPhoneError("Please enter your phone number.");
     } else if (businessPhone.length < 9) {
@@ -506,7 +259,7 @@ function CreateMarketplaceSeller({ history }) {
     }
 
     if (!idNumber) {
-      setIdNumberError("Please enter the ID  number.");
+      setIdNumberError("Please enter the ID number.");
     } else {
       setIdNumberError("");
     }
@@ -517,11 +270,11 @@ function CreateMarketplaceSeller({ history }) {
       setIdCardImageError("");
     }
 
-    if (!dob) {
-      setDobError("Please enter your date of birth.");
-    } else {
-      setDobError("");
-    }
+    // if (!dob) {
+    //   setDobError("Please enter your date of birth.");
+    // } else {
+    //   setDobError("");
+    // }
 
     if (!address) {
       setAddressError("Please enter your home address.");
@@ -533,7 +286,7 @@ function CreateMarketplaceSeller({ history }) {
       !idType ||
       !idNumber ||
       !idCardImage ||
-      !dob ||
+      // !dob ||
       !address ||
       !businessName ||
       !businessAddress ||
@@ -541,370 +294,446 @@ function CreateMarketplaceSeller({ history }) {
       !staffSize ||
       !businessIndustry ||
       !businessCategory ||
-      !businessPhone ||
+      // !businessPhone ||
       !country
     ) {
       setFormError("Please fix the errors in the form.");
       return;
     } else {
-      setDobError("");
+      setFormError("");
       dispatch(createMarketplaceSeller(sellerData));
+      // navigation.navigate("Seller Photo"); 
     }
   };
 
+  const pickImage = async (field, useLibrary) => {
+    let result;
+    const options = {
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    };
+
+    if (useLibrary) {
+      result = await ImagePicker.launchImageLibraryAsync(options);
+    } else {
+      await ImagePicker.requestCameraPermissionsAsync();
+      result = await ImagePicker.launchCameraAsync(options);
+    }
+
+    if (!result.cancelled) {
+      const uri = result.assets[0].uri;
+      const file = {
+        uri: uri,
+        name: uri.split("/").pop(),
+        type: `image/${uri.split(".").pop()}`,
+      };
+
+      setIdCardImage(file);
+      setIdCardImageError("");
+    }
+  };
+
+  const removeImage = () => {
+    setIdCardImage(null);
+  };
+
   return (
-    <Container>
-      <Row className="justify-content-center py-2">
-        <Col xs={12} md={6}>
-          <h2 className="text-center py-2">Seller Registration</h2>
-          {loading && <Loader />}
+    <ScrollView style={styles.container}>
+      <View style={styles.form}>
+        <Text style={styles.title}>Become a Seller</Text>
 
-          {success && (
-            <Message variant="success" fixed>
-              Form submitted successfully.
-            </Message>
+        {loading && <Loader />}
+        {success && (
+          <Message variant="success">
+            Seller Created Successfully. Redirecting to Photo Upload Page...
+          </Message>
+        )}
+        {formError && <Message variant="danger">{formError}</Message>}
+        {error && <Message variant="danger">{error}</Message>}
+
+        <View style={styles.formGroup}>
+          <Text>Business Name</Text>
+          <TextInput
+            style={styles.input}
+            value={businessName}
+            onChangeText={(value) => handleFieldChange("businessName", value)}
+          />
+          {businessNameError && (
+            <Text style={styles.error}>{businessNameError}</Text>
           )}
-          {error && (
-            <Message variant="danger" fixed>
-              {error}
-            </Message>
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text>Business Reg Number</Text>
+          <TextInput
+            style={styles.input}
+            value={businessRegNum}
+            onChangeText={(value) => handleFieldChange("businessRegNum", value)}
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text>Business Address</Text>
+          <TextInput
+            style={styles.input}
+            value={businessAddress}
+            onChangeText={(value) =>
+              handleFieldChange("businessAddress", value)
+            }
+          />
+          {businessAddressError && (
+            <Text style={styles.error}>{businessAddressError}</Text>
           )}
+        </View>
 
-          <Form>
-            <Form.Group>
-              <Form.Label>Business Name*</Form.Label>
-              <Form.Control
-                type="text"
-                value={businessName}
-                onChange={(e) =>
-                  handleFieldChange("businessName", e.target.value)
-                }
-                placeholder="Enter business name"
-                className="rounded py-2 mb-2"
-                required
-                maxLength={100}
-              />
-              <Form.Text className="text-danger">{businessNameError}</Form.Text>
-            </Form.Group>
+        <View style={styles.formGroup}>
+          <Text>Business Type</Text>
+          <View style={styles.formContainer}>
+            <RNPickerSelect
+              onValueChange={(value) =>
+                handleFieldChange("businessType", value)
+              }
+              items={businessTypeChoices?.map(([value, label]) => ({
+                label,
+                value,
+              }))}
+              style={pickerSelectStyles}
+            />
+          </View>
+          {businessTypeError && (
+            <Text style={styles.error}>{businessTypeError}</Text>
+          )}
+        </View>
 
-            <Form.Group>
-              <Form.Label>Business Status*</Form.Label>
-              <Form.Control
-                as="select"
-                value={businessType}
-                onChange={(e) =>
-                  handleFieldChange("businessType", e.target.value)
-                }
-                className="rounded py-2 mb-2"
-                required
-              >
-                <option value="">Select Business Status</option>
-                {BUSINESS_TYPE_CHOICES.map((type) => (
-                  <option key={type[0]} value={type[0]}>
-                    {type[1]}
-                  </option>
-                ))}
-              </Form.Control>
-              <Form.Text className="text-danger">{businessTypeError}</Form.Text>
-            </Form.Group>
+        <View style={styles.formGroup}>
+          <Text>Staff Size</Text>
+          <View style={styles.formContainer}>
+            <RNPickerSelect
+              onValueChange={(value) => handleFieldChange("staffSize", value)}
+              items={staffSizeChoices?.map(([value, label]) => ({
+                label,
+                value,
+              }))}
+              style={pickerSelectStyles}
+            />
+          </View>
+          {staffSizeError && <Text style={styles.error}>{staffSizeError}</Text>}
+        </View>
 
-            <Form.Group>
-              <Form.Label>Business Registration Number</Form.Label>
-              <Form.Control
-                type="text"
-                value={businessRegNum}
-                onChange={(e) =>
-                  handleFieldChange("businessRegNum", e.target.value)
-                }
-                placeholder="Enter business registration number"
-                className="rounded py-2 mb-2"
-                maxLength={50}
-                required
-              />
-            </Form.Group>
+        <View style={styles.formGroup}>
+          <Text>Business Industry</Text>
+          <View style={styles.formContainer}>
+            <RNPickerSelect
+              onValueChange={(value) =>
+                handleFieldChange("businessIndustry", value)
+              }
+              items={industryChoices?.map(([value, label]) => ({
+                label,
+                value,
+              }))}
+              style={pickerSelectStyles}
+            />
+          </View>
+          {businessIndustryError && (
+            <Text style={styles.error}>{businessIndustryError}</Text>
+          )}
+        </View>
 
-            <Form.Group>
-              <Form.Label>Business Industry*</Form.Label>
-              <Form.Control
-                as="select"
-                value={businessIndustry}
-                onChange={(e) =>
-                  handleFieldChange("businessIndustry", e.target.value)
-                }
-                className="rounded py-2 mb-2"
-                required
-              >
-                <option value="">Select Business Industry</option>
-                {BUSINESS_INDUSTRY_CHOICES.map((industry) => (
-                  <option key={industry[0]} value={industry[0]}>
-                    {industry[1]}
-                  </option>
-                ))}
-              </Form.Control>
-              <Form.Text className="text-danger">
-                {businessIndustryError}
-              </Form.Text>
-            </Form.Group>
+        <View style={styles.formGroup}>
+          <Text>Business Category</Text>
+          <View style={styles.formContainer}>
+            <RNPickerSelect
+              onValueChange={(value) =>
+                handleFieldChange("businessCategory", value)
+              }
+              items={businessCategoryChoices?.map(([value, label]) => ({
+                label,
+                value,
+              }))}
+              style={pickerSelectStyles}
+            />
+          </View>
+          {businessCategoryError && (
+            <Text style={styles.error}>{businessCategoryError}</Text>
+          )}
+        </View>
 
-            <Form.Group>
-              <Form.Label>Business Category*</Form.Label>
-              <Form.Control
-                as="select"
-                value={businessCategory}
-                onChange={(e) =>
-                  handleFieldChange("businessCategory", e.target.value)
-                }
-                className="rounded py-2 mb-2"
-                required
-              >
-                <option value="">Select Business Category</option>
-                {BUSINESS_CATEGORY_CHOICES.map((category) => (
-                  <option key={category[0]} value={category[0]}>
-                    {category[1]}
-                  </option>
-                ))}
-              </Form.Control>
-              <Form.Text className="text-danger">
-                {businessCategoryError}
-              </Form.Text>
-            </Form.Group>
+        <View style={styles.formGroup}>
+          <Text>Business Description</Text>
+          <TextInput
+            style={styles.input}
+            value={businessDescription}
+            onChangeText={(value) =>
+              handleFieldChange("businessDescription", value)
+            }
+          />
+        </View>
 
-            <Form.Group>
-              <Form.Label>Staff Size*</Form.Label>
-              <Form.Control
-                as="select"
-                value={staffSize}
-                onChange={(e) => handleFieldChange("staffSize", e.target.value)}
-                className="rounded py-2 mb-2"
-                required
-              >
-                <option value="">Select Staff Size</option>
-                {STAFF_SIZE_CHOICES.map((size) => (
-                  <option key={size[0]} value={size[0]}>
-                    {size[1]}
-                  </option>
-                ))}
-              </Form.Control>
-              <Form.Text className="text-danger">{staffSizeError}</Form.Text>
-            </Form.Group>
+        <View style={styles.formGroup}>
+          <Text>Business Phone</Text>
+          <PhoneInput
+            style={styles.input}
+            initialCountry="us"
+            value={businessPhone}
+            onChangePhoneNumber={(value) =>
+              handleFieldChange("businessPhone", value)
+            }
+          />
+          {businessPhoneError && (
+            <Text style={styles.error}>{businessPhoneError}</Text>
+          )}
+        </View>
 
-            <Form.Group>
-              <Form.Label>Business Phone</Form.Label>
-              <Form.Control
-                type="text"
-                value={businessPhone}
-                onChange={(e) =>
-                  handleFieldChange("businessPhone", e.target.value)
-                }
-                // onChange={(e) => setBusinessPhone(e.target.value)}
-                placeholder="Enter business phone"
-                className="rounded py-2 mb-2"
-                maxLength={18}
-                required
-              />
+        <View style={styles.formGroup}>
+          <Text>Business Website</Text>
+          <TextInput
+            style={styles.input}
+            value={businessWebsite}
+            onChangeText={(value) =>
+              handleFieldChange("businessWebsite", value)
+            }
+          />
+        </View>
 
-              {/* <PhoneInput
-                country={selectedCountry}
-                value={businessPhone}
-                maxLength={18}
-                onChange={(value) => {
-                  setBusinessPhone(value);
-                  handleFieldChange("businessPhone", value);
-                }}
-              />               */}
-              <Form.Text className="text-danger">
-                {businessPhoneError}
-              </Form.Text>
-            </Form.Group>
+        <View style={styles.formGroup}>
+          <Text>Country</Text>
+          <View style={styles.formContainer}>
+            <RNPickerSelect
+              onValueChange={(value) => handleFieldChange("country", value)}
+              items={countryChoices?.map(([value, label]) => ({
+                label,
+                value,
+              }))}
+              style={pickerSelectStyles}
+            />
+          </View>
+          {countryError && <Text style={styles.error}>{countryError}</Text>}
+        </View>
 
-            <Form.Group>
-              <Form.Label>Business Website</Form.Label>
-              <Form.Control
-                type="text"
-                value={businessWebsite}
-                onChange={(e) => setBusinessWebsite(e.target.value)}
-                placeholder="Enter business description"
-                className="rounded py-2 mb-2"
-                maxLength={100}
-                required
-              />
-            </Form.Group>
+        <View style={styles.formGroup}>
+          <Text>ID Type</Text>
+          <View style={styles.formContainer}>
+            <RNPickerSelect
+              onValueChange={(value) => handleFieldChange("idType", value)}
+              items={idTypeChoices?.map(([value, label]) => ({
+                label,
+                value,
+              }))}
+              style={pickerSelectStyles}
+            />
+          </View>
+          {idTypeError && <Text style={styles.error}>{idTypeError}</Text>}
+        </View>
 
-            <Form.Group>
-              <Form.Label>Business Description</Form.Label>
-              <Form.Control
-                type="text"
-                value={businessDescription}
-                onChange={(e) => setBusinessDescription(e.target.value)}
-                placeholder="Enter business description"
-                className="rounded py-2 mb-2"
-                maxLength={100}
-                required
-              />
-            </Form.Group>
+        <View style={styles.formGroup}>
+          <Text>ID Number</Text>
+          <TextInput
+            style={styles.input}
+            value={idNumber}
+            onChangeText={(value) => handleFieldChange("idNumber", value)}
+          />
+          {idNumberError && <Text style={styles.error}>{idNumberError}</Text>}
+        </View>
 
-            <Form.Group>
-              <Form.Label>Business Address*</Form.Label>
-              <Form.Control
-                type="text"
-                value={businessAddress}
-                onChange={(e) =>
-                  handleFieldChange("businessAddress", e.target.value)
-                }
-                placeholder="Enter business address"
-                className="rounded py-2 mb-2"
-                maxLength={225}
-                required
-              />
-              <Form.Text className="text-danger">
-                {businessAddressError}
-              </Form.Text>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Home Address*</Form.Label>
-              <Form.Control
-                type="text"
-                value={address}
-                onChange={(e) => handleFieldChange("address", e.target.value)}
-                placeholder="Enter home address"
-                className="rounded py-2 mb-2"
-                maxLength={225}
-                required
-              />
-              <Form.Text className="text-danger">{addressError}</Form.Text>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Country*</Form.Label>
-              {/* <Form.Control
-                type="text"
-                value={country}
-                onChange={(e) => handleFieldChange("country", e.target.value)}
-                placeholder="Enter country"
-                className="rounded py-2 mb-2"
-                maxLength={100}
-                required
-              /> */}
-
-              <Select
-                value={{ value: country, label: country }}
-                onChange={(selectedOption) =>
-                  handleFieldChange("country", selectedOption.value)
-                }
-                options={COUNTRY_CHOICES.map((type) => ({
-                  value: type[0],
-                  label: type[1],
-                }))}
-              />
-              <Form.Text className="text-danger">{countryError}</Form.Text>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Personal ID Type*</Form.Label>
-              <Form.Control
-                as="select"
-                value={idType}
-                onChange={(e) => handleFieldChange("idType", e.target.value)}
-                className="rounded py-2 mb-2"
-                required
-              >
-                <option value="">ID Type</option>
-                {ID_TYPE_CHOICES.map((type) => (
-                  <option key={type[0]} value={type[0]}>
-                    {type[1]}
-                  </option>
-                ))}
-              </Form.Control>
-              <Form.Text className="text-danger">{idTypeError}</Form.Text>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Personal ID Number*</Form.Label>
-              <Form.Control
-                type="text"
-                value={idNumber}
-                onChange={(e) => handleFieldChange("idNumber", e.target.value)}
-                placeholder="Enter ID Number"
-                className="rounded py-2 mb-2"
-                required
-                maxLength={100}
-              />
-              <Form.Text className="text-danger">{idNumberError}</Form.Text>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Personal ID Card Photo* </Form.Label>
-              <Form.Control
-                type="file"
-                onChange={(e) =>
-                  handleFieldChange("idCardImage", e.target.files[0])
-                }
-                placeholder="Upload the ID Card Photo"
-                className="rounded py-2 mb-2"
-                required
-                maxLength={100}
-              />
-              <Form.Text className="text-danger">{idCardImageError}</Form.Text>
-            </Form.Group>
-
-            <Form.Group>
-              <Form.Label>Date Of Birth*</Form.Label>
-              {/* <Form.Control
-                type="text"
-                value={dob}
-                onChange={(e) => handleFieldChange("dob", e.target.value)}
-                placeholder="Enter date of birth"
-                className="rounded py-2 mb-2"
-                maxLength={50}
-                required
-              /> */}
-              <div>
-                <DatePicker
-                  selected={dob ? new Date(dob) : null}
-                  // onChange={(date) => setDob(date)}
-                  onChange={(date) => {
-                    setDob(date);
-                    handleFieldChange("dob", date);
-                  }}
-                  dateFormat="dd/MM/yyyy"
-                  className="rounded py-2 mb-2 form-control"
-                  placeholderText="Select date of birth"
-                  showYearDropdown
-                  scrollableYearDropdown
-                  yearDropdownItemNumber={100}
-                  scrollableMonthYearDropdown
+        <View style={styles.formGroup}>
+          <Text>ID Card Photo</Text>
+          <View style={styles.imgContainer}>
+            <TouchableOpacity
+              style={styles.imagePicker}
+              onPress={() => pickImage("idCardImage", true)}
+            >
+              <Text style={styles.uploadText}>
+                {idCardImage ? "Change Photo" : "Select Photo"}
+              </Text>
+            </TouchableOpacity>
+            {/* <TouchableOpacity style={styles.imagePicker} onPress={() => pickImage("idCardImage", false)}>
+              <Text style={styles.uploadText}>Capture Photo</Text>
+            </TouchableOpacity> */}
+            {idCardImage ? (
+              <>
+                <Image
+                  source={{ uri: idCardImage.uri }}
+                  style={styles.imagePreview}
                 />
-              </div>
+                <TouchableOpacity
+                  style={styles.removeButton}
+                  onPress={removeImage}
+                >
+                  <Text style={styles.removeButtonText}>Remove Photo</Text>
+                </TouchableOpacity>
+              </>
+            ) : null}
+          </View>
+          {idCardImageError && (
+            <Text style={styles.error}>{idCardImageError}</Text>
+          )}
+        </View>
 
-              <Form.Text className="text-danger">{dobError}</Form.Text>
-            </Form.Group>
+        <View style={styles.formGroup}>
+          <Text>Date of Birth</Text>
+          <View style={styles.dobContainer}>
+            <Button title="Select Date" onPress={() => setOpen(true)} />
+            <DatePicker
+              modal
+              open={open}
+              // style={styles.input}
+              date={dob}
+              mode="date"
+              onConfirm={(date) => {
+                setOpen(false);
+                setDob(date);
+              }}
+              onCancel={() => {
+                setOpen(false);
+              }}
+              placeholder="Select date"
+              confirmText="Confirm"
+              cancelText="Cancel"
+              onDateChange={(date) => handleFieldChange("dob", date)}
+            />
+          </View>
+          {/* {dobError && <Text style={styles.error}>{dobError}</Text>} */}
+        </View>
 
-            {formError && (
-              <Message variant="danger" fixed>
-                {formError}
-              </Message>
-            )}
-            {/* {loading && <Loader />} */}
-            {/* {success && (
-              <Message variant="success" fixed>Form submitted successfully.</Message>
-            )}
-            {error && <Message variant="danger">{error}</Message>} */}
-          </Form>
-          <Button
-            variant="primary"
-            onClick={handleCreateMarketplaceSeller}
-            className="rounded py-2 mb-2 text-center w-100"
-            disabled={loading || success}
-          >
-            <span className="d-flex justify-content-center">
-              {loading && <LoaderButton />} {"  "}Continue
-            </span>
-          </Button>
-        </Col>
-      </Row>
-    </Container>
+        <View style={styles.formGroup}>
+          <Text>Home Address</Text>
+          <TextInput
+            style={styles.input}
+            value={address}
+            onChangeText={(value) => handleFieldChange("address", value)}
+          />
+          {addressError && <Text style={styles.error}>{addressError}</Text>}
+        </View>
+
+        <View style={styles.formGroup}>
+          {loading && <Loader />}
+          {formError && <Message variant="danger">{formError}</Message>}
+          {error && <Message variant="danger">{error}</Message>}
+          {success && (
+            <Message variant="success">
+              Seller Created Successfully. Redirecting to Photo Upload Page...
+            </Message>
+          )}
+        </View>
+
+        <View style={styles.submitBtn}>
+          <TouchableOpacity onPress={handleCreateMarketplaceSeller}>
+            <Text style={styles.roundedPrimaryBtn}>Create Seller</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  form: {
+    marginBottom: 40,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 24,
+  },
+  formGroup: {
+    marginBottom: 16,
+  },
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    marginTop: 8,
+  },
+  uploadText: {
+    color: "#007BFF",
+    textDecorationLine: "underline",
+  },
+  formContainer: {
+    width: "100%",
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  dobContainer: {
+    width: "100%",
+    minHeight: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  imgContainer: {
+    width: "100%",
+    minHeight: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  imagePreview: {
+    width: 100,
+    height: 100,
+    marginTop: 10,
+  },
+  removeButton: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#ff0000",
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  removeButtonText: {
+    color: "#fff",
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  submitBtn: {
+    padding: 10,
+  },
+  error: {
+    color: "red",
+    marginTop: 8,
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  // inputIOS: {
+  //   height: 40,
+  //   borderColor: "#ccc",
+  //   borderWidth: 1,
+  //   paddingHorizontal: 8,
+  //   marginTop: 8,
+  // },
+  // inputAndroid: {
+  //   height: 40,
+  //   borderColor: "#ccc",
+  //   borderWidth: 1,
+  //   paddingHorizontal: 8,
+  //   marginTop: 8,
+  // },
+});
 
 export default CreateMarketplaceSeller;

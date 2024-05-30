@@ -10,7 +10,7 @@ import {
   Text,
   TextInput,
   Button,
-  SafeAreaView, 
+  SafeAreaView,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
@@ -402,18 +402,18 @@ const RegisterScreen = () => {
           )}
 
           <View style={styles.buttonContainer}>
-            <Button
-              title="Register"
-              onPress={submitHandler}
-              disabled={loading}
-            />
+            <TouchableOpacity onPress={submitHandler} disabled={loading}>
+              <Text style={styles.roundedPrimaryBtn}>Register</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.buttonContainer}>
-            <Button
-              title="Already have an account? Login"
+            <TouchableOpacity
               onPress={() => navigation.navigate("Login")}
-            />
+              disabled={loading}
+            >
+              <Text style={styles.roundedSuccessBtn}>Login</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>

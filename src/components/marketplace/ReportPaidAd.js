@@ -1,65 +1,45 @@
 // ReportPaidAd.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+  StyleSheet,
+  Button,
+  Alert,
+  RefreshControl,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Button, Row, Col } from "react-bootstrap";
-import { reportPaidAd } from "../../actions/marketplaceSellerActions";
-import Loader from "../Loader";
-import Message from "../Message";
-import Select from "react-select";
+import { useNavigation } from "@react-navigation/native";
+import { reportPaidAd } from "../../redux/actions/marketplaceSellerActions";
+import Message from "../../Message";
+import Loader from "../../Loader";
+import RNPickerSelect from "react-native-picker-select";
 
 const AD_REPORT_CHOICES = [
-  [
-    "Misleading Content",
-    "False or deceptive information in the ad, claims that are not substantiated.",
-  ],
-  [
-    "Inappropriate Content",
-    "Offensive language, images, or themes; content violating community standards or guidelines.",
-  ],
-  [
-    "Irrelevant or Unwanted Ads",
-    "Ads that are not relevant to the user; too frequent display of the same ad.",
-  ],
-  [
-    "Malware or Phishing",
-    "Ads containing malicious software or links to phishing websites.",
-  ],
-  [
-    "Privacy Concerns",
-    "Collection of personal information without consent; violation of privacy policies.",
-  ],
-  [
-    "Low-Quality or Unprofessional Design",
-    "Poorly designed or unprofessional-looking ads.",
-  ],
-  [
-    "Counterfeit or Fraudulent Products",
-    "Ads promoting counterfeit goods or fraudulent services.",
-  ],
-  [
-    "Political or Social Issues",
-    "Ads perceived as promoting hate speech, discrimination, or controversial political content.",
-  ],
-  [
-    "Technical Issues",
-    "Broken links or malfunctioning interactive elements in the ad.",
-  ],
-  [
-    "Unsolicited or Spammy Ads",
-    "Ads that appear as spam or unsolicited marketing messages.",
-  ],
-  [
-    "Disallowed Content",
-    "Ads promoting content that violates platform policies or legal regulations.",
-  ],
-  ["Unverified Claims", "Ads making claims that cannot be verified or proven."],
-  ["Unrealistic Promises", "Ads promising unrealistic results or benefits."],
+  { label: "Misleading Content", value: "Misleading Content" },
+  { label: "Inappropriate Content", value: "Inappropriate Content" },
+  { label: "Irrelevant or Unwanted Ads", value: "Irrelevant or Unwanted Ads" },
+  { label: "Malware or Phishing", value: "Malware or Phishing" },
+  { label: "Privacy Concerns", value: "Privacy Concerns" },
+  { label: "Low-Quality or Unprofessional Design", value: "Low-Quality or Unprofessional Design" },
+  { label: "Counterfeit or Fraudulent Products", value: "Counterfeit or Fraudulent Products" },
+  { label: "Political or Social Issues", value: "Political or Social Issues" },
+  { label: "Technical Issues", value: "Technical Issues" },
+  { label: "Unsolicited or Spammy Ads", value: "Unsolicited or Spammy Ads" },
+  { label: "Disallowed Content", value: "Disallowed Content" },
+  { label: "Unverified Claims", value: "Unverified Claims" },
+  { label: "Unrealistic Promises", value: "Unrealistic Promises" },
 ];
 
-function ReportPaidAd({ history, adId }) {
+const ReportPaidAd = ({ route }) => {
+  const { adId } = route.params;
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const [adReport, setAdReport] = useState("Inappropriate Content");
+  const [refreshing, setRefreshing] = useState(false);
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -72,72 +52,119 @@ function ReportPaidAd({ history, adId }) {
     ad_id: adId,
   };
 
-  const submitHandler = (e) => {
-    e.preventDefault();
-
+  const submitHandler = () => {
     dispatch(reportPaidAd(adReportData));
   };
-  console.log("adReportData:", adReportData);
 
-  const handleReportAdChange = (selectedOption) => {
-    setAdReport(selectedOption.value);
-  };
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    dispatch(reportPaidAd(adReportData));
+    wait(2000).then(() => setRefreshing(false));
+  }, [dispatch]);
 
   useEffect(() => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     }
-  }, [dispatch, userInfo, history]);
+  }, [userInfo, navigation]);
 
   useEffect(() => {
     if (success) {
+      Alert.alert("Success", "Ad reported successfully.");
       const timer = setTimeout(() => {
-        window.location.reload();
+        navigation.goBack();
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [success, history]);
+  }, [success, navigation]);
+
+  const wait = (timeout) => {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
+  };
 
   return (
-    <div>
-      <Row className="d-flex justify-content-center py-2">
-        <Col>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>Report Ad</Text>
           {loading && <Loader />}
           {error && <Message variant="danger">{error}</Message>}
-          {success && (
-            <Message variant="success">Ad reported successfully.</Message>
-          )}
-          <Form onSubmit={submitHandler}>
-            <Form.Group>
-              {/* <Form.Label>Report Ad</Form.Label> */}
-              <Select
-                options={AD_REPORT_CHOICES.map(([value, label]) => ({
-                  value,
-                  label,
-                }))}
-                value={{ value: adReport, label: adReport }}
-                onChange={handleReportAdChange}
-                placeholder="Select Report"
-                className="rounded py-2 mb-2"
-                required
-              />
-            </Form.Group>
-
-            <div className="py-2">
-              <Button
-                className="w-100 rounded"
-                type="submit"
-                variant="primary"
-                disabled={loading || success}
-              >
-                Submit
-              </Button>
-            </div>
-          </Form>
-        </Col>
-      </Row>
-    </div>
+          {success && <Message variant="success">Ad reported successfully.</Message>}
+          <RNPickerSelect
+            onValueChange={(value) => setAdReport(value)}
+            items={AD_REPORT_CHOICES}
+            value={adReport}
+            placeholder={{
+              label: "Select Report",
+              value: null,
+            }}
+            style={pickerSelectStyles}
+          />
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Submit Report"
+              onPress={submitHandler}
+              color="#007bff"
+              disabled={loading || success}
+            />
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  scrollView: {
+    flexGrow: 1,
+  },
+  container: {
+    flex: 1,
+    padding: 16,
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 10,
+    textAlign: "center",
+  },
+  buttonContainer: {
+    marginTop: 20,
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 4,
+    color: "black",
+    paddingRight: 30,
+    marginVertical: 10,
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 4,
+    color: "black",
+    paddingRight: 30,
+    marginVertical: 10,
+  },
+});
 
 export default ReportPaidAd;

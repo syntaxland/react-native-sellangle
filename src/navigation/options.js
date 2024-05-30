@@ -22,7 +22,6 @@ export const navOptions = (nav) => {
       <TouchableOpacity onPress={() => nav.navigate("Home")}>
         <Image 
         source={logoImage}
-        // accessibilityLabel="Sellangle Logo"
          style={styles.logo} /> 
       </TouchableOpacity>
     ),

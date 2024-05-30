@@ -1,76 +1,46 @@
 // Marketplace.js
 import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+  RefreshControl,
+  StyleSheet,
+  Button,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { Row, Col, Button, Form, Container } from "react-bootstrap";
-import { getUserProfile } from "../../actions/userProfileActions";
+import { useNavigation } from "@react-navigation/native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faSearch,
+  faShoppingCart,
+  faMapMarkerAlt,
+  faPlusSquare,
+} from "@fortawesome/free-solid-svg-icons";
 import AllPaidAdScreen from "./AllPaidAdScreen";
 import AllFreeAdScreen from "./AllFreeAdScreen";
 import SellerSearchCard from "./SellerSearchCard";
-import FilterBar from "./FilterBar"; 
+import FilterBar from "./FilterBar";
+import Quotes from "./Quotes";
+import { getUserProfile } from "../../redux/actions/userProfileActions";
 import {
-  getSellerUsernameSearch, 
+  getSellerUsernameSearch,
   getAllPaidAd,
   getAllFreeAd,
-} from "../../actions/marketplaceSellerActions";
-import Message from "../Message";
-import LoaderButton from "../LoaderButton";
-import Select from "react-select";
+} from "../../redux/actions/marketplaceSellerActions";
 import { Country, State, City } from "country-state-city";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+import Message from "../../Message";
+import Loader from "../../Loader";
 
-const quotes = [
-  "At this angle, sells are quick ...",
-  "Turning Angles into Sells – SellAngle Style!",
-  "Global Sells, Universal Angles – One Marketplace for All!", 
-  "Selling Perfected: It's the SellAngle Way!",
-  "Sell with Ease, Master the Angle – SellAngle!",
-  "Every Sell, Every Angle, Every Human – One Global Stop!",
-  "Navigating Sell Success, One Angle at a Time!",
-  "Global Sells, Infinite Angles – One Marketplace for All!",
-  "From Every Angle, to Every Human – SellAngle!",
-  "From Every Angle, One Global Sell Destination!",
-  "Strategic Angles, Stellar Sells!",
-  "Precision in Every Angle, Power in Every Sell! SellAngle!!",
-  "Angles that Convert, Sells that Skyrocket!",
-  "Angle Your Way to Instant Sells Success!",
-  "Selling at Every Angle, Selling in a Flash!",
-  "SellAngle: Where Every Angle Counts in Sells!",
-  "Swift Sells at Every Angle!",
-  "Maximize Sells Momentum with SellAngle!",
-  "Precision Sells, Perfect Angles – SellAngle!",
-  "Angles That Accelerate Sells!",
-  "Sell Smart, Sell Quick with the Power of Angle",
-  "Your Angle to Sell Success: SellAngle Unleashed!",
-  "The Quickest Sells, All in the Right Angle!",
-  "Sell Globally, Angle Locally with SellAngle!",
-  "One Stop, Every Sell, Every Angle – Global Marketplace!",
-  "Global Sells, One-Stop Angles – It's Marketplace Magic!",
-  "Sell Smart, Angle Globally – Your One-Stop Hub!",
-  "One Stop for Sells Worldwide – Master Every Angle!",
-  "Sell Everywhere, Master Every Angle – SellAngle!",
-  "Global Sells, Local Angles – One Marketplace!",
-  "Sell at Every Turn, One Marketplace for All – SellAngle!",
-  "Unlock Global Sells, Master Every Angle – SellAngle!",
-  "Sells for All, Angles for Every Need – SellAngle!",
-  "One Marketplace, All Humans – Sell and Angle Globally!",
-  "All Humans, All Sells, All Angles – One Marketplace!",
-  "For All, By All – SellAngle, Your Global Sells Hub!",
-  "Sells for Every Human, Angles for Every Heart – SellAngle!",
-  "One Marketplace, Infinite Sells, Endless Angles – SellAngle!",
-  "All Humans, One Marketplace – Sell and Angle Worldwide!",
-  "From Every Corner, For All Humans – SellAngle!",
-  "Master the Art of Selling with SellAngle!",
-];
-
-function Marketplace() {
-  const dispatch = useDispatch(); 
-  const history = useHistory();
-
-  const [sellerUsername, setSellerUsername] = useState("");
-  const [searchSellerUsername, setSearchSellerUsername] = useState(null); 
+const Marketplace = () => {
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -80,79 +50,119 @@ function Marketplace() {
 
   const getAllPaidAdState = useSelector((state) => state.getAllPaidAdState);
   const { paidAds } = getAllPaidAdState;
-  console.log("paidAds:", paidAds?.length);
 
   const getAllFreeAdState = useSelector((state) => state.getAllFreeAdState);
   const { freeAds } = getAllFreeAdState;
-  console.log("freeAds:", freeAds?.length);
 
   const searchAdsState = useSelector((state) => state.searchAdsState);
   const {
     loading: searchAdLoading,
-    // success: searchAdSuccess,
     error: searchAdError,
     freeSearchAds,
     paidSearchAds,
   } = searchAdsState;
-  console.log("freeSearchAds", freeSearchAds?.length);
-  console.log("paidSearchAds", paidSearchAds?.length);
 
   const getSellerUsernameSearchState = useSelector(
     (state) => state.getSellerUsernameSearchState
   );
   const {
     loading: sellerUsernameSearchLoading,
-    // success: sellerUsernameSearchSuccess,
     error: sellerUsernameSearchError,
     serachResults,
     sellerAvatarUrl,
   } = getSellerUsernameSearchState;
-  // console.log("serachResults", serachResults);
 
-  // const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  const [sellerUsername, setSellerUsername] = useState("");
+  const [searchSellerUsername, setSearchSellerUsername] = useState(null);
 
-  // const handleQuoteChange = () => {
-  //   const newIndex = Math.floor(Math.random() * quotes.length);
-  //   setCurrentQuoteIndex(newIndex);
-  // };
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedType, setSelectedType] = useState(null);
 
-  // useEffect(() => {
-  //   const interval = setInterval(handleQuoteChange, 5000);
-
-  //   return () => clearInterval(interval);
-  // }, []);
-
-  const settings = {
-    // dots: true,
-    arrows: false,
-    infinite: true,
-    speed: 1000,
-    slidesToShow: 1,
-    slidesToScroll: 1, 
-    autoplay: true,
-    autoplaySpeed: 5000,
-    fade: true,
-    focusOnSelect: true,
-    centerMode: true,
-  };
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
 
   const [freeAdLength, setFreeAdLength] = useState(0);
   const [paidAdLength, setPaidAdLength] = useState(0);
+
+  const [filteredFreeAds, setFilteredFreeAds] = useState([]);
+  const [filteredPaidAds, setFilteredPaidAds] = useState([]);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    if (userInfo) {
+      dispatch(getUserProfile());
+    }
+  }, [dispatch, userInfo]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const storedCategory = await AsyncStorage.getItem("selectedCategory");
+      const storedType = await AsyncStorage.getItem("selectedType");
+
+      if (storedCategory && storedType) {
+        setSelectedCategory(storedCategory);
+        setSelectedType(storedType);
+
+        const filteredFreeAds = freeAds?.filter(
+          (ad) => ad.ad_category === storedCategory
+        );
+        const filteredPaidAds = paidAds?.filter(
+          (ad) => ad.ad_category === storedCategory && ad.ad_type === storedType
+        );
+        setFilteredFreeAds(filteredFreeAds);
+        setFilteredPaidAds(filteredPaidAds);
+      }
+    };
+
+    fetchData();
+  }, [freeAds, paidAds]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const savedCountry = await AsyncStorage.getItem("selectedCountry");
+      const savedState = await AsyncStorage.getItem("selectedState");
+      const savedCity = await AsyncStorage.getItem("selectedCity");
+
+      if (savedCountry) setSelectedCountry(savedCountry);
+      if (savedState) setSelectedState(savedState);
+      if (savedCity) setSelectedCity(savedCity);
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const saveData = async () => {
+      if (selectedCountry)
+        await AsyncStorage.setItem("selectedCountry", selectedCountry);
+      if (selectedState)
+        await AsyncStorage.setItem("selectedState", selectedState);
+      if (selectedCity)
+        await AsyncStorage.setItem("selectedCity", selectedCity);
+    };
+
+    saveData();
+  }, [selectedCountry, selectedState, selectedCity]);
+
+  useEffect(() => {
+    const adData = {
+      selected_country: selectedCountry,
+      selected_state: selectedState,
+      selected_city: selectedCity,
+    };
+    dispatch(getAllPaidAd(adData));
+    dispatch(getAllFreeAd(adData));
+  }, [dispatch, selectedCountry, selectedState, selectedCity]);
 
   useEffect(() => {
     setFreeAdLength(freeAds ? freeAds.length : 0);
     setPaidAdLength(paidAds ? paidAds.length : 0);
   }, [freeAds, paidAds]);
 
-  const [filteredFreeAds, setFilteredFreeAds] = useState([]);
-  const [filteredPaidAds, setFilteredPaidAds] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedType, setSelectedType] = useState(null);
-  // console.log("filteredFreeAds", filteredFreeAds?.length);
-  // console.log("filteredPaidAds", filteredPaidAds?.length);
-
   const handleCategoryChange = useCallback(
-    (category) => {
+    async (category) => {
       setSelectedCategory(category);
       setSelectedType(null);
 
@@ -165,370 +175,215 @@ function Marketplace() {
       setFilteredFreeAds(filteredFreeAds);
       setFilteredPaidAds(filteredPaidAds);
 
-      localStorage.setItem("selectedCategory", category);
-      localStorage.removeItem("selectedType");
+      await AsyncStorage.setItem("selectedCategory", category);
+      await AsyncStorage.removeItem("selectedType");
     },
     [freeAds, paidAds]
   );
 
   const handleTypeChange = useCallback(
-    (type, filteredFreeAds, filteredPaidAds) => {
+    async (type, filteredFreeAds, filteredPaidAds) => {
       setSelectedType(type);
       setFilteredFreeAds(filteredFreeAds);
       setFilteredPaidAds(filteredPaidAds);
-
-      // localStorage.setItem("selectedType", type);
     },
     []
   );
 
-  useEffect(() => {
-    const storedCategory = localStorage.getItem("selectedCategory");
-    const storedType = localStorage.getItem("selectedType");
-
-    if (storedCategory && storedType) {
-      setSelectedCategory(storedCategory);
-      setSelectedType(storedType);
-
-      const filteredFreeAds = freeAds?.filter(
-        (ad) => ad.ad_category === storedCategory
-      );
-      const filteredPaidAds = paidAds?.filter(
-        (ad) => ad.ad_category === storedCategory && ad.ad_type === storedType
-      );
-      setFilteredFreeAds(filteredFreeAds);
-      setFilteredPaidAds(filteredPaidAds);
-    }
-  }, [freeAds, paidAds]);
-
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedState, setSelectedState] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
-
-  const handleCountryChange = (selectedOption) => {
-    setSelectedCountry(selectedOption.value);
-    setSelectedState("");
-    setSelectedCity("");
-  };
-
-  const handleStateChange = (selectedOption) => {
-    setSelectedState(selectedOption.value);
-    setSelectedCity("");
-  };
-
-  const handleCityChange = (selectedOption) => {
-    setSelectedCity(selectedOption.value);
-  };
-
-  useEffect(() => {
-    const savedCountry = localStorage.getItem("selectedCountry");
-    const savedState = localStorage.getItem("selectedState");
-    const savedCity = localStorage.getItem("selectedCity");
-
-    if (savedCountry) setSelectedCountry(savedCountry);
-    if (savedState) setSelectedState(savedState);
-    if (savedCity) setSelectedCity(savedCity);
-  }, []);
-
-  useEffect(() => {
-    if (selectedCountry)
-      localStorage.setItem("selectedCountry", selectedCountry);
-    // if (selectedState) localStorage.setItem("selectedState", selectedState);
-    // if (selectedCity) localStorage.setItem("selectedCity", selectedCity);
-  }, [selectedCountry, selectedState, selectedCity]);
-
-  console.log("location", selectedCountry, selectedState, selectedCity);
-
-  useEffect(() => {
-    const adData = {
-      selected_country: selectedCountry,
-      selected_state: selectedState,
-      selected_city: selectedCity,
-    };
-    dispatch(getAllPaidAd(adData));
-    dispatch(getAllFreeAd(adData));
-    // eslint-disable-next-line
-  }, [dispatch, selectedCountry, selectedState, selectedCity]);
-
-  useEffect(() => {
-    if (userInfo) {
-      dispatch(getUserProfile());
-    }
-  }, [dispatch, userInfo]);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    dispatch(getAllPaidAd());
+    dispatch(getAllFreeAd());
+    setTimeout(() => setRefreshing(false), 2000);
+  }, [dispatch]);
 
   const handlePostFreeAd = () => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     } else if (userInfo && !profile.is_marketplace_seller) {
-      history.push("/create-marketplace-seller");
+      navigation.navigate("Create Seller Account");
     } else {
-      history.push("/ad/free");
+      navigation.navigate("Post Free Ad");
     }
   };
 
   const handleSearchAds = () => {
-    history.push("/search-ad/");
+    navigation.navigate("SearchAd");
   };
 
-  const handleSellerUsernameSearch = (e) => {
+  const handleSellerUsernameSearch = async (e) => {
     e.preventDefault();
     if (sellerUsername.trim() !== "") {
       const lowerCaseUsername = sellerUsername.toLowerCase().trim();
       const result = dispatch(getSellerUsernameSearch(lowerCaseUsername));
-      setSearchSellerUsername(result);
-      if (!result) {
-        console.log("Seller not found.");
+      setSearchSellerUsername(lowerCaseUsername);
+      if (result && !sellerUsernameSearchError) {
+        await AsyncStorage.setItem("sellerUsername", lowerCaseUsername);
       }
+    } else {
+      setSellerUsername("");
+      setSearchSellerUsername(null);
     }
   };
 
+  const handleCountryChange = async (country) => {
+    setSelectedCountry(country);
+    setSelectedState("");
+    setSelectedCity("");
+    await AsyncStorage.setItem("selectedCountry", country);
+    await AsyncStorage.removeItem("selectedState");
+    await AsyncStorage.removeItem("selectedCity");
+  };
+
+  const handleStateChange = async (state) => {
+    setSelectedState(state);
+    setSelectedCity("");
+    await AsyncStorage.setItem("selectedState", state);
+    await AsyncStorage.removeItem("selectedCity");
+  };
+
+  const handleCityChange = async (city) => {
+    setSelectedCity(city);
+    await AsyncStorage.setItem("selectedCity", city);
+  };
+
+  console.log("Hey Sellangle!");
+
   return (
-    <Container>
-      <Row>
-        <Col>
-          <hr />
-          <h1 className="text-center py-2">
-            <i className="fas fa-shopping-cart"></i> Sell Angle
-          </h1>
-          <hr />
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.container}>
+          <View>
+            <Quotes />
+          </View>
 
-          <div className="py-2 d-flex justify-content-center text-center">
-            {searchAdError && (
-              <Message fixed variant="danger">
-                {searchAdError}
-              </Message>
-            )}
-
-            {/* {sellerUsernameSearchSuccess && (
-              <Message variant="success" fixed> 
-                Seller found!
-              </Message>
-            )} */}
-
-            {sellerUsernameSearchError && (
-              <Message fixed variant="danger">
-                {sellerUsernameSearchError}
-              </Message>
-            )}
-          </div>
-
-          <Row className="py-2 d-flex justify-content-center">
-            <Col md={8}>
-              <Row className="py-2 d-flex justify-content-betwwen">
-                <Col className="d-flex justify-content-center">
-                  <Button
-                    variant="primary"
-                    className="rounded"
-                    size="sm"
-                    onClick={handleSearchAds}
-                  >
-                    <div className="d-flex justify-content-center">
-                      <span className="py-1">
-                        Search Ads <i className="fas fa-search"></i>
-                      </span>
-                      {searchAdLoading && <LoaderButton />}
-                    </div>
-                  </Button>
-                </Col>
-              </Row>
-            </Col>
-          </Row>
-
-          <hr />
-          <Col md={6}>
-            <Button
-              variant="outline-transparent"
-              size="sm"
-              className="py-2 rounded"
-              disabled
-            >
-              <i className="fas fa-map-marker-alt"></i> Ad Location (
-              {freeAdLength + paidAdLength} ads)
-            </Button>
-          </Col>
-          <Row className="py-2 d-flex justify-content-end">
-            <Col className="py-2">
-              <Col md={4}>
-                <span>Country: </span>
-                <Select
-                  options={Country.getAllCountries().map((country) => ({
-                    // value: country.name,
-                    value: country.isoCode,
-                    label: country.name,
-                  }))}
-                  value={{ value: selectedCountry, label: selectedCountry }}
-                  // value={
-                  //   selectedCountry
-                  //     ? { value: selectedCountry, label: selectedCountry }
-                  //     : defaultCountry
-                  // }
-                  onChange={handleCountryChange}
-                  placeholder="Select Country"
-                  className="rounded"
-                  required
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity onPress={handlePostFreeAd}>
+              <Text style={styles.roundedPrimaryBtn}>
+                Post Free Ad{" "}
+                <FontAwesomeIcon
+                  icon={faPlusSquare}
+                  size={14}
+                  // style={styles.icon}
+                  color="white"
                 />
-              </Col>
-              <Col md={4}>
-                <span>State/Province: </span>
-                <Select
-                  options={
-                    selectedCountry
-                      ? State.getStatesOfCountry(selectedCountry).map(
-                          (state) => ({
-                            value: state.isoCode,
-                            // value: state.name,
-                            label: state.name,
-                          })
-                        )
-                      : []
-                  }
-                  value={{ value: selectedState, label: selectedState }}
-                  // value={
-                  //   selectedState
-                  //     ? { value: selectedState, label: selectedState }
-                  //     : defaultState
-                  // }
-                  onChange={handleStateChange}
-                  placeholder="Select State/Province"
-                  className="rounded"
-                  required
-                />
-              </Col>
-              <Col md={4}>
-                <span>City: </span>
-                <Select
-                  options={
-                    selectedState
-                      ? City.getCitiesOfState(
-                          selectedCountry,
-                          selectedState
-                        ).map((city) => ({
-                          value: city.name,
-                          label: city.name,
-                        }))
-                      : []
-                  }
-                  value={{ value: selectedCity, label: selectedCity }}
-                  // value={
-                  //   selectedCity
-                  //     ? { value: selectedCity, label: selectedCity }
-                  //     : defaultCity
-                  // }
-                  onChange={handleCityChange}
-                  placeholder="Select City"
-                  className="rounded"
-                  required
-                />
-              </Col>
-            </Col>
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-            <Col md={4} xs={12} sm={6} lg={4} xl={4} className="py-2">
-              <Form onSubmit={handleSellerUsernameSearch}>
-                <Row className="d-flex justify-content-betwwen">
-                  <Col md={10}>
-                    <Form.Group>
-                      <Form.Control
-                        type="search"
-                        placeholder="Search seller by username"
-                        value={sellerUsername}
-                        onChange={(e) => setSellerUsername(e.target.value)}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={2} className="d-flex justify-content-end">
-                    <Button
-                      variant="primary"
-                      className="rounded"
-                      size="sm"
-                      type="submit"
-                      // onClick={handleSellerUsernameSearch}
-                      required
-                    >
-                      <div className="d-flex justify-content-center">
-                        <span className="py-1">
-                          <i className="fas fa-search"></i>
-                          {/* Search */}
-                          {/* Seller */}
-                        </span>
-                        {sellerUsernameSearchLoading && <LoaderButton />}
-                      </div>
-                    </Button>
-                  </Col>
-                </Row>
-              </Form>
-            </Col>
-          </Row>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity onPress={handleSearchAds}>
+              <Text style={styles.roundedPrimaryBtn}>
+                Search Ads{" "}
+                <FontAwesomeIcon
+                  icon={faSearch}
+                  size={14}
+                  // style={styles.icon}
+                  color="white"
+                />
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-          <div className="py-2 d-flex justify-content-center">
-            <FilterBar
-              selectedCategory={selectedCategory}
-              selectedType={selectedType}
-              setSelectedType={setSelectedType}
-              setSelectedCategory={setSelectedCategory}
-              freeAds={freeAds}
-              paidAds={paidAds}
-              onCategoryChange={handleCategoryChange}
-              onTypeChange={handleTypeChange}
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search by Seller Username"
+              value={sellerUsername}
+              onChangeText={(text) => setSellerUsername(text)}
             />
-          </div>
+            <Button title="Search" onPress={handleSellerUsernameSearch} />
+          </View>
 
-          <div className="py-2 d-flex justify-content-center">
-            {searchSellerUsername && (
-              <Row className="py-2 d-flex justify-content-center">
-                <hr />
-                <Col md={6}>
-                  <div>
-                    {serachResults && (
-                      <SellerSearchCard
-                        serachResults={serachResults}
-                        sellerAvatarUrl={sellerAvatarUrl}
-                      />
-                    )}
-                  </div>
-                </Col>
-              </Row>
-            )}
-          </div>
+          <View style={styles.locationContainer}>
+            <View style={styles.location}>
+              <Text style={styles.title}>
+                <FontAwesomeIcon icon={faMapMarkerAlt} size={14} />
+                Ad Location ({freeAdLength + paidAdLength} ads)
+              </Text>
+            </View>
+            <Text style={styles.pickerLabel}>Country:</Text>
 
-          <hr />
-
-          <div className="text-center py-2">
-            {/* <span>At this angle, sells are quick ...{"  "}</span> */}
-
-            <Slider {...settings}>
-              {quotes.map((quote, index) => (
-                <div key={index} className="quote-slide">
-                  <p className="text-center py-2">
-                    <i className="fas fa-quote-left"></i> {quote}{" "}
-                    <i className="fas fa-quote-right"></i>
-                  </p>
-                </div>
-              ))}
-            </Slider>
-            {/* <Slider {...settings} initialSlide={currentQuoteIndex}>
-              {quotes.map((quote, index) => (
-                <div key={index} className="quote-slide">
-                  <p className="text-center py-2">
-                    <i className="fas fa-quote-left"></i> {quote}{" "}
-                    <i className="fas fa-quote-right"></i>
-                  </p>
-                </div>
-              ))}
-            </Slider> */}
-
-            <div className="text-center py-2">
-              <Button
-                variant="success"
-                className="rounded"
-                size="sm"
-                onClick={handlePostFreeAd}
+            <View style={styles.adLocation}>
+              <Picker
+                selectedValue={selectedCountry}
+                onValueChange={handleCountryChange}
+                style={styles.picker}
               >
-                Post Free Ads <i className="fas fa-plus-square"></i>
-              </Button>
-            </div>
-          </div>
+                {Country.getAllCountries().map((country) => (
+                  <Picker.Item
+                    key={country.isoCode}
+                    label={country.name}
+                    value={country.isoCode}
+                  />
+                ))}
+              </Picker>
+            </View>
 
-          <div>
+            {selectedCountry && (
+              <>
+                <Text style={styles.pickerLabel}>State/Province:</Text>
+
+                <View style={styles.adLocation}>
+                  <Picker
+                    selectedValue={selectedState}
+                    onValueChange={handleStateChange}
+                    style={styles.picker}
+                  >
+                    {State.getStatesOfCountry(selectedCountry).map((state) => (
+                      <Picker.Item
+                        key={state.isoCode}
+                        label={state.name}
+                        value={state.isoCode}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              </>
+            )}
+
+            {selectedState && (
+              <>
+                <Text style={styles.pickerLabel}>City:</Text>
+
+                <View style={styles.adLocation}>
+                  <Picker
+                    selectedValue={selectedCity}
+                    onValueChange={handleCityChange}
+                    style={styles.picker}
+                  >
+                    {City.getCitiesOfState(selectedCountry, selectedState).map(
+                      (city) => (
+                        <Picker.Item
+                          key={city.name}
+                          label={city.name}
+                          value={city.name}
+                        />
+                      )
+                    )}
+                  </Picker>
+                </View>
+              </>
+            )}
+          </View>
+
+          <FilterBar
+            selectedCategory={selectedCategory}
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
+            setSelectedCategory={setSelectedCategory}
+            freeAds={freeAds}
+            paidAds={paidAds}
+            onCategoryChange={handleCategoryChange}
+            onTypeChange={handleTypeChange}
+          />
+
+          <View style={styles.adContainer}>
             <AllPaidAdScreen
               selectedCountry={selectedCountry}
               selectedState={selectedState}
@@ -537,22 +392,118 @@ function Marketplace() {
               // paidAds={selectedType ? filteredPaidAds : paidAds}
               paidAds={filteredPaidAds || paidAds}
             />
-          </div>
+          </View>
 
-          <div>
+          <View style={styles.adContainer}>
             <AllFreeAdScreen
               selectedCountry={selectedCountry}
               selectedState={selectedState}
               selectedCity={selectedCity}
-              // freeAds={filteredFreeAds}
-              // freeAds={selectedType ? filteredFreeAds : freeAds}
               freeAds={filteredFreeAds || freeAds}
             />
-          </div>
-        </Col>
-      </Row>
-    </Container>
+          </View>
+
+          {searchAdLoading && <Loader />}
+          {searchAdError && <Message>{searchAdError}</Message>}
+
+          {sellerUsernameSearchLoading && <Loader />}
+          {sellerUsernameSearchError && (
+            <Message>{sellerUsernameSearchError}</Message>
+          )}
+
+          {searchSellerUsername && (
+            <SellerSearchCard
+              sellerUsername={searchSellerUsername}
+              searchResults={serachResults}
+              sellerAvatarUrl={sellerAvatarUrl}
+            />
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    // padding: 8,
+    paddingVertical: 10,
+    paddingBottom: 10,
+  },
+  container: {
+    // flex: 1,
+    justifyContent: "center",
+    // alignItems: "center",
+    // paddingHorizontal: 20,
+    paddingVertical: 10,
+    // padding: 5,
+  },
+  headerContainer: {
+    padding: 20,
+    backgroundColor: "#6c757d",
+    alignItems: "center",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    padding: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  searchInput: {
+    flex: 1,
+    borderColor: "#ced4da",
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 10,
+    marginRight: 10,
+  },
+  scrollViewContainer: {
+    paddingBottom: 20,
+  },
+  locationContainer: {
+    padding: 20,
+  },
+  location: {
+    width: "100%",
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+  },
+  adLocation: {
+    width: "100%",
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  picker: {
+    height: 50,
+    width: "100%",
+    marginBottom: 10,
+  },
+  adContainer: {
+    width: "100%",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 10,
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+});
 
 export default Marketplace;

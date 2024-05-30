@@ -1,126 +1,277 @@
 // GetSellCreditPoint.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+  StyleSheet,
+  RefreshControl,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Table } from "react-bootstrap";
-import { getUserSellCreditPoint } from "../../actions/creditPointActions";
-import Message from "../Message";
-import Loader from "../Loader";
-import Pagination from "../Pagination";
-import { formatAmount } from "../FormatAmount";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faCreditCard,
+  faCheckCircle,
+  faTimesCircle,
+} from "@fortawesome/free-solid-svg-icons";
+import { useNavigation } from "@react-navigation/native";
+import { getUserSellCreditPoint } from "../../redux/actions/creditPointActions";
+import Message from "../../Message";
+import Loader from "../../Loader";
+import { DataTable } from "react-native-paper";
+import { Pagination } from "../../Pagination";
+import { formatAmount } from "../../FormatAmount";
 
-function GetSellCreditPoint() {
+const GetSellCreditPoint = () => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const getSellCreditPointState = useSelector(
     (state) => state.getSellCreditPointState
   );
   const { loading, creditPoints, error } = getSellCreditPointState;
-  console.log("GetSellCreditPoint:", creditPoints);
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
-  console.log("userInfo.access:", userInfo.access);
+
+  useEffect(() => {
+    if (!userInfo) {
+      navigation.navigate("Login");
+    }
+  }, [userInfo, navigation]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = creditPoints?.slice(indexOfFirstItem, indexOfLastItem);
 
+  const totalPages = Math.ceil(creditPoints?.length / itemsPerPage);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const wait = (timeout) => {
+    return new Promise((resolve) => {
+      setTimeout(resolve, timeout);
+    });
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    dispatch(getUserSellCreditPoint());
+    wait(2000).then(() => setRefreshing(false));
+  }, [dispatch]);
+
   useEffect(() => {
     dispatch(getUserSellCreditPoint());
   }, [dispatch]);
 
+  const handlePagination = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
-    <div>
-      <hr />
-      <h1 className="text-center py-3">
-        <i className="fas fa-credit-card"></i> Sold/Shared CPS List
-      </h1>
-      <hr />
-      {loading ? (
-        <Loader />
-      ) : error ? (
-        <Message variant="danger">{error}</Message>
-      ) : (
-        <>
-          {currentItems.length === 0 ? (
-            <div className="text-center py-3">Sold/Shared cps appear here.</div>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>
+            <FontAwesomeIcon icon={faCreditCard} /> Sold/Shared CPS List
+          </Text>
+          {loading ? (
+            <Loader />
+          ) : error ? (
+            <Message variant="danger">{error}</Message>
           ) : (
-            <Table striped bordered hover responsive className="table-sm">
-              <thead>
-                <tr>
-                  <th>SN</th>
-                  <th>CPS ID</th>
-                  <th>Seller</th>
-                  <th>Buyer</th>
-                  <th>Amount</th>
-                  <th>Old Balance</th>
-                  <th>New Balance</th>
-                  {/* <th>CPS Amount</th> */}
-                  <th>Success</th>
-                  <th>Created At</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.map((cps, index) => (
-                  <tr key={cps.id}>
-                    <td>{index + 1}</td>
-                    <td>{cps.cps_sell_id}</td>
-                    <td>{cps.seller_username}</td>
-                    <td>{cps.buyer_username}</td>
-                    <td style={{ color: "red" }}> {formatAmount(cps.amount)}</td>
-                    <td>{formatAmount(cps.seller_old_bal)}</td>
-                    <td>{formatAmount(cps.seller_new_bal)}</td>
-                    {/* <td>{cps.cps_amount}</td> */} 
-                    <td>
-                      {cps.is_success ? (
-                        <>
-                          <i
-                            className="fas fa-check-circle"
-                            style={{ fontSize: "16px", color: "green" }}
-                          ></i>{" "}
-                          Yes
-                        </>
-                      ) : (
-                        <>
-                          <i
-                            className="fas fa-times-circle"
-                            style={{ fontSize: "16px", color: "red" }}
-                          ></i>{" "}
-                          No
-                        </>
-                      )}
-                    </td>
-                    <td>
-                      {new Date(cps.created_at).toLocaleString("en-US", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "numeric",
-                        minute: "numeric",
-                        second: "numeric",
-                      })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
+            <>
+              {currentItems?.length === 0 ? (
+                <Text style={styles.noData}>Sold/Shared CPS appear here.</Text>
+              ) : (
+                <ScrollView horizontal={true}>
+                  <DataTable>
+                    <DataTable.Header>
+                      <DataTable.Title style={styles.snHeaderCell}>
+                        SN
+                      </DataTable.Title>
+                      <DataTable.Title style={styles.headerCell}>
+                        CPS ID
+                      </DataTable.Title>
+                      <DataTable.Title style={styles.headerCell}>
+                        Seller
+                      </DataTable.Title>
+                      <DataTable.Title style={styles.headerCell}>
+                        Buyer
+                      </DataTable.Title>
+                      <DataTable.Title style={styles.headerCell}>
+                        Amount
+                      </DataTable.Title>
+                      <DataTable.Title style={styles.headerCell}>
+                        Old Balance
+                      </DataTable.Title>
+                      <DataTable.Title style={styles.headerCell}>
+                        New Balance
+                      </DataTable.Title>
+                      <DataTable.Title style={styles.headerCell}>
+                        Success
+                      </DataTable.Title>
+                      <DataTable.Title style={styles.headerCell}>
+                        Created At
+                      </DataTable.Title>
+                    </DataTable.Header>
+
+                    {currentItems.map((cps, index) => (
+                      <DataTable.Row key={cps.id}>
+                        <DataTable.Cell style={styles.snCell}>
+                          {indexOfFirstItem + index + 1}
+                        </DataTable.Cell>
+                        <DataTable.Cell style={styles.cell}>
+                          <ScrollView horizontal>
+                            <Text>{cps.cps_sell_id}</Text>
+                          </ScrollView>
+                        </DataTable.Cell>
+                        <DataTable.Cell style={styles.cell}>
+                          <ScrollView horizontal>
+                            <Text>{cps.seller_username}</Text>
+                          </ScrollView>
+                        </DataTable.Cell>
+                        <DataTable.Cell style={styles.cell}>
+                          <ScrollView horizontal>
+                            <Text>{cps.buyer_username}</Text>
+                          </ScrollView>
+                        </DataTable.Cell>
+                        <DataTable.Cell style={styles.cell}>
+                          <ScrollView horizontal>
+                            <Text style={{ color: "red" }}>
+                              {formatAmount(cps.amount)}
+                            </Text>
+                          </ScrollView>
+                        </DataTable.Cell>
+                        <DataTable.Cell style={styles.cell}>
+                          <ScrollView horizontal>
+                            <Text>{formatAmount(cps.seller_old_bal)}</Text>
+                          </ScrollView>
+                        </DataTable.Cell>
+                        <DataTable.Cell style={styles.cell}>
+                          <ScrollView horizontal>
+                            <Text>{formatAmount(cps.seller_new_bal)}</Text>
+                          </ScrollView>
+                        </DataTable.Cell>
+                        <DataTable.Cell style={styles.cell}>
+                          <ScrollView horizontal>
+                            {cps.is_success ? (
+                              <Text style={{ color: "green" }}>
+                                <FontAwesomeIcon
+                                  color="green"
+                                  icon={faCheckCircle}
+                                />{" "}
+                                Yes
+                              </Text>
+                            ) : (
+                              <Text style={{ color: "red" }}>
+                                <FontAwesomeIcon
+                                  color="red"
+                                  icon={faTimesCircle}
+                                />{" "}
+                                No
+                              </Text>
+                            )}
+                          </ScrollView>
+                        </DataTable.Cell>
+                        <DataTable.Cell style={styles.cell}>
+                          <ScrollView horizontal>
+                            <Text>
+                              {new Date(cps.created_at).toLocaleString(
+                                "en-US",
+                                {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                  hour: "numeric",
+                                  minute: "numeric",
+                                  second: "numeric",
+                                }
+                              )}
+                            </Text>
+                          </ScrollView>
+                        </DataTable.Cell>
+                      </DataTable.Row>
+                    ))}
+                  </DataTable>
+                </ScrollView>
+              )}
+
+              <View style={styles.pagination}>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  paginate={handlePagination}
+                />
+              </View>
+            </>
           )}
-          <Pagination
-            itemsPerPage={itemsPerPage}
-            totalItems={creditPoints.length}
-            currentPage={currentPage}
-            paginate={paginate}
-          />
-        </>
-      )}
-    </div>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  scrollView: {
+    flexGrow: 1,
+  },
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 10,
+    textAlign: "center",
+  },
+  noData: {
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+  headerCell: {
+    width: 150,
+    marginLeft: 20,
+    borderRightWidth: 1,
+    borderColor: "black",
+  },
+  cell: {
+    width: 150,
+    marginLeft: 10,
+  },
+  snHeaderCell: {
+    width: 50,
+    borderRightWidth: 1,
+    borderColor: "black",
+  },
+  snCell: {
+    width: 50,
+  },
+  iconSize: {
+    fontSize: 16,
+  },
+  icon: {
+    marginRight: 5,
+  },
+});
 
 export default GetSellCreditPoint;

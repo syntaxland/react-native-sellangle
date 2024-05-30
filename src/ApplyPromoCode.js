@@ -6,7 +6,7 @@ import { applyPromoCode } from "./redux/actions/promoActions";
 import Message from "./Message";
 import Loader from "./Loader";
 
-const ApplyPromoCode = ({ order_id }) => {
+const ApplyPromoCode = ({ order_id }) => { 
   const dispatch = useDispatch();
 
   const applyPomoCodeState = useSelector((state) => state.applyPomoCodeState);

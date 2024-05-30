@@ -3,7 +3,7 @@ import { Text } from "react-native";
 import moment from "moment";
 
 const PromoTimer = ({ expirationDate }) => {
-  const calculateTimeRemaining = () => {
+  const calculateTimeRemaining = () => { 
     const now = moment();
     const expirationDateObj = moment(expirationDate);
 
