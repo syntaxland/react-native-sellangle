@@ -1,28 +1,119 @@
+// // FreeAdScreen.js
+// import React, { useEffect, useState } from "react";
+// import { View, Text, StyleSheet, FlatList } from "react-native";
+// import { useDispatch, useSelector } from "react-redux";
+// import { getSellerFreeAd } from "../../redux/actions/marketplaceSellerActions";
+// import FreeAdCard from "./FreeAdCard";
+// import Message from "../../Message";
+// import Loader from "../../Loader";
+// import { Pagination } from "../../Pagination";
+
+// const FreeAdScreen = () => {
+//   const dispatch = useDispatch();
+
+//   const getFreeAdState = useSelector((state) => state.getFreeAdState);
+//   const { loading, error, ads } = getFreeAdState;
+//   console.log("Free Ads screen:", ads);
+
+//   useEffect(() => {
+//     dispatch(getSellerFreeAd());
+//   }, [dispatch]);
+
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const itemsPerPage = 10;
+
+//   const indexOfLastItem = currentPage * itemsPerPage;
+//   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+//   const currentItems = ads?.slice(indexOfFirstItem, indexOfLastItem);
+
+//   const totalPages = Math.ceil(ads?.length / itemsPerPage);
+
+//   const handlePagination = (pageNumber) => {
+//     setCurrentPage(pageNumber);
+//   };
+
+//   return (
+//     <View style={styles.container}>
+//       <Text style={styles.title}>Running Ads</Text>
+//       {loading ? (
+//         <Loader />
+//       ) : error ? (
+//         <Message variant="danger">{error}</Message>
+//       ) : (
+//         <>
+//           {currentItems?.length === 0 ? (
+//             <Text style={styles.noData}>Running ads appear here.</Text>
+//           ) : (
+//             <FlatList
+//               data={currentItems}
+//               renderItem={({ item }) => (
+//                 <View style={styles.card}>
+//                   <FreeAdCard product={item} />
+//                 </View>
+//               )}
+//               keyExtractor={(item) => item.id.toString()}
+//               contentContainerStyle={styles.cardContainer}
+//             />
+//           )}
+//           <View style={styles.pagination}>
+//             <Pagination
+//               currentPage={currentPage}
+//               totalPages={totalPages}
+//               paginate={handlePagination}
+//             />
+//           </View>
+//         </>
+//       )}
+//     </View>
+//   );
+// };
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     padding: 16,
+//   },
+//   title: {
+//     fontSize: 24,
+//     fontWeight: "bold",
+//     marginVertical: 10,
+//     textAlign: "center",
+//   },
+//   noData: {
+//     textAlign: "center",
+//     marginVertical: 20,
+//   },
+//   cardContainer: {
+//     justifyContent: "space-around",
+//   },
+//   card: {
+//     marginVertical: 10,
+//     width: "100%",
+//   },
+//   pagination: {
+//     flexDirection: "row",
+//     justifyContent: "center",
+//     marginTop: 20,
+//   },
+// });
+
+// export default FreeAdScreen;
+
 // FreeAdScreen.js
 import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Row, Col } from "react-bootstrap";
-import {
-   getSellerFreeAd,
-  //  deleteFreeAd,
-  //  updateFreeAd,
-  //  getAllFreeAd,
-  // getPaidAd,
-  //  updatePaidAd,
-  //  deletePaidAd,
-  //  getAllPaidAd,  
-} from "../../actions/marketplaceSellerActions";
-
+import { getSellerFreeAd } from "../../redux/actions/marketplaceSellerActions";
 import FreeAdCard from "./FreeAdCard";
-import Message from "../Message";
-import Loader from "../Loader";
+import Message from "../../Message";
+import Loader from "../../Loader";
+import { Pagination } from "../../Pagination";
 
-function FreeAdScreen() {
+const FreeAdScreen = () => {
   const dispatch = useDispatch();
 
   const getFreeAdState = useSelector((state) => state.getFreeAdState);
   const { loading, error, ads } = getFreeAdState;
-  console.log("Free Ads screen:", ads);
 
   useEffect(() => {
     dispatch(getSellerFreeAd());
@@ -35,86 +126,74 @@ function FreeAdScreen() {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = ads?.slice(indexOfFirstItem, indexOfLastItem);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const totalPages = Math.ceil(ads?.length / itemsPerPage);
 
-  const pageNumbers = [];
-  for (let i = 1; i <= Math.ceil(ads?.length / itemsPerPage); i++) {
-    pageNumbers.push(i);
-  }
+  const handlePagination = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   return (
-    <div>
-      <Row>
-        <Col>
-            <hr />
-          <h1 className="text-center">Running Ads</h1>
-            <hr />
-          {loading ? (
-            <Loader />
-          ) : error ? (
-            <Message variant="danger">{error}</Message>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Running Ads</Text>
+      {loading ? (
+        <Loader />
+      ) : error ? (
+        <Message variant="danger">{error}</Message>
+      ) : (
+        <>
+          {currentItems?.length === 0 ? (
+            <Text style={styles.noData}>Running ads appear here.</Text>
           ) : (
-            <>
-              {currentItems?.length === 0 ? (
-                <div className="text-center">Running ads appear here.</div>
-              ) : (
-                <Row>
-                  {currentItems?.map((product) => (
-                    <Col key={product.id} xs={12} sm={12} md={6} >
-                      <FreeAdCard product={product} />
-                    </Col>
-                  ))}
-                </Row>
-              )}
-              <nav className="mt-4">
-                <ul className="pagination justify-content-center">
-                  <li
-                    className={`page-item ${
-                      currentPage === 1 ? "disabled" : ""
-                    }`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => paginate(currentPage - 1)}
-                    >
-                      Previous
-                    </button>
-                  </li>
-                  {pageNumbers.map((number) => (
-                    <li
-                      key={number}
-                      className={`page-item ${
-                        currentPage === number ? "active" : ""
-                      }`}
-                    >
-                      <button
-                        className="page-link"
-                        onClick={() => paginate(number)}
-                      >
-                        {number}
-                      </button>
-                    </li>
-                  ))}
-                  <li
-                    className={`page-item ${
-                      currentPage === pageNumbers.length ? "disabled" : ""
-                    }`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => paginate(currentPage + 1)}
-                    >
-                      Next
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            </>
+            <View style={styles.cardContainer}>
+              {currentItems?.map((product) => (
+                <View key={product.id} style={styles.card}>
+                  <FreeAdCard product={product} />
+                </View>
+              ))}
+            </View>
           )}
-        </Col>
-      </Row>
-    </div>
+          <View style={styles.pagination}>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              paginate={handlePagination}
+            />
+          </View>
+        </>
+      )}
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 10,
+    textAlign: "center",
+  },
+  noData: {
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  cardContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
+  },
+  card: {
+    width: "100%",
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+});
 
 export default FreeAdScreen;
+

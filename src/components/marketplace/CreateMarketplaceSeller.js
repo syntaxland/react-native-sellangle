@@ -14,7 +14,9 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { createMarketplaceSeller } from "../../redux/actions/marketplaceSellerActions";
 import * as ImagePicker from "expo-image-picker";
-import DatePicker from "react-native-date-picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import moment from "moment";
+// import DatePicker from "react-native-date-picker";
 import PhoneInput from "react-native-phone-input";
 import RNPickerSelect from "react-native-picker-select";
 import Message from "../../Message";
@@ -97,11 +99,28 @@ const CreateMarketplaceSeller = () => {
   const [dob, setDob] = useState(new Date());
   // const [dobError, setDobError] = useState("");
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState("date");
+  const [show, setShow] = useState(false);
 
   const [address, setAddress] = useState("");
   const [addressError, setAddressError] = useState("");
 
   const [formError, setFormError] = useState("");
+
+  const onChangeDob = (event, selectedDate) => {
+    const currentDate = selectedDate || dob;
+    setShow(false);
+    setDob(currentDate);
+  };
+
+  const showMode = (currentMode) => {
+    setShow(true);
+    setMode(currentMode);
+  };
+
+  const showDatepicker = () => {
+    showMode("date");
+  };
 
   const handleFieldChange = (fieldName, value) => {
     switch (fieldName) {
@@ -189,6 +208,8 @@ const CreateMarketplaceSeller = () => {
   sellerData.append("dob", dob);
   // sellerData.append("dob", dob.toISOString().split("T")[0]);
   sellerData.append("home_address", address);
+
+  console.log("sellerData:", sellerData);
 
   useEffect(() => {
     if (success) {
@@ -302,7 +323,7 @@ const CreateMarketplaceSeller = () => {
     } else {
       setFormError("");
       dispatch(createMarketplaceSeller(sellerData));
-      // navigation.navigate("Seller Photo"); 
+      // navigation.navigate("Seller Photo");
     }
   };
 
@@ -573,25 +594,18 @@ const CreateMarketplaceSeller = () => {
         <View style={styles.formGroup}>
           <Text>Date of Birth</Text>
           <View style={styles.dobContainer}>
-            <Button title="Select Date" onPress={() => setOpen(true)} />
-            <DatePicker
-              modal
-              open={open}
-              // style={styles.input}
-              date={dob}
-              mode="date"
-              onConfirm={(date) => {
-                setOpen(false);
-                setDob(date);
-              }}
-              onCancel={() => {
-                setOpen(false);
-              }}
-              placeholder="Select date"
-              confirmText="Confirm"
-              cancelText="Cancel"
-              onDateChange={(date) => handleFieldChange("dob", date)}
-            />
+            <Button onPress={showDatepicker} title="Select Date" />
+            {show && (
+              <DateTimePicker
+                value={dob}
+                mode={mode}
+                display="default"
+                onChange={onChangeDob}
+              />
+            )}
+            <Text style={styles.dateText}>
+              {moment(dob).format("YYYY-MM-DD")}
+            </Text>
           </View>
           {/* {dobError && <Text style={styles.error}>{dobError}</Text>} */}
         </View>
@@ -668,6 +682,17 @@ const styles = StyleSheet.create({
     width: "100%",
     minHeight: 40,
     borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  dateText: {
+    width: "100%",
+    minHeight: 40,
+    // borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
     padding: 10,

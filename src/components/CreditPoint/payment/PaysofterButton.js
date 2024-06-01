@@ -1,21 +1,27 @@
 // PaysofterButton.js
 import React, { useState, useEffect } from "react";
-import { Button, Modal, Row, Col } from "react-bootstrap";
+import {
+  View,
+  Text,
+  Modal,
+  Button,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
-import "react-datepicker/dist/react-datepicker.css";
 import CardPayment from "./CardPayment";
-import UsdCardPayment from "./UsdCardPayment";
 import UssdPayment from "./UssdPayment";
 import BankPayment from "./BankPayment";
 import TransferPayment from "./TransferPayment";
 import PaysofterAccountFund from "./PaysofterAccountFund";
 import PaysofterUsdAccountFund from "./PaysofterUsdAccountFund";
 import QrPayment from "./QrPayment";
-import { formatAmount } from "../../FormatAmount";
+import { formatAmount } from "../../../FormatAmount";
 
-import "./Paysofter.css";
-
-function PaysofterButton({
+const PaysofterButton = ({
   showPaymentModal,
   setShowPaymentModal,
   reference,
@@ -23,17 +29,13 @@ function PaysofterButton({
   amount,
   currency,
   paysofterPublicKey,
-  // handlePaymentDetailsChange,
-  // handlePaymentSubmit,
-  // paymentData,
-  // paysofterPaymentData,
-}) {
+}) => {
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
   }, [userInfo]);
 
@@ -48,254 +50,102 @@ function PaysofterButton({
     setShowMoreOptions(!showMoreOptions);
   };
 
+  console.log("PaysofterButton")
+
   return (
-    <div>
-      <div className="text-center">
-        <Button
-          className="text-center rounded py-2"
-          variant="outline-primary"
-          onClick={() => setShowPaymentModal(true)}
+    <ScrollView>
+      <View style={styles.container}>
+        <View style={styles.center}>
+          <Button title="Pay Now" onPress={() => setShowPaymentModal(true)} />
+        </View>
+
+        <Modal
+          visible={showPaymentModal}
+          onRequestClose={() => setShowPaymentModal(false)}
         >
-          <span>Pay Now</span>
-        </Button>
-      </div>
+          <View style={styles.modalHeader}>
+            {/* <Button onPress={() => setShowPaymentModal(false)} title="Close" /> */}
+            {/* <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
+            <Text style={styles.closeButton}>
+              <FontAwesomeIcon icon={faTimes} size={16} style={styles.icon} />{" "}
+              Close
+            </Text>
+          </TouchableOpacity> */}
 
-      <Modal show={showPaymentModal} onHide={() => setShowPaymentModal(false)}>
-        <Modal.Header closeButton>
-          <div className="text-center w-100 py-2">
-            <Modal.Title>Mock Payment (Test)</Modal.Title>
-            <div>{userEmail}</div>
-            <div>
-              {formatAmount(amount)} {currency}
-            </div>
-          </div>
-        </Modal.Header>
+            <Text style={styles.modalTitle}>Mock Payment (Test)</Text>
+            <Text>{userEmail}</Text>
+            <Text>{`${formatAmount(amount)} ${currency}`}</Text>
+          </View>
 
-        <Modal.Body>
-          <Row>
-            {/* Left column with payment options */}
-            <Col md={3}>
-              <div className="text-center">
-                <p>Options</p>
+          <ScrollView>
+            <View style={styles.options}>
+              <Text>Options</Text>
+              <Button
+                title="Debit Card"
+                onPress={() => handlePaymentOptionChange("card")}
+                color={selectedPaymentOption === "card" ? "#007bff" : "gray"}
+              />
+              <Button
+                title="Paysofter Account Fund"
+                onPress={() => handlePaymentOptionChange("account-fund")}
+                // disabled
+                color={
+                  selectedPaymentOption === "account-fund" ? "#007bff" : "gray"
+                }
+              />
+              <Button
+                title="Paysofter Promise"
+                onPress={() => handlePaymentOptionChange("promise")}
+                color={selectedPaymentOption === "promise" ? "#007bff" : "gray"}
+                disabled
+              />
+              <Button
+                title="More Options"
+                onPress={handleMoreOptions}
+                disabled
+              />
 
-                {/* <div className="py-1">
+              {showMoreOptions && (
+                <>
                   <Button
-                    variant="outline-primary"
-                    onClick={() => handlePaymentOptionChange("card")}
-                    className={selectedPaymentOption === "card" ? "active" : ""}
-                  >
-                    <i className="fas fa-credit-card"></i> Debit Card
-                  </Button>{" "}
-                </div> */}
-
-                {currency === "USD" && (
-                  <div className="py-1">
-                    <Button
-                      variant="outline-primary"
-                      onClick={() => handlePaymentOptionChange("card")}
-                      className={
-                        selectedPaymentOption === "card" ? "active" : ""
-                      }
-                    >
-                      <i className="fas fa-credit-card"></i> Debit Card (USD)
-                    </Button>{" "}
-                  </div>
-                )}
-
-                {currency === "NGN" && (
-                  <div className="py-1">
-                    <Button
-                      variant="outline-primary"
-                      onClick={() => handlePaymentOptionChange("card")}
-                      className={
-                        selectedPaymentOption === "card" ? "active" : ""
-                      }
-                    >
-                      <i className="fas fa-credit-card"></i> Debit Card (NGN)
-                    </Button>{" "}
-                  </div>
-                )}
-
-                {currency === "NGN" && (
-                  <div className="py-1">
-                    <Button
-                      variant="outline-primary"
-                      onClick={() => handlePaymentOptionChange("account-fund")}
-                      className={
-                        selectedPaymentOption === "account-fund" ? "active" : ""
-                      }
-                    >
-                      <i className="fas fa-money-bill-alt"></i> Paysofter
-                      Account Fund (NGN)
-                    </Button>
-                  </div>
-                )}
-
-                {currency === "USD" && (
-                  <div className="py-1">
-                    <Button
-                      variant="outline-primary"
-                      onClick={() =>
-                        handlePaymentOptionChange("usd-account-fund")
-                      }
-                      className={
-                        selectedPaymentOption === "usd-account-fund"
-                          ? "active"
-                          : ""
-                      }
-                    >
-                      <i className="fas fa-money-bill-alt"></i> Paysofter
-                      Account Fund (USD)
-                    </Button>
-                  </div>
-                )}
-
-                <div className="py-1">
-                  <Button
-                    variant="outline-primary"
-                    onClick={() => handlePaymentOptionChange("promise")}
-                    className={
-                      selectedPaymentOption === "promise" ? "active" : ""
+                    title="Transfer"
+                    onPress={() => handlePaymentOptionChange("transfer")}
+                    color={
+                      selectedPaymentOption === "transfer" ? "#007bff" : "gray"
                     }
-                    disabled
-                  >
-                    <i className="fas fa-money-bill-wave"></i> Paysofter Promise
-                  </Button>
-                </div>
-
-                <div className="text-center py-2">
+                  />
                   <Button
-                    variant="outline-primary"
-                    onClick={handleMoreOptions}
-                    className="rounded"
-                    disabled
-                  >
-                    <i className="fas fa-bars"></i> More Options
-                  </Button>
-                </div>
-
-                {/* <div className="py-1">
-                  <Button
-                    variant="outline-primary"
-                    onClick={() => handlePaymentOptionChange("transfer")}
-                    className={
-                      selectedPaymentOption === "transfer" ? "active" : ""
+                    title="Bank"
+                    onPress={() => handlePaymentOptionChange("bank")}
+                    color={
+                      selectedPaymentOption === "bank" ? "#007bff" : "gray"
                     }
-                  >
-                    <i className="fa fa-exchange"></i> Transfer
-                  </Button>
-                </div>
-
-                <div className="py-1">
+                  />
                   <Button
-                    variant="outline-primary"
-                    onClick={() => handlePaymentOptionChange("bank")}
-                    className={selectedPaymentOption === "bank" ? "active" : ""}
-                  >
-                    <i className="fas fa-bank"></i> Bank
-                  </Button>
-                </div>
-
-                <div className="py-1">
+                    title="USSD"
+                    onPress={() => handlePaymentOptionChange("ussd")}
+                    color={
+                      selectedPaymentOption === "ussd" ? "#007bff" : "gray"
+                    }
+                  />
                   <Button
-                    variant="outline-primary"
-                    onClick={() => handlePaymentOptionChange("ussd")}
-                    className={selectedPaymentOption === "ussd" ? "active" : ""}
-                  >
-                    <i className="fa fa-mobile"></i> USSD
-                  </Button>{" "}
-                </div>
-
-                <div className="py-1">
-                  <Button
-                    variant="outline-primary"
-                    onClick={() => handlePaymentOptionChange("qr")}
-                    className={selectedPaymentOption === "qr" ? "active" : ""}
-                  >
-                    <i className="fa fa-qrcode"></i> Visa QR
-                  </Button>{" "}
-                </div> */}
-
-                {showMoreOptions && (
-                  <>
-                    <div className="py-1">
-                      <Button
-                        variant="outline-primary"
-                        onClick={() => handlePaymentOptionChange("transfer")}
-                        className={
-                          selectedPaymentOption === "transfer" ? "active" : ""
-                        }
-                      >
-                        <i className="fa fa-exchange"></i> Transfer
-                      </Button>
-                    </div>
-
-                    <div className="py-1">
-                      <Button
-                        variant="outline-primary"
-                        onClick={() => handlePaymentOptionChange("bank")}
-                        className={
-                          selectedPaymentOption === "bank" ? "active" : ""
-                        }
-                      >
-                        <i className="fas fa-bank"></i> Bank
-                      </Button>
-                    </div>
-
-                    <div className="py-1">
-                      <Button
-                        variant="outline-primary"
-                        onClick={() => handlePaymentOptionChange("ussd")}
-                        className={
-                          selectedPaymentOption === "ussd" ? "active" : ""
-                        }
-                      >
-                        <i className="fa fa-mobile"></i> USSD
-                      </Button>{" "}
-                    </div>
-
-                    <div className="py-1">
-                      <Button
-                        variant="outline-primary"
-                        onClick={() => handlePaymentOptionChange("qr")}
-                        className={
-                          selectedPaymentOption === "qr" ? "active" : ""
-                        }
-                      >
-                        <i className="fa fa-qrcode"></i> Visa QR
-                      </Button>{" "}
-                    </div>
-                  </>
-                )}
-              </div>
-            </Col>
-            <Col md={9}>
-              {currency === "NGN" && (
-                <div>
-                  {selectedPaymentOption === "card" && (
-                    <CardPayment
-                      amount={amount}
-                      currency={currency}
-                      reference={reference}
-                      userEmail={userEmail}
-                      paysofterPublicKey={paysofterPublicKey}
-                    />
-                  )}
-                </div>
+                    title="Visa QR"
+                    onPress={() => handlePaymentOptionChange("qr")}
+                    color={selectedPaymentOption === "qr" ? "#007bff" : "gray"}
+                  />
+                </>
               )}
+            </View>
 
-              {currency === "USD" && (
-                <div>
-                  {selectedPaymentOption === "card" && (
-                    <UsdCardPayment
-                      amount={amount}
-                      currency={currency}
-                      reference={reference}
-                      userEmail={userEmail}
-                      paysofterPublicKey={paysofterPublicKey}
-                    />
-                  )}
-                </div>
+            <View style={styles.paymentDetails}>
+              {selectedPaymentOption === "card" && (
+                <CardPayment
+                  amount={amount}
+                  currency={currency}
+                  reference={reference}
+                  userEmail={userEmail}
+                  paysofterPublicKey={paysofterPublicKey}
+                />
               )}
 
               {selectedPaymentOption === "account-fund" && (
@@ -318,28 +168,57 @@ function PaysofterButton({
                 />
               )}
 
-              {/* 
               {selectedPaymentOption === "promise" && (
                 <PaysofterPromise
+                  buyerEmail={buyerEmail}
                   amount={amount}
-                  userEmail={userEmail}
-                  paysofterPublicKey={paysofterPublicKey}
-                  
-                  paymentData={paymentData}
-                  reference={reference}
+                  sellerApiKey={sellerApiKey}
+                  currency={currency}
+                  usdPrice={usdPrice}
                 />
-              )} */}
+              )}
 
               {selectedPaymentOption === "bank" && <BankPayment />}
               {selectedPaymentOption === "transfer" && <TransferPayment />}
               {selectedPaymentOption === "ussd" && <UssdPayment />}
               {selectedPaymentOption === "qr" && <QrPayment />}
-            </Col>
-          </Row>
-        </Modal.Body>
-      </Modal>
-    </div>
+            </View>
+          </ScrollView>
+        </Modal>
+      </View>
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 10,
+    flex: 1,
+  },
+  center: {
+    alignItems: "center",
+  },
+  modalHeader: {
+    padding: 20,
+    alignItems: "center",
+  },
+  closeButton: {
+    alignSelf: "flex-end",
+    padding: 10,
+    fontSize: 18,
+    color: "blue",
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  options: {
+    padding: 20,
+    alignItems: "center",
+  },
+  paymentDetails: {
+    padding: 20,
+  },
+});
 
 export default PaysofterButton;

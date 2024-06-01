@@ -1,18 +1,24 @@
 // VerifyUsdAccountFundOtp.js
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-// import { clearCart } from "../../../actions/cartActions";
 import {
-  // createPayment,
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import {
   createPaysofterPayment,
   debitPaysofterUsdAccountFund,
   verifyOtp,
-} from "../../../actions/paymentActions";
-import { buyCreditPoint } from "../../../actions/creditPointActions";
-import { useHistory } from "react-router-dom";
-import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import Loader from "../../Loader";
-import Message from "../../Message";
+} from "../../../redux/actions/paymentActions";
+import { buyCreditPoint } from "../../../redux/actions/creditPointActions";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import Loader from "../../../Loader";
+import Message from "../../../Message";
 
 const VerifyUsdAccountFundOtp = ({
   amount,
@@ -32,31 +38,33 @@ const VerifyUsdAccountFundOtp = ({
   const createdAt = new Date().toISOString();
 
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
-  }, [userInfo]);
+  }, [userInfo, navigation]);
 
   const otpVerifyState = useSelector((state) => state.otpVerifyState);
   const { loading, success, error } = otpVerifyState;
 
   const buyCreditPointState = useSelector((state) => state.buyCreditPointState);
-  const {
-    success: buyCreditPointSuccess,
-    error: buyCreditPointError,
-  } = buyCreditPointState;
+  const { success: buyCreditPointSuccess, error: buyCreditPointError } =
+    buyCreditPointState;
 
-  console.log("formattedPayerEmail:", formattedPayerEmail);
+  const [sendOtpData, setSendOtpData] = useState(null);
 
-  const sendOtpData =
-    JSON.parse(localStorage.getItem("debitUsdAccountData")) || [];
-  console.log("sendOtpData:", sendOtpData, sendOtpData.account_id);
+  useEffect(() => {
+    const fetchSendOtpData = async () => {
+      const data = await AsyncStorage.getItem("debitUsdAccountData");
+      setSendOtpData(JSON.parse(data));
+    };
+    fetchSendOtpData();
+  }, []);
 
   const paysofterPaymentData = {
     payment_id: reference,
@@ -68,14 +76,14 @@ const VerifyUsdAccountFundOtp = ({
 
   const otpData = {
     otp: otp,
-    account_id: sendOtpData.account_id,
+    account_id: sendOtpData?.account_id,
     amount: amount,
     currency: currency,
   };
 
   const debitUsdAccountData = {
-    account_id: sendOtpData.account_id,
-    security_code: sendOtpData.security_code,
+    account_id: sendOtpData?.account_id,
+    security_code: sendOtpData?.security_code,
     amount: amount,
   };
 
@@ -83,11 +91,11 @@ const VerifyUsdAccountFundOtp = ({
     dispatch(verifyOtp(otpData));
   };
 
-  const handleResendEmailOtp = () => {
+  const handleResendEmailOtp = async () => {
     setResendLoading(true);
     setResendMessage("");
     try {
-      dispatch(
+      await dispatch(
         debitPaysofterUsdAccountFund(JSON.stringify(debitUsdAccountData))
       );
       setResendMessage(`OTP resent to ${formattedPayerEmail} successfully.`);
@@ -120,100 +128,101 @@ const VerifyUsdAccountFundOtp = ({
     if (success) {
       dispatch(createPaysofterPayment(paysofterPaymentData));
       dispatch(buyCreditPoint(creditPointData));
-      localStorage.removeItem("debitUsdAccountData");
+      AsyncStorage.removeItem("debitUsdAccountData");
       setShowSuccessMessage(true);
       setTimeout(() => {
-        // window.location.reload();
+        navigation.navigate("Dashboard");
       }, 5000);
     }
-    // eslint-disable-next-line
-  }, [dispatch, success, history]);
+  }, [success, dispatch, navigation, paysofterPaymentData, creditPointData]);
 
-  useEffect(() => {
-    if (buyCreditPointSuccess) {
-      const timer = setTimeout(() => {
-        window.location.reload();
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [buyCreditPointSuccess, history]);
+  console.log("VerifyUsdAccountFundOtp")
 
   return (
-    <Container>
-      <Row className="justify-content-center text-center mt-5">
-        <Col>
-          <div className="border rounded p-4 py-2">
-            <h1 className="py-2">Verify OTP ({currency})</h1>
-            {showSuccessMessage && (
-              <Message variant="success">Payment made successfully!</Message>
-            )}
-            {loading && <Loader />}
-            {error && <Message variant="danger">{error}</Message>}
-            {resendMessage && (
-              <Message variant={resendLoading ? "info" : "success"}>
-                {resendMessage}
-              </Message>
-            )}
-
-            {buyCreditPointSuccess && (
-              <Message variant="success">
-                Your account has been credited with the CPS purchased for{" "}
-                {amount} {currency}.
-              </Message>
-            )}
-
-            {buyCreditPointError && (
-              <Message variant="danger">{buyCreditPointError}</Message>
-            )}
-
-            <Form className="py-2">
-              <Form.Group controlId="otp">
-                <Form.Control
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="Enter OTP"
-                  required
-                />
-              </Form.Group>
-              <div className="py-3">
-                <Button
-                  onClick={handleVerifyEmailOtp}
-                  disabled={loading || success}
-                  variant="success"
-                  type="submit"
-                  className="rounded"
-                >
-                  Verify OTP
-                </Button>
-              </div>
-            </Form>
-            <p>
-              OTP has been sent to email: {formattedPayerEmail} for Paysofter
-              Account ID: {sendOtpData.account_id} and expires in 10 minutes. It
-              might take a few seconds to deliver.
-            </p>
-            <Button
-              variant="link"
-              type="submit"
-              disabled={resendDisabled || resendLoading}
-              onClick={handleResendEmailOtp}
-            >
-              {resendLoading
-                ? "Resending OTP..."
-                : resendDisabled
-                ? `Resend OTP (${countdown}sec)`
-                : "Resend OTP"}
-            </Button>
-          </div>
-
-          <div className="py-2 d-flex justify-content-center">
-            <Form.Text className="text-danger">{error}</Form.Text>
-          </div>
-        </Col>
-      </Row>
-    </Container>
+    <View style={styles.container}>
+      <Text style={styles.header}>Verify OTP ({currency})</Text>
+      {showSuccessMessage && (
+        <Message variant="success">Payment made successfully!</Message>
+      )}
+      {loading && <Loader />}
+      {error && <Message variant="danger">{error}</Message>}
+      {resendMessage && (
+        <Message variant={resendLoading ? "info" : "success"}>
+          {resendMessage}
+        </Message>
+      )}
+      {buyCreditPointSuccess && (
+        <Message variant="success">
+          Your account has been credited with the CPS purchased for {amount}{" "}
+          {currency}.
+        </Message>
+      )}
+      {buyCreditPointError && (
+        <Message variant="danger">{buyCreditPointError}</Message>
+      )}
+      <TextInput
+        style={styles.input}
+        value={otp}
+        onChangeText={(text) => setOtp(text)}
+        placeholder="Enter OTP"
+        keyboardType="numeric"
+      />
+      <Button
+        onPress={handleVerifyEmailOtp}
+        title="Verify OTP"
+        disabled={loading || success}
+        color="#28a745"
+      />
+      <Text style={styles.otpInfo}>
+        OTP has been sent to email: {formattedPayerEmail} for Paysofter Account
+        ID: {sendOtpData?.account_id} and expires in 10 minutes. It might take a
+        few seconds to deliver.
+      </Text>
+      <TouchableOpacity
+        onPress={handleResendEmailOtp}
+        disabled={resendDisabled || resendLoading}
+      >
+        <Text style={styles.resendText}>
+          {resendLoading
+            ? "Resending OTP..."
+            : resendDisabled
+            ? `Resend OTP (${countdown}sec)`
+            : "Resend OTP"}
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    alignItems: "center",
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    width: "100%",
+    marginBottom: 20,
+  },
+  otpInfo: {
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  resendText: {
+    color: "#007bff",
+    textAlign: "center",
+    marginTop: 20,
+  },
+});
 
 export default VerifyUsdAccountFundOtp;

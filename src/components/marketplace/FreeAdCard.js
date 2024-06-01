@@ -1,197 +1,89 @@
 // FreeAdCard.js
 import React, { useState, useEffect } from "react";
-import { Card, Button, Modal } from "react-bootstrap";
-import { Link, useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
-import RatingSeller from "../RatingSeller";
-// import {
-//   saveProduct,
-//   removeProduct,
-//   updateProductSaveCount,
-//   // trackProductView,
-// } from "../../actions/productAction";
-// import Message from "../Message";
-// import Loader from "../Loader";
-import PromoTimer from "../PromoTimer";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Modal,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faEye,
+  faClock,
+  faMapMarkerAlt,
+  faFlag,
+} from "@fortawesome/free-solid-svg-icons";
+import { useNavigation } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getSellerAccount,
+  getFreeAdDetail,
+  trackFreeAdView,
+} from "../../redux/actions/marketplaceSellerActions";
+import ReportFreeAd from "./ReportFreeAd";
+import ToggleFreeAdSave from "./ToggleFreeAdSave";
+import ReviewFreeAdSeller from "./ReviewFreeAdSeller";
+import PromoTimer from "../../PromoTimer";
+import RatingSeller from "../../RatingSeller";
 import DeleteFreeAd from "./DeleteFreeAd";
 import DeactivateFreeAd from "./DeactivateFreeAd";
 import ReactivateFreeAd from "./ReactivateFreeAd";
-import ToggleFreeAdSave from "./ToggleFreeAdSave";
-import ReviewFreeAdSeller from "./ReviewFreeAdSeller";
 
 function FreeAdCard({ product }) {
-  // const dispatch = useDispatch();
-
-  // const [productSaved, setProductSaved] = useState(false);
-  // const [totalSaves, setTotalSaves] = useState(product?.ad_save_count);
-
-  // const [productMessages, setProductMessages] = useState({
-  //   productSaveSuccess: false,
-  //   productRemoveSuccess: false,
-  //   productSaveError: null,
-  //   productRemoveError: null,
-  // });
-
-  // const [productLoading, setProductLoading] = useState({
-  //   productSaveLoading: false,
-  //   productRemoveLoading: false,
-  // });
-
-  const history = useHistory();
-
-  const userLogin = useSelector((state) => state.userLogin);
-  const { userInfo } = userLogin;
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const getFreeAdDetailState = useSelector(
     (state) => state.getFreeAdDetailState
   );
   const { sellerRating, sellerReviewCount } = getFreeAdDetailState;
 
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
   }, [userInfo]);
 
   const isAdExpired = new Date(product?.expiration_date) < new Date();
 
   const [deleteAdModal, setDeleteModal] = useState(false);
-
-  const handleDeleteAdOpen = () => {
-    setDeleteModal(true);
-  };
-
-  const handleDeleteAdClose = () => {
-    setDeleteModal(false);
-  };
-
   const [deactivateAdModal, setDeactivateAdModal] = useState(false);
-  const handleDeactivateAdOpen = () => {
-    setDeactivateAdModal(true);
-  };
-  const handleDeactivateAdClose = () => {
-    setDeactivateAdModal(false);
-  };
-
   const [reactivateAdModal, setReactivateAdModal] = useState(false);
-  const handleReactivateAdOpen = () => {
-    setReactivateAdModal(true);
-  };
-  const handleReleteAdClose = () => {
-    setReactivateAdModal(false);
-  };
+
+  const handleDeleteAdOpen = () => setDeleteModal(true);
+  const handleDeleteAdClose = () => setDeleteModal(false);
+
+  const handleDeactivateAdOpen = () => setDeactivateAdModal(true);
+  const handleDeactivateAdClose = () => setDeactivateAdModal(false);
+
+  const handleReactivateAdOpen = () => setReactivateAdModal(true);
+  const handleReactivateAdClose = () => setReactivateAdModal(false);
+
+  // const handleEditAd = () => {
+  //   const id = product.id;
+  //   navigation.navigate("EditFreeAd", { id });
+  // };
 
   const handleEditAd = () => {
-    const id = product.id;
-    history.push(`/edit/free/ad/${id}`);
+    const id = product?.id;
+    if (id) {
+      navigation.navigate("Edit Free Ad", { id });
+    } else {
+      console.error("Product ID is undefined");
+    }
   };
-
-  // useEffect(() => {
-  //   if (
-  //     userInfo &&
-  //     userInfo.favorite_products &&
-  //     userInfo.favorite_products.includes(product.id)
-  //   ) {
-  //     setProductSaved(true);
-  //   } else {
-  //     setProductSaved(false);
-  //   }
-  // }, [userInfo, product.id]);
-
-  // const toggleFavoriteHandler = () => {
-  //   if (!userInfo) {
-  //     history.push("/login");
-  //   } else {
-  //     if (productSaved) {
-  //       setProductLoading({ productRemoveLoading: true });
-  //       dispatch(removeProduct(userInfo.id, product.id))
-  //         .then(() => {
-  //           setProductMessages((prevState) => ({
-  //             ...prevState,
-  //             productRemoveSuccess: true,
-  //             productSaveSuccess: false,
-  //             productRemoveError: null,
-  //             productSaveError: null,
-  //           }));
-  //           setProductSaved(false);
-  //           setTotalSaves((prevSaves) => prevSaves - 1); // Decrement totalSaves
-  //           const updatedSaveCount = product?.ad_save_count - 1;
-  //           dispatch(updateProductSaveCount(product.id, updatedSaveCount));
-  //         })
-  //         .catch((error) => {
-  //           // Handle error
-  //           setProductMessages((prevState) => ({
-  //             ...prevState,
-  //             productRemoveError:
-  //               error.response && error.response.data.detail
-  //                 ? error.response.data.detail
-  //                 : error.message,
-  //             productRemoveSuccess: false,
-  //             productSaveSuccess: false,
-  //             productSaveError: null,
-  //           }));
-  //         })
-  //         .finally(() => {
-  //           setProductLoading({ productRemoveLoading: false });
-  //         });
-  //     } else {
-  //       setProductLoading({ productSaveLoading: true });
-  //       dispatch(saveProduct(userInfo.id, product.id))
-  //         .then(() => {
-  //           setProductMessages((prevState) => ({
-  //             ...prevState,
-  //             productSaveSuccess: true,
-  //             productRemoveSuccess: false,
-  //             productSaveError: null,
-  //             productRemoveError: null,
-  //           }));
-  //           setProductSaved(true);
-  //           setTotalSaves((prevSaves) => prevSaves + 1);
-  //           const updatedSaveCount = product?.ad_save_count + 1;
-  //           dispatch(updateProductSaveCount(product.id, updatedSaveCount));
-  //         })
-  //         .catch((error) => {
-  //           setProductMessages((prevState) => ({
-  //             ...prevState,
-  //             productSaveError:
-  //               error.response && error.response.data.detail
-  //                 ? error.response.data.detail
-  //                 : error.message,
-  //             productSaveSuccess: false,
-  //             productRemoveSuccess: false,
-  //             productRemoveError: null,
-  //           }));
-  //         })
-  //         .finally(() => {
-  //           setProductLoading({ productSaveLoading: false });
-  //         });
-  //     }
-  //   }
-  //   setTimeout(() => {
-  //     setProductMessages((prevState) => ({
-  //       ...prevState,
-  //       productSaveSuccess: false,
-  //       productRemoveSuccess: false,
-  //     }));
-  //   }, 3000);
-  // };
-
-  // const viewProductHandler = () => {
-  //   if (!userInfo) {
-  //     history.push("/login");
-  //     // dispatch(trackProductView(userInfo.id, product.id));
-  //   }
-  //   dispatch(trackProductView(userInfo.id, product.id));
-
-  //   history.push(`/paid-ad-detail/${product.id}`);
-  // };
+  
 
   function formatCount(viewCount) {
     if (viewCount >= 1000000) {
-      // Format as million
       return (viewCount / 1000000).toFixed(1) + "m";
     } else if (viewCount >= 1000) {
-      // Format as thousand
       return (viewCount / 1000).toFixed(1) + "k";
     } else {
       return viewCount?.toString();
@@ -206,216 +98,230 @@ function FreeAdCard({ product }) {
   }
 
   return (
-    <Card className="my-3 p-3 rounded">
-      {/* {productMessages.productSaveSuccess && (
-        <Message variant="success">Item added to favorites.</Message>
-      )}
-      {productMessages.productRemoveSuccess && (
-        <Message variant="danger">Item removed from favorites.</Message>
-      )}
-      {productMessages.productSaveError && (
-        <Message variant="danger">{productMessages.productSaveError}</Message>
-      )}
-      {productMessages.productRemoveError && (
-        <Message variant="danger">{productMessages.productRemoveError}</Message>
-      )}
+    <ScrollView>
+      <View style={styles.card}>
+        <TouchableOpacity onPress={handleEditAd}>
+          <Image source={{ uri: product.image1 }} style={styles.image} />
+        </TouchableOpacity>
 
-      {productLoading.productSaveLoading && <Loader />}
-      {productLoading.productRemoveLoading && <Loader />} */}
+        <View style={styles.body}>
+          <TouchableOpacity onPress={handleEditAd}>
+            <Text style={styles.title}>{product.ad_name}</Text>
+          </TouchableOpacity>
 
-      <Link>
-        <Card.Img src={product.image1} />
-      </Link>
+          <View style={styles.ratingContainer}>
+            <RatingSeller
+              value={sellerRating}
+              text={`${formatCount(sellerReviewCount)} reviews `}
+              color={"green"}
+            />
+            <ReviewFreeAdSeller adId={product?.id} />
+          </View>
 
-      <Card.Body>
-        <div className="d-flex justify-content-between">
-          <Link>
-            <Card.Title as="div">
-              <strong>{product.ad_name}</strong>
-            </Card.Title>
-          </Link>
-        </div>
+          <Text style={styles.views}>
+            <FontAwesomeIcon icon={faEye} size={16} />{" "}
+            {formatCount(product?.ad_view_count)} views
+          </Text>
 
-        <div className="d-flex justify-content-between">
-          <div as="div">
-            <div className="py-2">
-              <RatingSeller
-                value={sellerRating}
-                text={`${formatCount(sellerReviewCount)} reviews `}
-                color={"green"}
-              />
+          <Text style={styles.price}>
+            {formatNumber(product?.price)} {product?.currency}{" "}
+            {product?.is_price_negotiable ? <Text>(Negotiable)</Text> : null}
+          </Text>
 
-              {/* {userInfo ? (
-                <Link to={`/review-list/${product.id}`}>(Seller Ratings)</Link>
-              ) : (
-                <Link onClick={() => history.push("/login")}>
-                  (Seller Ratings)
-                </Link>
-              )} */}
-              <ReviewFreeAdSeller adId={product?.id} />
-            </div>
-          </div>
-
-          <Card.Text as="div" className="py-2">
-            <span className="text-right">
-              <i className="fas fa-eye"></i>{" "}
-              {formatCount(product?.ad_view_count)} views
-            </span>
-          </Card.Text>
-        </div>
-
-        <div className="d-flex justify-content-between py-2">
-          <Card.Text as="h5" className="py-2">
-            <span>
-              {formatNumber(product?.price)} {product?.currency}{" "}
-              {/* {product?.usd_price ? <span> / {product?.usd_price} USD </span> : <></>}{" "} */}
-              {product?.is_price_negotiable ? <i>(Negotiable)</i> : <></>}
-            </span>
-          </Card.Text>
-        </div>
-
-        <div className="d-flex justify-content-between">
-          <span className="py-2">
-            <Button
-              variant="outline-danger"
-              size="sm"
-              className="py-2 rounded"
-              disabled
-            >
-              Expires in:{" "}
+          <View style={styles.promoContainer}>
+            <Text style={styles.promoText}>
+              <FontAwesomeIcon icon={faClock} size={16} /> Expires in:{" "}
               <PromoTimer expirationDate={product?.expiration_date} />
-            </Button>
-          </span>
+            </Text>
+          </View>
 
-          <div>
+          <View style={styles.buttonsContainer}>
             <ToggleFreeAdSave ad={product} />
-          </div>
+          </View>
 
-          {/* <span className="py-2">
-            <Button
-              onClick={toggleFavoriteHandler}
-              className="py-2 rounded"
-              type="button"
-              variant={productSaved ? "danger" : "outline-danger"}
-            >
-              <div className="mt-auto">
-                <i
-                  className={productSaved ? "fas fa-heart" : "far fa-heart"}
-                ></i>{" "}
-                {productSaved ? "Saved" : "Save"}{" "}
-                <span className="text-muted">({formatCount(totalSaves)})</span>
-              </div>
-            </Button>
-          </span> */}
-        </div>
-
-        <div className="d-flex justify-content-between py-2">
-          <span className="py-2">
-            <Button
-              // disabled
-              variant="primary"
-              size="sm"
-              className="py-2 rounded"
-              onClick={handleEditAd}
-            >
-              Edit
-            </Button>
-          </span>
-
-          <span className="py-2">
-            {isAdExpired ? (
-              <Button
-                variant="primary"
-                size="sm"
-                className="py-2 rounded"
-                onClick={handleReactivateAdOpen}
-              >
-                Reactivate
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                size="sm"
-                className="py-2 rounded"
-                onClick={handleDeactivateAdOpen}
-              >
-                Deactivate
-              </Button>
-            )}
-          </span>
-
-          <span className="py-2">
-            <Button
-              variant="danger"
-              size="sm"
-              className="py-2 rounded"
-              onClick={handleDeleteAdOpen}
-            >
-              Delete
-            </Button>
-          </span>
-        </div>
-
-        <div className="py-2 text-center">
-          <Button
-            variant="outline-tranparent"
-            size="sm"
-            className="py-2 rounded"
-            disabled
-          >
-            Due Ad Charges: Free
-          </Button>
-        </div>
-
-        <div className="d-flex justify-content-center">
-          <span className="py-2">
-            <Button
-              variant="outline-transparent"
-              size="sm"
-              className="py-2 rounded"
-              disabled
-            >
-              <i className="fas fa-map-marker-alt"></i> {product?.city}{" "}
+          <View style={styles.locationContainer}>
+            <Text style={styles.locationText}>
+              <FontAwesomeIcon icon={faMapMarkerAlt} size={16} /> {product?.city}{" "}
               {product?.state_province}, {product?.country}.
-            </Button>
-          </span>
-        </div>
-      </Card.Body>
+            </Text>
+          </View>
 
-      <Modal show={deleteAdModal} onHide={handleDeleteAdClose}>
-        <Modal.Header closeButton>
-          <Modal.Title className="text-center w-100 py-2">
-            Delete Ad
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {deleteAdModal && <DeleteFreeAd ad_id={product?.id} />}
-        </Modal.Body>
-      </Modal>
+          <View style={styles.actionsContainer}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={handleEditAd}
+            >
+              <Text style={styles.buttonText}>Edit</Text>
+            </TouchableOpacity>
+            {isAdExpired ? (
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={handleReactivateAdOpen}
+              >
+                <Text style={styles.buttonText}>Reactivate</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={handleDeactivateAdOpen}
+              >
+                <Text style={styles.buttonText}>Deactivate</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={handleDeleteAdOpen}
+            >
+              <Text style={styles.buttonText}>Delete</Text>
+            </TouchableOpacity>
+          </View>
 
-      <Modal show={deactivateAdModal} onHide={handleDeactivateAdClose}>
-        <Modal.Header closeButton>
-          <Modal.Title className="text-center w-100 py-2">
-            Deactivate Ad
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {deactivateAdModal && <DeactivateFreeAd ad_id={product?.id} />}
-        </Modal.Body>
-      </Modal>
+          <View style={styles.modalContainer}>
+            <Modal
+              visible={deleteAdModal}
+              transparent={true}
+              animationType="slide"
+              onRequestClose={handleDeleteAdClose}
+            >
+              <View style={styles.modalContent}>
+                <DeleteFreeAd ad_id={product?.id} />
+                <TouchableOpacity onPress={handleDeleteAdClose}>
+                  <Text style={styles.closeButton}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </Modal>
 
-      <Modal show={reactivateAdModal} onHide={handleReleteAdClose}>
-        <Modal.Header closeButton>
-          <Modal.Title className="text-center w-100 py-2">
-            Reactivate Ad
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {reactivateAdModal && <ReactivateFreeAd ad_id={product?.id} />}
-        </Modal.Body>
-      </Modal>
-    </Card>
+            <Modal
+              visible={deactivateAdModal}
+              transparent={true}
+              animationType="slide"
+              onRequestClose={handleDeactivateAdClose}
+            >
+              <View style={styles.modalContent}>
+                <DeactivateFreeAd ad_id={product?.id} />
+                <TouchableOpacity onPress={handleDeactivateAdClose}>
+                  <Text style={styles.closeButton}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </Modal>
+
+            <Modal
+              visible={reactivateAdModal}
+              transparent={true}
+              animationType="slide"
+              onRequestClose={handleReactivateAdClose}
+            >
+              <View style={styles.modalContent}>
+                <ReactivateFreeAd ad_id={product?.id} />
+                <TouchableOpacity onPress={handleReactivateAdClose}>
+                  <Text style={styles.closeButton}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </Modal>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    marginVertical: 10,
+    marginHorizontal: 15,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  image: {
+    width: "100%",
+    height: 200,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  body: {
+    padding: 10,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  views: {
+    color: "grey",
+    marginBottom: 5,
+  },
+  price: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  promoContainer: {
+    marginBottom: 5,
+  },
+  promoText: {
+    color: "green",
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  locationContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  locationText: {
+    color: "grey",
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  actionButton: {
+    padding: 10,
+    borderRadius: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 5,
+    backgroundColor: "#007bff",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
+  },
+  closeButton: {
+    color: "#007bff",
+    marginTop: 10,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+});
 
 export default FreeAdCard;

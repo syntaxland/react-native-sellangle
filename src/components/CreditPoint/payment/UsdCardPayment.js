@@ -1,42 +1,52 @@
 // UsdCardPayment.js
 import React, { useState, useEffect } from "react";
-import { Form, Button } from "react-bootstrap";
-import DatePicker from "react-datepicker";
-import { useHistory } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { buyUsdCreditPoint } from "../../../actions/creditPointActions";
 import {
-  // createPayment,
-  createPaysofterPayment,
-} from "../../../actions/paymentActions";
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import DatePicker from "react-native-date-picker";
+import { useNavigation } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
+import { buyUsdCreditPoint } from "../../../redux/actions/creditPointActions";
+import { createPaysofterPayment } from "../../../redux/actions/paymentActions";
 import Message from "../../Message";
 import Loader from "../../Loader";
 import { formatAmount } from "../../FormatAmount";
 
-function UsdCardPayment({
+const UsdCardPayment = ({
   amount,
   currency,
-  paymentData,
   reference,
   userEmail,
   paysofterPublicKey,
-}) {
+}) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
   }, [userInfo]);
+
+  const createdAt = new Date().toISOString();
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const paysofterPayment = useSelector((state) => state.paysofterPayment);
   const { loading, success, error } = paysofterPayment;
 
-  const buyUsdCreditPointState = useSelector((state) => state.buyUsdCreditPointState);
+  const buyUsdCreditPointState = useSelector(
+    (state) => state.buyUsdCreditPointState
+  );
   const {
     success: buyUsdCreditPointSuccess,
     error: buyUsdCreditPointError,
@@ -45,28 +55,23 @@ function UsdCardPayment({
   const [cardType, setCardType] = useState("");
   const [paymentDetails, setPaymentDetails] = useState({
     cardNumber: "",
-    expirationMonthYear: null,
-    expirationMonth: null,
-    expirationYear: null,
+    expirationMonthYear: new Date(),
     cvv: "",
   });
 
-  const [
-    isExpirationMonthYearSelected,
-    setIsExpirationMonthYearSelected,
-  ] = useState(false);
+  const [isExpirationMonthYearSelected, setIsExpirationMonthYearSelected] =
+    useState(false);
 
-  const handlePaymentDetailsChange = (e) => {
-    const { name, value } = e.target;
-
-    // Detect card type based on the card number prefix
+  const handlePaymentDetailsChange = (name, value) => {
     let detectedCardType = "";
-    if (/^4/.test(value)) {
-      detectedCardType = "Visa";
-    } else if (/^5[1-5]/.test(value)) {
-      detectedCardType = "Mastercard";
+    if (name === "cardNumber") {
+      if (/^4/.test(value)) {
+        detectedCardType = "Visa";
+      } else if (/^5[1-5]/.test(value)) {
+        detectedCardType = "Mastercard";
+      }
+      setCardType(detectedCardType);
     }
-    setCardType(detectedCardType);
     setPaymentDetails({ ...paymentDetails, [name]: value });
   };
 
@@ -78,11 +83,8 @@ function UsdCardPayment({
     );
   };
 
-  const createdAt = new Date().toISOString();
 
-  const submitHandler = (e) => {
-    e.preventDefault();
-
+  const submitHandler = () => {
     const paysofterPaymentData = {
       payment_id: reference,
       email: userEmail,
@@ -90,7 +92,6 @@ function UsdCardPayment({
       currency: currency,
       public_api_key: paysofterPublicKey,
       created_at: createdAt,
-
       card_number: paymentDetails.cardNumber,
       expiration_month_year: paymentDetails.expirationMonthYear,
       cvv: paymentDetails.cvv,
@@ -103,125 +104,178 @@ function UsdCardPayment({
     amount: amount,
   };
 
+  const handleDateChange = (event, selectedDate) => {
+      const currentDate = selectedDate || paymentDetails.expirationMonthYear;
+      setShowDatePicker(false);
+      setPaymentDetails({
+        ...paymentDetails,
+        expirationMonthYear: currentDate,
+      });
+      setIsExpirationMonthYearSelected(!!selectedDate);
+    };
+
   useEffect(() => {
     if (success) {
       dispatch(buyUsdCreditPoint(creditPointData));
-      const timer = setTimeout(() => {
-        // window.location.reload();
-        // window.location.href = "/dashboard/users";
-      }, 5000);
+      const timer = setTimeout(() => {}, 5000);
       return () => clearTimeout(timer);
     }
-    // console.log('// eslint-disable-next-line')
-    // eslint-disable-next-line
-  }, [dispatch, success, history]);
+  }, [dispatch, success]);
 
   useEffect(() => {
     if (buyUsdCreditPointSuccess) {
       const timer = setTimeout(() => {
-        window.location.reload();
+        navigation.goBack();
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [buyUsdCreditPointSuccess, history]);
+  }, [buyUsdCreditPointSuccess, navigation]);
+
+  console.log("UsdCardPayment", amount)
 
   return (
-    <div>
-      <h2 className="py-2 text-center">Debit Card</h2>
-      {success && (
-        <Message variant="success">Payment made successfully.</Message>
-      )}
-
-      {error && <Message variant="danger">{error}</Message>}
-      {loading && <Loader />}
-
-      {buyUsdCreditPointSuccess && (
-        <Message variant="success">
-          Your account has been credited with the CPS purchased for USD {amount}
-          .
-        </Message>
-      )}
-
-      {buyUsdCreditPointError && (
-        <Message variant="danger">{buyUsdCreditPointError}</Message>
-      )}
-
-      <Form onSubmit={submitHandler}>
-        <Form.Group>
-          <Form.Label>Card Number</Form.Label>
-          <Form.Control
-            type="text"
-            name="cardNumber"
-            value={paymentDetails.cardNumber}
-            onChange={handlePaymentDetailsChange}
-            required
-            placeholder="1234 5678 9012 3456"
-            maxLength="16"
-          />
-        </Form.Group>
-        {cardType && (
-          <p>
-            Detected Card Type: {cardType}
-            {cardType === "Visa " && <i className="fab fa-cc-visa"></i>}
-            {cardType === "Mastercard " && (
-              <i className="fab fa-cc-mastercard"></i>
-            )}
-          </p>
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.header}>Debit Card</Text>
+        {success && (
+          <Message variant="success">Payment made successfully.</Message>
         )}
-        <i className="fab fa-cc-mastercard"></i>{" "}
-        <i className="fab fa-cc-visa"></i>
-        <Form.Group>
-          <Form.Label>Expiration Month/Year</Form.Label>
-          {/*<Form.Control
-            type="text" // You can change this to 'date' for separate month and year fields
-            name="expirationMonthYear"
-            value={paymentDetails.expirationMonthYear}
-            onChange={handlePaymentDetailsChange}
-            required
-            placeholder="MM/YY"
-          /> */}
+        {error && <Message variant="danger">{error}</Message>}
+        {loading && <Loader />}
+        {buyUsdCreditPointSuccess && (
+          <Message variant="success">
+            Your account has been credited with the CPS purchased for {amount}{" "}
+            {currency}.
+          </Message>
+        )}
+        {buyUsdCreditPointError && (
+          <Message variant="danger">{buyUsdCreditPointError}</Message>
+        )}
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Card Number</Text>
+          <TextInput
+            style={styles.input}
+            value={paymentDetails.cardNumber}
+            onChangeText={(value) =>
+              handlePaymentDetailsChange("cardNumber", value)
+            }
+            placeholder="1234 5678 9012 3456"
+            keyboardType="numeric"
+            maxLength={16}
+          />
+          {cardType ? <Text>Detected Card Type: {cardType}</Text> : null}
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Expiration Month/Year</Text>
+          <Button
+            title="Select Expiration Date"
+            onPress={() => setShowDatePicker(true)}
+          />
+          <Text>
+            Selected: {paymentDetails.expirationMonthYear.toLocaleDateString()}
+          </Text>
+          {showDatePicker && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={paymentDetails.expirationMonthYear}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+            />
+          )}
+          {/* <Text style={styles.dateText}>
+            {moment(paymentDetails.expirationMonthYear).format("YYYY-MM")}
+          </Text> */}
+        </View>
+
+        {/* <View style={styles.formGroup}>
+          <Text style={styles.label}>Expiration Month/Year</Text>
           <DatePicker
-            selected={paymentDetails.expirationMonthYear}
-            onChange={(date) => {
-              setPaymentDetails({
-                ...paymentDetails,
-                expirationMonthYear: date,
-              });
+            date={paymentDetails.expirationMonthYear}
+            onDateChange={(date) => {
+              setPaymentDetails({ ...paymentDetails, expirationMonthYear: date });
               setIsExpirationMonthYearSelected(!!date);
             }}
-            dateFormat="MM/yy"
-            showMonthYearPicker
-            isClearable
-            placeholderText="Select month/year"
-            className="rounded-select"
+            mode="date"
+            display="spinner"
+            placeholder="Select month/year"
+            style={styles.datePicker}
           />
-        </Form.Group>
-        <Form.Group>
-          <Form.Label>CVV</Form.Label>
-          <Form.Control
-            type="password"
-            name="cvv"
+        </View> */}
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>CVV</Text>
+          <TextInput
+            style={styles.input}
             value={paymentDetails.cvv}
-            onChange={handlePaymentDetailsChange}
-            required
-            maxLength="3"
+            onChangeText={(value) => handlePaymentDetailsChange("cvv", value)}
             placeholder="123"
+            secureTextEntry
+            maxLength={3}
+            keyboardType="numeric"
           />
-        </Form.Group>
-        <div className="text-center w-100 py-2">
-          <Button variant="primary" type="submit" disabled={!isFormValid()}>
-            Pay{" "}
-            <span>
-              ({formatAmount(amount)} {currency})
-            </span>
-          </Button>
-        </div>
-        <div className="py-2 d-flex justify-content-center"> 
-          <Form.Text className="text-danger">{error}</Form.Text>
-        </div>
-      </Form>
-    </div>
+        </View>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={submitHandler}
+          disabled={!isFormValid()}
+        >
+          <Text style={styles.buttonText}>
+            Pay ({formatAmount(amount)} {currency})
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    backgroundColor: "white",
+    flex: 1,
+  },
+  header: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  formGroup: {
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 5,
+  },
+  datePicker: {
+    // width: "100%",
+    // width: 320,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+  },
+  button: {
+    backgroundColor: "#007bff",
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});
 
 export default UsdCardPayment;

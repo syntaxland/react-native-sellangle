@@ -1,22 +1,23 @@
-// DeletePaidAd.js
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
-import { deletePaidAd } from "../../actions/marketplaceSellerActions";
-import { useHistory } from "react-router-dom";
-import Message from "../Message";
-import Loader from "../Loader";
+import { useNavigation } from "@react-navigation/native";
+import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import { deletePaidAd } from "../../redux/actions/marketplaceSellerActions";
+import Message from "../../Message";
+import Loader from "../../Loader";
 
 function DeletePaidAd({ ad_id }) {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
 
-  const userLogin = useSelector((state) => state.userLogin); 
+  const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
   }, [userInfo]);
 
@@ -26,70 +27,86 @@ function DeletePaidAd({ ad_id }) {
 
   useEffect(() => {
     if (success) {
-      const timer = setTimeout(() => {
-        window.location.reload();
-        // history.push("/dashboard");
+      setTimeout(() => {
+        navigation.navigate("CurrentAds");
       }, 3000);
-      return () => clearTimeout(timer);
     }
-    // eslint-disable-next-line
-  }, [dispatch, success, history]);
+  }, [success, navigation]);
 
   const adData = {
     ad_id: ad_id,
     keyword: keyword,
   };
-  console.log("adData:", adData);
 
   const handleDeletePaidAd = () => {
     dispatch(deletePaidAd(adData));
   };
 
   return (
-    <Container>
-      <Row className="justify-content-center py-2">
-        <Col>
-          {loading && <Loader />}
-          {success && (
-            <Message variant="success">Ad deleted successfully.</Message>
-          )}
-          {error && <Message variant="danger">{error}</Message>}
+    <View style={styles.container}>
+      {loading && <Loader />}
+      {success && <Message variant="success">Ad deleted successfully.</Message>}
+      {error && <Message variant="danger">{error}</Message>}
 
-          <p className="rounded mt-2 py-1 text-center">
-            <i
-              className="fa fa-warning"
-              style={{ fontSize: "18px", color: "yellow" }}
-            ></i>{" "}
-            Warning! This action will delete this ad and it's irreversible. Type{" "}
-            <i>delete</i> to confirm the deletion.
-          </p>
+      <View style={styles.warningContainer}>
+        <FontAwesomeIcon
+          icon={faExclamationTriangle}
+          style={styles.warningIcon}
+        />
+        <Text style={styles.warningText}>
+          Warning! This action will delete this ad and it's irreversible. Type{" "}
+          <Text style={{ fontStyle: "italic" }}>delete</Text> to confirm the
+          deletion.
+        </Text>
+      </View>
 
-          <Form>
-            <Form.Group>
-              <Form.Control
-                type="text"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                placeholder="delete"
-                className="rounded mt-2"
-                required
-                maxLength={6}
-              />
-            </Form.Group>
-          </Form>
+      <TextInput
+        style={styles.input}
+        value={keyword}
+        onChangeText={(text) => setKeyword(text)}
+        placeholder="delete"
+        maxLength={6}
+      />
 
-          <Button
-            variant="primary"
-            onClick={handleDeletePaidAd}
-            className="rounded mt-2 text-center w-100"
-            disabled={keyword.toLowerCase() !== "delete"}
-          >
-            Delete Ad
-          </Button>
-        </Col>
-      </Row>
-    </Container>
+      <Button
+        title="Delete Ad"
+        onPress={handleDeletePaidAd}
+        disabled={keyword.toLowerCase() !== "delete"}
+      />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  warningContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  warningIcon: {
+    color: "yellow",
+    marginRight: 5,
+  },
+  warningText: {
+    fontSize: 16,
+  },
+  italic: {
+    fontStyle: "italic",
+  },
+  input: {
+    height: 40,
+    width: "100%",
+    borderColor: "gray",
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+});
 
 export default DeletePaidAd;

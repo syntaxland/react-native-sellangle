@@ -1,39 +1,43 @@
 // PaidAdCard.js
 import React, { useState, useEffect } from "react";
-import { Card, Button, Modal } from "react-bootstrap";
-import { Link, useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
-import RatingSeller from "../RatingSeller";
-// import {
-//   saveProduct,
-//   removeProduct,
-//   updateProductSaveCount,
-//   // trackProductView,
-// } from "../../actions/productAction";
-// import Message from "../Message";
-// import Loader from "../Loader";
-import PromoTimer from "../PromoTimer";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Modal,
+  StyleSheet,
+} from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faEye,
+  faClock,
+  faMapMarkerAlt,
+  faFlag,
+} from "@fortawesome/free-solid-svg-icons";
+import { useNavigation } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
+import RatingSeller from "../../RatingSeller";
+import PromoTimer from "../../PromoTimer";
 import DeletePaidAd from "./DeletePaidAd";
 import DeactivatePaidAd from "./DeactivatePaidAd";
 import ReactivatePaidAd from "./ReactivatePaidAd";
 import TogglePaidAdSave from "./TogglePaidAdSave";
 import ReviewPaidAdSeller from "./ReviewPaidAdSeller";
-import { formatAmount } from "../FormatAmount";
-import { formatHour } from "../formatHour";
+import { formatAmount } from "../../FormatAmount";
+import { formatHour } from "../../formatHour";
 
 function PaidAdCard({ product }) {
-  // const dispatch = useDispatch();
-
-  const history = useHistory();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
-  }, [userInfo]);
+  }, [userInfo, navigation]);
 
   const getPaidAdDetailState = useSelector(
     (state) => state.getPaidAdDetailState
@@ -43,50 +47,27 @@ function PaidAdCard({ product }) {
   const isAdExpired = new Date(product?.expiration_date) < new Date();
 
   const [deleteAdModal, setDeleteModal] = useState(false);
-  const handleDeleteAdOpen = () => {
-    setDeleteModal(true);
-  };
-  const handleDeleteAdClose = () => {
-    setDeleteModal(false);
-  };
+  const [deactivateAdModal, setDeactivateAdModal] = useState(false);
+  const [reactivateAdModal, setReactivateAdModal] = useState(false);
+
+  const handleDeleteAdOpen = () => setDeleteModal(true);
+  const handleDeleteAdClose = () => setDeleteModal(false);
+
+  const handleDeactivateAdOpen = () => setDeactivateAdModal(true);
+  const handleDeactivateAdClose = () => setDeactivateAdModal(false);
+
+  const handleReactivateAdOpen = () => setReactivateAdModal(true);
+  const handleReleteAdClose = () => setReactivateAdModal(false);
 
   const handleEditAd = () => {
     const id = product.id;
-    history.push(`/edit/paid/ad/${id}`);
+    navigation.navigate("Edit Paid Ad", { id });
   };
-
-  const [deactivateAdModal, setDeactivateAdModal] = useState(false);
-  const handleDeactivateAdOpen = () => {
-    setDeactivateAdModal(true);
-  };
-  const handleDeactivateAdClose = () => {
-    setDeactivateAdModal(false);
-  };
-
-  const [reactivateAdModal, setReactivateAdModal] = useState(false);
-  const handleReactivateAdOpen = () => {
-    setReactivateAdModal(true);
-  };
-  const handleReleteAdClose = () => {
-    setReactivateAdModal(false);
-  };
-
-  // const viewProductHandler = () => {
-  //   if (!userInfo) {
-  //     history.push("/login");
-  //     // dispatch(trackProductView(userInfo.id, product.id));
-  //   }
-  //   dispatch(trackProductView(userInfo.id, product.id));
-
-  //   history.push(`/paid-ad-detail/${product.id}`);
-  // };
 
   function formatCount(viewCount) {
     if (viewCount >= 1000000) {
-      // Format as million
       return (viewCount / 1000000).toFixed(1) + "m";
     } else if (viewCount >= 1000) {
-      // Format as thousand
       return (viewCount / 1000).toFixed(1) + "k";
     } else {
       return viewCount?.toString();
@@ -101,251 +82,262 @@ function PaidAdCard({ product }) {
   }
 
   return (
-    <Card className="my-3 p-3 rounded">
-      {/* {productMessages.productSaveSuccess && (
-        <Message variant="success">Item added to favorites.</Message>
-      )}
-      {productMessages.productRemoveSuccess && (
-        <Message variant="danger">Item removed from favorites.</Message>
-      )} */}
-      {/* {productMessages.productSaveError && (
-        <Message variant="danger">{productMessages.productSaveError}</Message>
-      )} */}
-      {/* {productMessages.productRemoveError && (
-        <Message variant="danger">{productMessages.productRemoveError}</Message>
-      )} */}
+    <View style={styles.card}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("AdDetail", { id: product.id })}
+      >
+        <Image source={{ uri: product.image1 }} style={styles.image} />
+      </TouchableOpacity>
 
-      {/* {productLoading.productSaveLoading && <Loader />} */}
-      {/* {productLoading.productRemoveLoading && <Loader />} */}
-
-      <Link>
-        <Card.Img src={product.image1} />
-      </Link>
-
-      <Card.Body>
-        <div className="d-flex justify-content-between">
-          <Link>
-            <Card.Title as="div">
-              <strong>{product.ad_name}</strong>
-            </Card.Title>
-          </Link>
-
-          <span>
-            <Button
-              variant="outline-success"
-              size="sm"
-              className="rounded"
-              disabled
-            >
-              <i>Promoted</i>
-            </Button>
-          </span>
-        </div>
-
-        <div className="d-flex justify-content-between">
-          <div as="div">
-            <div className="py-2">
-              <RatingSeller
-                value={sellerRating}
-                text={`${formatCount(sellerReviewCount)} reviews `}
-                color={"green"}
-              />
-
-              {/* {userInfo ? (
-                <Link to={`/review-list/${product?.id}`}>(Seller Ratings)</Link>
-              ) : (
-                <Link onClick={() => history.push("/login")}>
-                  (Seller Ratings)
-                </Link>
-              )} */}
-              <ReviewPaidAdSeller adId={product?.id} />
-            </div>
-          </div>
-
-          <Card.Text as="div" className="py-2">
-            <span className="text-right">
-              <i className="fas fa-eye"></i>{" "}
-              {formatCount(product?.ad_view_count)} views
-            </span>
-          </Card.Text>
-        </div>
-
-        <div className="d-flex justify-content-between py-2">
-          <Card.Text as="h5" className="py-2">
-            <span>
-              {formatNumber(product?.price)} {product?.currency}{" "}
-              {product?.usd_price ? (
-                <span>
-                  {" "}
-                  / {product?.usd_price} {product?.usd_currency}{" "}
-                </span>
-              ) : (
-                <></>
-              )}{" "}
-              {product?.is_price_negotiable ? <i>(Negotiable)</i> : <></>}
-            </span>
-          </Card.Text>
-
-          <span className="py-2">
-            {product?.promo_code ? (
-              <Button
-                variant="outline-primary"
-                size="sm"
-                className="py-2 rounded"
-                disabled
-              >
-                <i>
-                  Promo Code: {product?.promo_code}{" "}
-                  {product?.discount_percentage}% Off
-                </i>
-              </Button>
-            ) : (
-              <></>
-            )}
-          </span>
-        </div>
-
-        <div className="d-flex justify-content-between">
-          <span className="py-2">
-            <Button
-              variant="outline-danger"
-              size="sm"
-              className="py-2 rounded"
-              disabled
-            >
-              Expires in:{" "}
-              <PromoTimer expirationDate={product?.expiration_date} />
-            </Button>
-          </span>
-
-          <div>
-            <TogglePaidAdSave ad={product} />
-          </div>
-
-          {/* <span className="py-2">
-            <Button
-              onClick={toggleFavoriteHandler}
-              className="py-2 rounded"
-              type="button"
-              variant={productSaved ? "danger" : "outline-danger"}
-            >
-              <div className="mt-auto">
-                <i
-                  className={productSaved ? "fas fa-heart" : "far fa-heart"}
-                ></i>{" "}
-                {productSaved ? "Saved" : "Save"}{" "}
-                <span className="text-muted">({formatCount(totalSaves)})</span>
-              </div>
-            </Button>
-          </span> */}
-        </div>
-
-        <div className="d-flex justify-content-between py-2">
-          <span className="py-2">
-            <Button
-              // disabled
-              variant="primary"
-              size="sm"
-              className="py-2 rounded"
-              onClick={handleEditAd}
-            >
-              Edit
-            </Button>
-          </span>
-
-          <span className="py-2">
-            {isAdExpired ? (
-              <Button
-                variant="primary"
-                size="sm"
-                className="py-2 rounded"
-                onClick={handleReactivateAdOpen}
-              >
-                Reactivate
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                size="sm"
-                className="py-2 rounded"
-                onClick={handleDeactivateAdOpen}
-              >
-                Deactivate
-              </Button>
-            )}
-          </span>
-
-          <span className="py-2">
-            <Button
-              variant="danger"
-              size="sm"
-              className="py-2 rounded"
-              onClick={handleDeleteAdOpen}
-            >
-              Delete
-            </Button>
-          </span>
-        </div>
-        <div className="py-2 text-center">
-          <Button
-            variant="outline-transparent"
-            size="sm"
-            className="py-2 rounded"
-            disabled
+      <View style={styles.body}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("AdDetail", { id: product.id })}
           >
-            Due Ad Charges: {formatAmount(product?.ad_charges)} CPS{' '} 
-            ({formatHour(product?.ad_charge_hours)} hours) 
-          </Button>
-        </div>
+            <Text style={styles.title}>{product.ad_name}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.promoBadge} disabled>
+            <Text style={styles.promoBadgeText}>Promoted</Text>
+          </TouchableOpacity>
+        </View>
 
-        <div className="d-flex justify-content-center">
-          <span className="py-2">
-            <Button
-              variant="outline-transparent"
-              size="sm"
-              className="py-2 rounded"
-              disabled
+        <View style={styles.ratingContainer}>
+          <RatingSeller
+            value={sellerRating}
+            text={`${formatCount(sellerReviewCount)} reviews`}
+            color={"green"}
+          />
+          <ReviewPaidAdSeller adId={product?.id} />
+        </View>
+
+        <Text style={styles.views}>
+          <FontAwesomeIcon icon={faEye} size={16} />{" "}
+          {formatCount(product?.ad_view_count)} views
+        </Text>
+
+        <Text style={styles.price}>
+          {formatNumber(product?.price)} {product?.currency}
+          {product?.usd_price && (
+            <Text>
+              {" "}
+              / {product?.usd_price} {product?.usd_currency}
+            </Text>
+          )}
+          {product?.is_price_negotiable && <Text> (Negotiable)</Text>}
+        </Text>
+
+        {product?.promo_code && (
+          <View style={styles.promoContainer}>
+            <Text style={styles.promoText}>
+              Promo Code: {product.promo_code} {product.discount_percentage}%
+              Off
+            </Text>
+          </View>
+        )}
+
+        {/* <Text style={styles.expiration}>
+          Expires in: <PromoTimer expirationDate={product?.expiration_date} />
+        </Text> */}
+
+        <View style={styles.promoContainer}>
+            <Text style={styles.expiration}>
+              <FontAwesomeIcon icon={faClock} size={16} /> Expires in:{" "}
+              <PromoTimer expirationDate={product?.expiration_date} />
+            </Text>
+          </View>
+
+        <TogglePaidAdSave ad={product} />
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={handleEditAd}>
+            <Text style={styles.buttonText}>Edit</Text>
+          </TouchableOpacity>
+          {isAdExpired ? (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleReactivateAdOpen}
             >
-              <i className="fas fa-map-marker-alt"></i> {product?.city}{" "}
-              {product?.state_province}, {product?.country}.
-            </Button>
-          </span>
-        </div>
-      </Card.Body>
-      <Modal show={deleteAdModal} onHide={handleDeleteAdClose}>
-        <Modal.Header closeButton>
-          <Modal.Title className="text-center w-100 py-2">
-            Delete Ad
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {deleteAdModal && <DeletePaidAd ad_id={product?.id} />}
-        </Modal.Body>
+              <Text style={styles.buttonText}>Reactivate</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleDeactivateAdOpen}
+            >
+              <Text style={styles.buttonText}>Deactivate</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.button} onPress={handleDeleteAdOpen}>
+            <Text style={styles.buttonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.dueCharges}>
+          Due Ad Charges: {formatAmount(product?.ad_charges)} CPS (
+          {formatHour(product?.ad_charge_hours)} hours)
+        </Text>
+
+        <Text style={styles.location}>
+          <FontAwesomeIcon icon={faMapMarkerAlt} size={16} /> {product?.city}{" "}
+          {product?.state_province}, {product?.country}.
+        </Text>
+      </View>
+
+      <Modal visible={deleteAdModal} transparent={true} animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Delete Ad</Text>
+            <DeletePaidAd ad_id={product?.id} />
+            <TouchableOpacity onPress={handleDeleteAdClose}>
+              <Text style={styles.closeButton}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
 
-      <Modal show={deactivateAdModal} onHide={handleDeactivateAdClose}>
-        <Modal.Header closeButton>
-          <Modal.Title className="text-center w-100 py-2">
-            Deactivate Ad
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {deactivateAdModal && <DeactivatePaidAd ad_id={product?.id} />}
-        </Modal.Body>
+      <Modal
+        visible={deactivateAdModal}
+        transparent={true}
+        animationType="slide"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Deactivate Ad</Text>
+            <DeactivatePaidAd ad_id={product?.id} />
+            <TouchableOpacity onPress={handleDeactivateAdClose}>
+              <Text style={styles.closeButton}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
 
-      <Modal show={reactivateAdModal} onHide={handleReleteAdClose}>
-        <Modal.Header closeButton>
-          <Modal.Title className="text-center w-100 py-2">
-            Reactivate Ad
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {reactivateAdModal && <ReactivatePaidAd ad_id={product?.id} />}
-        </Modal.Body>
+      <Modal
+        visible={reactivateAdModal}
+        transparent={true}
+        animationType="slide"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Reactivate Ad</Text>
+            <ReactivatePaidAd ad_id={product?.id} />
+            <TouchableOpacity onPress={handleReleteAdClose}>
+              <Text style={styles.closeButton}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
-    </Card>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    marginVertical: 10,
+    marginHorizontal: 15,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  image: {
+    width: "100%",
+    height: 200,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  body: {
+    padding: 10,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  promoBadge: {
+    backgroundColor: "#007bff",
+    borderRadius: 5,
+    padding: 5,
+  },
+  promoBadgeText: {
+    color: "#fff",
+    fontSize: 12,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 5,
+  },
+  views: {
+    color: "grey",
+    marginBottom: 5,
+  },
+  price: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  promoContainer: {
+    marginVertical: 5,
+  },
+  promoText: {
+    color: "blue",
+  },
+  expiration: {
+    color: "red",
+    marginBottom: 5,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 5,
+  },
+  button: {
+    flex: 1,
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#007bff",
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: "#fff",
+  },
+  dueCharges: {
+    color: "grey",
+    marginBottom: 5,
+  },
+  location: {
+    color: "grey",
+    marginBottom: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    width: "80%",
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  closeButton: {
+    marginTop: 10,
+    color: "#007bff",
+  },
+});
 
 export default PaidAdCard;

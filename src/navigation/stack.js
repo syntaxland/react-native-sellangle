@@ -1,5 +1,9 @@
 // stack.js
+import { useNavigation } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { navOptions } from "./options";
+import { HomeTabs } from "./taps";
+// screens
 // import HomeScreen from "../components/screens/HomeScreen";
 import LoginScreen from "../components/screens/LoginScreen";
 import RegisterScreen from "../components/screens/RegisterScreen";
@@ -13,11 +17,12 @@ import PaidAdProductDetail from "../components/marketplace/PaidAdProductDetail";
 import ShopFrontLink from "../components/marketplace/ShopFrontLink";
 import CreateMarketplaceSeller from "../components/marketplace/CreateMarketplaceSeller";
 import SellerPhoto from "../components/marketplace/SellerPhoto";
+import EditFreeAd from "../components/marketplace/EditFreeAd";
+import EditPaidAd from "../components/marketplace/EditPaidAd";
+import CurrentAds from "../components/marketplace/CurrentAds";
 // import SellerPhoto from "../components/marketplace/SellerPhoto";
 // import SellerPhoto from "../components/marketplace/SellerPhoto";
-// import SellerPhoto from "../components/marketplace/SellerPhoto";
-// import SellerPhoto from "../components/marketplace/SellerPhoto";
-
+// CreditPoint
 import GetBuyCreditPoint from "../components/CreditPoint/GetBuyCreditPoint";
 import GetUserCpsBonuses from "../components/CreditPoint/GetUserCpsBonuses";
 import GetAdCpsCharges from "../components/CreditPoint/GetAdCpsCharges";
@@ -25,12 +30,15 @@ import GetUsdBuyCreditPoint from "../components/CreditPoint/GetUsdBuyCreditPoint
 import GetSellCreditPoint from "../components/CreditPoint/GetSellCreditPoint";
 import GetBuyerCreditPoint from "../components/CreditPoint/GetBuyerCreditPoint";
 // import GetBuyCreditPoint from "../components/CreditPoint/GetBuyCreditPoint";
+// import GetBuyCreditPoint from "../components/CreditPoint/GetBuyCreditPoint";
 
-import { navOptions } from "./options";
-import { useNavigation } from "@react-navigation/native";
-// import Dashboard from "../components/profiles/Dashboard"; 
+import PaysofterButton from "../components/CreditPoint/payment/PaysofterButton";
+// import PaysofterButton from "../components/CreditPoint/PaysofterButton";
+// profiles
+import Dashboard from "../components/profiles/Dashboard"; 
 // import Inbox from "../components/profiles/Inbox"; 
-import { HomeTabs } from "./taps";
+// import Inbox from "../components/profiles/Inbox"; 
+// import Inbox from "../components/profiles/Inbox"; 
 
 const Stack = createStackNavigator();
 
@@ -39,12 +47,12 @@ export const HomeStack = () => {
 
   return (
     <Stack.Navigator screenOptions={() => navOptions(navigation)}>
-      <Stack.Screen name="HomeTabs" component={HomeTabs} />
       <Stack.Screen name="Home" component={Marketplace} />
+      <Stack.Screen name="HomeTabs" component={HomeTabs} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="VerifyEmailOtp" component={VerifyEmailOtp} />
-      {/* <Stack.Screen name="Dashboard" component={Dashboard} /> */}
+      <Stack.Screen name="Dashboard" component={Dashboard} />
       {/* <Stack.Screen name="Inbox" component={Inbox} /> */}
       {/* marketplace */}
       <Stack.Screen name="Bought NGN CPS List" component={GetBuyCreditPoint} /> 
@@ -60,10 +68,14 @@ export const HomeStack = () => {
       <Stack.Screen name="Shop Front Link" component={ShopFrontLink} /> 
       <Stack.Screen name="Create Seller Account" component={CreateMarketplaceSeller} /> 
       <Stack.Screen name="Seller Photo" component={SellerPhoto} /> 
-      {/* <Stack.Screen name="SellerPhoto" component={SellerPhoto} />  */}
-      {/* <Stack.Screen name="SellerPhoto" component={SellerPhoto} />  */}
-      {/* <Stack.Screen name="SellerPhoto" component={SellerPhoto} />  */}
-      {/* <Stack.Screen name="SellerPhoto" component={SellerPhoto} />  */}
+      <Stack.Screen name="Current Ads" component={CurrentAds} /> 
+      <Stack.Screen name="Edit Free Ad" component={EditFreeAd} /> 
+      <Stack.Screen name="Edit Paid Ad" component={EditPaidAd} /> 
+      {/* <Stack.Screen name="EditPaidAd" component={EditPaidAd} />  */}
+      {/* <Stack.Screen name="EditPaidAd" component={EditPaidAd} />  */}
+      {/* <Stack.Screen name="EditPaidAd" component={EditPaidAd} />  */}
+
+      <Stack.Screen name="PaysofterButton" component={PaysofterButton} /> 
 
     </Stack.Navigator>
   );

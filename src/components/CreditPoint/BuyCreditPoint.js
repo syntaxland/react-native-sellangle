@@ -1,26 +1,37 @@
 // BuyCreditPoint.js
 import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import RNPickerSelect from "react-native-picker-select";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
-import { getPaymentApiKeys } from "../../actions/paymentActions";
+import { useNavigation } from "@react-navigation/native";
+import { getPaymentApiKeys } from "../../redux/actions/paymentActions";
 import PaymentScreen from "./payment/PaymentScreen";
-// import Select from "react-select";
+import Loader from "../../Loader";
+import Message from "../../Message";
 
-function BuyCreditPoint({ currency }) {
+const BuyCreditPoint = ({ currency }) => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const getPaymentApiKeysState = useSelector(
     (state) => state.getPaymentApiKeysState
   );
-  const { paystackPublicKey, paysofterPublicKey } = getPaymentApiKeysState;
+  const { loading, error, paystackPublicKey, paysofterPublicKey } =
+    getPaymentApiKeysState;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
-  const userEmail = userInfo.email;
+  const userEmail = userInfo ? userInfo.email : null;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     } else {
       dispatch(getPaymentApiKeys());
     }
@@ -34,78 +45,128 @@ function BuyCreditPoint({ currency }) {
   };
 
   const BUY_CPS_CHOICES = [
-    ["500", "500 cps for 500 NGN"],
-    ["1000", "1,000 cps for 1,000 NGN"],
-    ["5000", "5,200 cps for 5,000 NGN"],
-    ["10000", "10,800 cps for 10,000 NGN"],
-    ["15000", "16,500 cps for 15,000 NGN"],
-    ["20000", "24,000 cps for 20,000 NGN"],
-    ["50000", "60,000 cps for 50,000 NGN"],
-    ["100000", "125,000 cps for 100,000 NGN"],
-    ["200000", "255,000 cps for 200,000 NGN"],
-    ["500000", "700,000 cps for 500,000 NGN"],
-    ["1000000", "1,500,000 cps for 1,000,000 NGN"],
+    { label: "500 cps for 500 NGN", value: "500" },
+    { label: "1,000 cps for 1,000 NGN", value: "1000" },
+    { label: "5,200 cps for 5,000 NGN", value: "5000" },
+    { label: "10,800 cps for 10,000 NGN", value: "10000" },
+    { label: "16,500 cps for 15,000 NGN", value: "15000" },
+    { label: "24,000 cps for 20,000 NGN", value: "20000" },
+    { label: "60,000 cps for 50,000 NGN", value: "50000" },
+    { label: "125,000 cps for 100,000 NGN", value: "100000" },
+    { label: "255,000 cps for 200,000 NGN", value: "200000" },
+    { label: "700,000 cps for 500,000 NGN", value: "500000" },
+    { label: "1,500,000 cps for 1,000,000 NGN", value: "1000000" },
   ];
 
-  console.log("amount:", currency, amount);
-
   return (
-    <Container>
-      {showPaymentScreen ? (
-        <PaymentScreen
-          currency={currency}
-          amount={amount}
-          paysofterPublicKey={paysofterPublicKey}
-          paystackPublicKey={paystackPublicKey}
-          userEmail={userEmail}
-        />
-      ) : (
-        <Row className="justify-content-center py-2">
-          <Col>
-            <Form>
-              <Form.Group>
-                {/* <Form.Label>Amount</Form.Label> */}
-                <Form.Control
-                  as="select"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="rounded py-2 mb-2"
-                  required
-                >
-                  <option value="">Select CPS Amount</option>
-                  {BUY_CPS_CHOICES.map((type) => (
-                    <option key={type[0]} value={type[0]}>
-                      {type[1]}
-                    </option>
-                  ))}
-                </Form.Control>
-                {/* <Select
-                  value={amount}
-                  onChange={(selectedOption) => setAmount(selectedOption)}
-                  options={BUY_CPS_CHOICES.map((type) => ({
-                    value: type[0],
-                    label: type[1],
-                  }))}
-                  placeholder="Select CPS Amount"
-                /> */}
-              </Form.Group>
-            </Form>
+    <ScrollView>
+      <View style={styles.container}>
+        {showPaymentScreen ? (
+          <View style={styles.paymentContainer}>
+            <PaymentScreen
+              currency={currency}
+              amount={amount}
+              paysofterPublicKey={paysofterPublicKey}
+              paystackPublicKey={paystackPublicKey}
+              userEmail={userEmail}
+            />
+          </View>
+        ) : (
+          <>
+            <View style={styles.formContainer}>
+              <Text style={styles.label}>Select CPS Amount</Text>
+              <RNPickerSelect
+                onValueChange={(value) => setAmount(value)}
+                items={BUY_CPS_CHOICES}
+                placeholder={{ label: "Select CPS Amount", value: null }}
+                style={pickerSelectStyles}
+                value={amount}
+              />
+            </View>
 
-            <div className="py-2">
-              <Button
-                variant="primary"
-                onClick={handleShowPaymentScreen}
-                className="rounded mt-2 text-center w-100"
-                disabled={amount === ""}
-              >
-                Buy Credit Point (NGN)
-              </Button>
-            </div>
-          </Col>
-        </Row>
-      )}
-    </Container>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                { backgroundColor: amount ? "#007bff" : "#cccccc" },
+              ]}
+              onPress={handleShowPaymentScreen}
+              disabled={!amount}
+            >
+              <Text style={styles.buttonText}>Buy Credit Point (NGN)</Text>
+            </TouchableOpacity>
+
+            {loading && <Loader />}
+            {error && <Message variant="danger">{error}</Message>}
+          </>
+        )}
+      </View>
+    </ScrollView>
   );
-}
+};
 
-export default BuyCreditPoint; 
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    padding: 2,
+    justifyContent: "center",
+  },
+  paymentContainer: {
+    padding: 20,
+  },
+  formContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  label: {
+    marginBottom: 10,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: "#007bff",
+    paddingVertical: 15,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  // inputIOS: {
+  //   fontSize: 16,
+  //   paddingVertical: 12,
+  //   paddingHorizontal: 10,
+  //   borderWidth: 1,
+  //   borderColor: "gray",
+  //   borderRadius: 4,
+  //   color: "black",
+  //   paddingRight: 30,
+  //   marginBottom: 20,
+  // },
+  // inputAndroid: {
+  //   fontSize: 16,
+  //   paddingHorizontal: 10,
+  //   paddingVertical: 8,
+  //   borderWidth: 0.5,
+  //   borderColor: "gray",
+  //   borderRadius: 8,
+  //   color: "black",
+  //   paddingRight: 30,
+  //   marginBottom: 20,
+  // },
+});
+
+export default BuyCreditPoint;

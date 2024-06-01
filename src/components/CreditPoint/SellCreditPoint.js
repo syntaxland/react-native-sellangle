@@ -1,143 +1,163 @@
 // SellCreditPoint.js
 import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  ScrollView,
+  Alert,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
-import { sellCreditPoint } from "../../actions/creditPointActions";
-import { useHistory } from "react-router-dom";
-import Message from "../Message";
-import Loader from "../Loader";
+import { useNavigation } from "@react-navigation/native";
+import { sellCreditPoint } from "../../redux/actions/creditPointActions";
+import Message from "../../Message";
+import Loader from "../../Loader";
 
-function SellCreditPoint() {
+const SellCreditPoint = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
-  }, [userInfo]);
+  }, [userInfo, navigation]);
 
-  const sellCreditPointState = useSelector(
-    (state) => state.sellCreditPointState
-  );
+  const sellCreditPointState = useSelector((state) => state.sellCreditPointState);
   const { success, error, loading } = sellCreditPointState;
 
   const [username, setUsername] = useState("");
   const [amount, setAmount] = useState("");
   const [password, setPassword] = useState("");
 
-  const [messsage, setMesssage] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (success) {
-      const timer = setTimeout(() => {
-        window.location.reload();
-        // history.push("/dashboard");
-      }, 5000);
-      return () => clearTimeout(timer);
+      Alert.alert(
+        "Success",
+        `You have transferred ${amount} credit points to ${username} successfully.`,
+        [{ text: "OK", onPress: () => navigation.navigate("Dashboard") }]
+      );
     }
-  }, [dispatch, success, history]);
+  }, [success, amount, username, navigation]);
 
   const lowerCaseUsername = username.toLowerCase().trim();
   const creditPointData = {
-    // username: username,
     username: lowerCaseUsername,
     amount: amount,
     password: password,
   };
-  console.log("creditPointData:", creditPointData);
 
   const handleSellCreditPoint = () => {
     if (amount < 100) {
-      setMesssage("The minimum credit point transfer amount is 100.");
+      setMessage("The minimum credit point transfer amount is 100.");
     } else {
       dispatch(sellCreditPoint(creditPointData));
     }
   };
 
   return (
-    <Container>
-      <Row className="justify-content-center py-2">
-        <Col md={8}>
-          {loading && <Loader />}
-          {success && (
-            <Message variant="success">
-              You have transferred {amount} credit points to {username}{" "}
-              successfully.
-            </Message>
-          )}
-          {error && <Message variant="danger">{error}</Message>}
-          {messsage && <Message variant="danger">{messsage}</Message>}
+    <ScrollView contentContainerStyle={styles.container}>
+      {loading && <Loader />}
+      {success && (
+        <Message variant="success">
+          You have transferred {amount} credit points to {username} successfully.
+        </Message>
+      )}
+      {error && <Message variant="danger">{error}</Message>}
+      {message && <Message variant="danger">{message}</Message>}
 
-          <p className="rounded mt-2 py-1 text-center">
-            <i
-              className="fa fa-warning"
-              style={{ fontSize: "18px", color: "yellow" }}
-            ></i>{" "}
-            Warning! This action will transfer the credit point amount from your
-            account to the receiver's credit point wallet.
-            {/* Please enter the password for your account email <strong>({userInfo.email}</strong>):{" "} */}
-          </p>
+      <Text style={styles.warning}>
+        <Text style={styles.warningIcon}>⚠️</Text> Warning! This action will
+        transfer the credit point amount from your account to the receiver's
+        credit point wallet.
+      </Text>
 
-          <Form>
-            <Form.Group>
-              <Form.Label>Receiver's Username</Form.Label>
-              <Form.Control
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter cps receiver's username"
-                className="rounded"
-                required
-                maxLength={12}
-              />
-            </Form.Group>
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Receiver's Username</Text>
+        <TextInput
+          style={styles.input}
+          value={username}
+          onChangeText={(text) => setUsername(text)}
+          placeholder="Enter cps receiver's username"
+          maxLength={12}
+        />
+      </View>
 
-            <Form.Group className="py-1">
-              <Form.Label>Amount</Form.Label>
-              <Form.Control
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Enter cps amount"
-                className="rounded"
-                required
-              />
-            </Form.Group>
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Amount</Text>
+        <TextInput
+          style={styles.input}
+          value={amount}
+          onChangeText={(text) => setAmount(text)}
+          placeholder="Enter cps amount"
+          keyboardType="numeric"
+        />
+      </View>
 
-            <Form.Group className="py-1">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="rounded"
-                required
-                maxLength={100}
-              />
-            </Form.Group>
-            <div className="py-2">
-              <Button
-                variant="success"
-                onClick={handleSellCreditPoint}
-                className="rounded text-center w-100"
-                disabled={password === "" || username === "" || amount === ""}
-              >
-                Sell/Share CPS
-              </Button>
-            </div>
-            <div className="py-2 d-flex justify-content-center text-center">
-              <Form.Text className="text-danger">{error}</Form.Text>
-            </div>
-          </Form>
-        </Col>
-      </Row>
-    </Container>
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+          placeholder="Enter your password"
+          secureTextEntry
+          maxLength={100}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Sell/Share CPS"
+          onPress={handleSellCreditPoint}
+          disabled={!password || !username || !amount}
+        />
+      </View>
+
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 2,
+    flexGrow: 1,
+  },
+  warning: {
+    textAlign: "center",
+    backgroundColor: "#ffcc00",
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 10,
+  },
+  warningIcon: {
+    fontSize: 18,
+    color: "yellow",
+  },
+  formGroup: {
+    marginVertical: 10,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 16,
+  },
+  buttonContainer: {
+    marginTop: 20,
+  },
+});
 
 export default SellCreditPoint;

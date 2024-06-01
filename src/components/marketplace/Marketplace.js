@@ -192,10 +192,15 @@ const Marketplace = () => {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    dispatch(getAllPaidAd());
-    dispatch(getAllFreeAd());
-    setTimeout(() => setRefreshing(false), 2000);
-  }, [dispatch]);
+    const adData = {
+      selected_country: selectedCountry,
+      selected_state: selectedState,
+      selected_city: selectedCity,
+    };
+    dispatch(getAllPaidAd(adData));
+    dispatch(getAllFreeAd(adData));
+    setTimeout(() => setRefreshing(false), 500);
+  }, [dispatch, selectedCountry, selectedState, selectedCity]);
 
   const handlePostFreeAd = () => {
     if (!userInfo) {

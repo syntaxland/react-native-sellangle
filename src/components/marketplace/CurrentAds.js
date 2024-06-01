@@ -1,25 +1,29 @@
 // CurrentAds.js
 import React from "react";
-import { Row, Col, Container } from "react-bootstrap";
+import { View, ScrollView, StyleSheet } from "react-native";
 import FreeAdScreen from "./FreeAdScreen";
 import PaidAdScreen from "./PaidAdScreen";
- 
-function CurrentAds({ history }) {
-  return (
-    <Container>
-      <Row>
-        <Col>
-          <div>
-            <FreeAdScreen />
-          </div>
 
-          <div>
-            <PaidAdScreen />
-          </div>
-        </Col>
-      </Row>
-    </Container>
+const CurrentAds = () => {
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.section}>
+        <FreeAdScreen />
+      </View>
+      <View style={styles.section}>
+        <PaidAdScreen />
+      </View>
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 10,
+  },
+  section: {
+    marginVertical: 10,
+  },
+});
 
 export default CurrentAds;

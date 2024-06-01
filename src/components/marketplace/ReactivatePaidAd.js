@@ -1,22 +1,28 @@
 // ReactivatePaidAd.js
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
-import { reactivatePaidAd } from "../../actions/marketplaceSellerActions";
-import { useHistory } from "react-router-dom";
-import Message from "../Message";
-import Loader from "../Loader";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { reactivatePaidAd } from "../../redux/actions/marketplaceSellerActions";
+import { useNavigation } from "@react-navigation/native";
+import Message from "../../Message";
+import Loader from "../../Loader";
 
 function ReactivatePaidAd({ ad_id }) {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
   }, [userInfo]);
 
@@ -29,19 +35,16 @@ function ReactivatePaidAd({ ad_id }) {
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
-        window.location.reload();
-        // history.push("/dashboard");
+        navigation.navigate("CurrentAds");
       }, 3000);
       return () => clearTimeout(timer);
     }
-    // eslint-disable-next-line
-  }, [dispatch, success, history]);
+  }, [success, navigation]);
 
   const adData = {
     ad_id: ad_id,
     duration: duration,
   };
-  console.log("adData:", adData);
 
   const handleReactivatePaidAd = () => {
     dispatch(reactivatePaidAd(adData));
@@ -58,56 +61,67 @@ function ReactivatePaidAd({ ad_id }) {
   ];
 
   return (
-    <Container>
-      <Row className="justify-content-center py-2">
-        <Col>
-          {loading && <Loader />}
-          {success && (
-            <Message variant="success">Ad successfully reactivated for {duration}.</Message>
-          )}
-          {error && <Message variant="danger">{error}</Message>}
+    <View style={styles.container}>
+      <View style={styles.content}>
+        {loading && <Loader />}
+        {success && (
+          <Message variant="success">
+            Ad successfully reactivated for {duration}.
+          </Message>
+        )}
+        {error && <Message variant="danger">{error}</Message>}
 
-          {/* <p className="rounded mt-2 py-1 text-center">
-            <i
-              className="fa fa-warning"
-              style={{ fontSize: "18px", color: "yellow" }}
-            ></i>{" "}
-            Warning! This action will reactivate this ad and it's irreversible.
-            Type <i>reactivate</i> to confirm the deactivation.
-          </p> */}
+        <Picker
+          selectedValue={duration}
+          style={styles.picker}
+          onValueChange={(itemValue) => setDuration(itemValue)}
+        >
+          <Picker.Item label="Select Ad Duration" value="" />
+          {DURATION_CHOICES.map((type) => (
+            <Picker.Item key={type[0]} label={type[1]} value={type[0]} />
+          ))}
+        </Picker>
 
-          <Form>
-            <Form.Group>
-              {/* <Form.Label>Duration</Form.Label> */}
-              <Form.Control
-                as="select"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                className="rounded py-2 mb-2"
-                required
-              >
-                <option value="">Select Ad Duration</option>
-                {DURATION_CHOICES.map((type) => (
-                  <option key={type[0]} value={type[0]}>
-                    {type[1]}
-                  </option>
-                ))}
-              </Form.Control>
-            </Form.Group>
-          </Form>
-
-          <Button
-            variant="primary"
-            onClick={handleReactivatePaidAd}
-            className="rounded mt-2 text-center w-100"
-            disabled={duration === ""}
-          >
-            Reactivate Ad
-          </Button>
-        </Col>
-      </Row>
-    </Container>
+        <TouchableOpacity
+          style={[
+            styles.button,
+            { opacity: duration === "" ? 0.5 : 1 },
+          ]}
+          onPress={handleReactivatePaidAd}
+          disabled={duration === ""}
+        >
+          <Text style={styles.buttonText}>Reactivate Ad</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  content: {
+    width: "80%",
+  },
+  picker: {
+    height: 50,
+    width: "100%",
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: "blue",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  buttonText: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+});
 
 export default ReactivatePaidAd;

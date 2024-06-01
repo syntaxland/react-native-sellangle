@@ -1,24 +1,34 @@
 // PaymentScreen.js
 import React, { useEffect, useState } from "react";
-import { Button, Row, Col, Modal } from "react-bootstrap";
+import {
+  View,
+  Text,
+  Button,
+  Modal,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { useSelector } from "react-redux";
-import Paystack from "./Paystack";
+import { useNavigation } from "@react-navigation/native";
+import PaystackPayment from "./PaystackPayment";
 import PaystackUsd from "./PaystackUsd";
 import Paysofter from "./Paysofter";
 
-function PaymentScreen({
+const PaymentScreen = ({
   amount,
   currency,
   paysofterPublicKey,
   paystackPublicKey,
   userEmail,
-}) {
+}) => {
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
   }, [userInfo]);
 
@@ -40,122 +50,165 @@ function PaymentScreen({
   console.log("amount:", currency, amount);
 
   return (
-    <>
-      <Row>
-        <div className="d-flex justify-content-center ">
-          <Col>
-            <h1 className="text-center py-2">Payment Page</h1>
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.header}>Payment Page</Text>
 
-            <div className="text-center py-2">
-              <Row className="text-center py-2">
-                <Col md={10}>
-                  <Button
-                    variant="dark"
-                    onClick={() => handlePaymentGatewaySelection("paystack")}
-                    className="mr-2 rounded w-100"
-                  >
-                    Pay with Paystack
-                  </Button>
-                </Col>
-                <Col md={2}>
-                  <Button variant="outline"></Button>
-                </Col>
-              </Row>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.payButton}
+            onPress={() => handlePaymentGatewaySelection("paystack")}
+          >
+            <Text style={styles.buttonText}>Pay with Paystack</Text>
+          </TouchableOpacity>
 
-              <Row className="text-center py-2">
-                <Col md={10}>
-                  <Button
-                    variant="primary"
-                    onClick={() => handlePaymentGatewaySelection("paysofter")}
-                    className="mr-2 rounded w-100"
-                  >
-                    Pay with Paysofter
-                  </Button>
-                </Col>
-                <Col md={2}>
-                  <Button
-                    variant="outline"
-                    onClick={handleInfoModalShow}
-                    data-toggle="tooltip"
-                    data-placement="top"
-                    title="Don't have a Paysofter account? Click here."
-                  >
-                    <i className="fa fa-info-circle"> </i>
-                  </Button>
+          <View style={styles.infoButtonContainer}>
+            <TouchableOpacity
+              style={styles.infoButton}
+              onPress={handleInfoModalShow}
+            >
+              <Text style={styles.infoButtonText}>ℹ️</Text>
+            </TouchableOpacity>
+            <Modal
+              visible={showInfoModal}
+              animationType="slide"
+              onRequestClose={handleInfoModalClose}
+            >
+              <View style={styles.modalContent}>
+                <Text style={styles.modalHeader}>Paysofter Account</Text>
+                <Text style={styles.modalBody}>
+                  Don't have a Paysofter account? You're just about 3 minutes
+                  away! Sign up for a much softer payment experience.
+                </Text>
+                <TouchableOpacity
+                  style={styles.createAccountButton}
+                  onPress={() => Linking.openURL("https://paysofter.com/")}
+                >
+                  <Text style={styles.createAccountButtonText}>
+                    Create A Free Account
+                  </Text>
+                </TouchableOpacity>
+                <Button title="Close" onPress={handleInfoModalClose} />
+              </View>
+            </Modal>
+          </View>
 
-                  <Modal show={showInfoModal} onHide={handleInfoModalClose}>
-                    <Modal.Header closeButton>
-                      <Modal.Title className="text-center w-100 py-2">
-                        Paysofter Account
-                      </Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                      <p className="text-center">
-                        Don't have a Paysofter account? You're just about 3
-                        minutes away! Sign up for a much softer payment
-                        experience.{" "}
-                        <a
-                          href="https://paysofter.com/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {" "}
-                          <span>
-                            <Button
-                              variant="primary"
-                              size="sm"
-                              className="text-center py-2"
-                            >
-                              Create A Free Account
-                            </Button>
-                          </span>
-                        </a>
-                      </p>
-                    </Modal.Body>
-                  </Modal>
-                </Col>
-              </Row>
-            </div>
+          <TouchableOpacity
+            style={styles.payButton}
+            onPress={() => handlePaymentGatewaySelection("paysofter")}
+          >
+            <Text style={styles.buttonText}>Pay with Paysofter</Text>
+          </TouchableOpacity>
+        </View>
 
-            {currency === "NGN" && (
-              <div>
-                {selectedPaymentGateway === "paystack" && (
-                  <Paystack
-                    currency={currency}
-                    amount={amount}
-                    userEmail={userEmail}
-                    paystackPublicKey={paystackPublicKey}
-                  />
-                )}
-              </div>
-            )}
+        <View style={styles.paymentContainer}>
+          {currency === "NGN" && selectedPaymentGateway === "paystack" && (
+            <PaystackPayment
+              currency={currency}
+              amount={amount}
+              userEmail={userEmail}
+              paystackPublicKey={paystackPublicKey}
+            />
+          )}
 
-            {currency === "USD" && (
-              <div>
-                {selectedPaymentGateway === "paystack" && (
-                  <PaystackUsd
-                    currency={currency}
-                    amount={amount}
-                    userEmail={userEmail}
-                    paystackPublicKey={paystackPublicKey}
-                  />
-                )}
-              </div>
-            )}
+          {currency === "USD" && selectedPaymentGateway === "paystack-usd" && (
+            <PaystackUsd
+              currency={currency}
+              amount={amount}
+              userEmail={userEmail}
+              paystackPublicKey={paystackPublicKey}
+            />
+          )}
 
-            {selectedPaymentGateway === "paysofter" && (
-              <Paysofter
-                userEmail={userEmail}
-                currency={currency}
-                amount={amount}
-                paysofterPublicKey={paysofterPublicKey}
-              />
-            )}
-          </Col>
-        </div>
-      </Row>
-    </>
+          {selectedPaymentGateway === "paysofter" && (
+            <Paysofter
+              userEmail={userEmail}
+              currency={currency}
+              amount={amount}
+              paysofterPublicKey={paysofterPublicKey}
+            />
+          )}
+        </View>
+      </View>
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 2,
+    marginVertical: 20,
+    // justifyContent: "center",
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  buttonContainer: {
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  payButton: {
+    backgroundColor: "#007bff",
+    padding: 15,
+    borderRadius: 10,
+    width: "100%",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  infoButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  infoButton: {
+    backgroundColor: "#fff",
+    borderColor: "#007bff",
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    marginVertical: 10,
+    marginHorizontal: 5,
+  },
+  infoButtonText: {
+    color: "#007bff",
+    fontSize: 16,
+  },
+  modalContent: {
+    padding: 20,
+    alignItems: "center",
+  },
+  modalHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  modalBody: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  createAccountButton: {
+    backgroundColor: "#007bff",
+    padding: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  createAccountButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  paymentContainer: {
+    marginVertical: 20,
+  },
+});
 
 export default PaymentScreen;

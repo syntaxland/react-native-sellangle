@@ -1,15 +1,27 @@
-// PaystackUsd.js
+// PaystackPayment.js
 import React, { useEffect, useState } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  Modal,
+  ScrollView,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
+import { Paystack } from "react-native-paystack-webview";
 import { buyCreditPoint } from "../../../redux/actions/creditPointActions";
 import Loader from "../../../Loader";
 import Message from "../../../Message";
 import { formatAmount } from "../../../FormatAmount";
-import { Paystack } from "react-native-paystack-webview";
 
-const PaystackUsd = ({ currency, amount, paystackPublicKey, userEmail }) => {
+const PaystackPayment = ({
+  currency,
+  amount,
+  paystackPublicKey,
+  userEmail,
+}) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
@@ -52,46 +64,50 @@ const PaystackUsd = ({ currency, amount, paystackPublicKey, userEmail }) => {
     setPaymentInitiated(true);
   };
 
+  console.log("PaystackPayment")
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Paystack Payment Option</Text>
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.header}>Paystack Payment Option</Text>
 
-      {loading && <Loader />}
-      {error && <Message variant="danger">{error}</Message>}
+        {loading && <Loader />}
+        {error && <Message variant="danger">{error}</Message>}
 
-      {success && (
-        <Message variant="success">
-          You have received {amount} credit points.
-        </Message>
-      )}
-
-      <View style={styles.infoContainer}>
-        <Text>
-          Amount: {formatAmount(amount)} {currency}
-        </Text>
-      </View>
-
-      <View style={styles.buttonContainer}>
-        {!paymentInitiated && (
-          <Button title="Pay Now" onPress={initiatePayment} color="#000" />
+        {success && (
+          <Message variant="success">
+            You have received {amount} credit points.
+          </Message>
         )}
 
-        {paymentInitiated && (
-          <Paystack
-            paystackKey={paystackPublicKey}
-            amount={amount * 100}
-            billingEmail={userEmail}
-            billingMobile="1234567890" // replace with actual mobile number
-            reference={`ref_${Math.floor(Math.random() * 1000000000)}`}
-            activityIndicatorColor="green"
-            onCancel={() => setPaymentInitiated(false)}
-            onSuccess={onSuccess}
-            onError={(error) => console.log(error)}
-            autoStart={true}
-          />
-        )}
+        <View style={styles.infoContainer}>
+          <Text>
+            Amount: {formatAmount(amount)} {currency}
+          </Text>
+        </View>
+
+        <View style={styles.buttonContainer}>
+          {!paymentInitiated && (
+            <Button title="Pay Now" onPress={initiatePayment} color="#000" />
+          )}
+
+          {paymentInitiated && (
+            <Paystack
+              paystackKey={paystackPublicKey}
+              amount={amount * 100}
+              billingEmail={userEmail}
+              billingMobile="1234567890" // replace with actual mobile number
+              reference={`ref_${Math.floor(Math.random() * 1000000000)}`}
+              activityIndicatorColor="green"
+              onCancel={() => setPaymentInitiated(false)}
+              onSuccess={onSuccess}
+              onError={(error) => console.log(error)}
+              autoStart={true}
+            />
+          )}
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -100,7 +116,7 @@ const styles = StyleSheet.create({
     padding: 20,
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
+    // alignItems: "center",
   },
   header: {
     fontSize: 24,
@@ -118,4 +134,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PaystackUsd;
+export default PaystackPayment;

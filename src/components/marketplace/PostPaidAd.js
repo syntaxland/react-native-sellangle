@@ -18,6 +18,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import * as ImagePicker from "expo-image-picker";
 import { postPaidAd } from "../../redux/actions/marketplaceSellerActions";
+import { getUserProfile } from "../../redux/actions/userProfileActions";
 import { Picker } from "@react-native-picker/picker";
 import RNPickerSelect from "react-native-picker-select";
 import { Checkbox } from "react-native-paper";
@@ -64,11 +65,28 @@ function PostPaidAd() {
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
+  const userProfile = useSelector((state) => state.userProfile);
+  const { profile } = userProfile;
+
+  useEffect(() => {
+    dispatch(getUserProfile());
+  }, [dispatch]);
+
   useEffect(() => {
     if (!userInfo) {
       navigation.navigate("Login");
+    } else if (userInfo && !profile.is_marketplace_seller) {
+      navigation.navigate("Create Seller Account");
+    } else {
+      navigation.navigate("Post Paid Ad");
     }
   }, [userInfo, navigation]);
+
+  // useEffect(() => {
+  //   if (!userInfo) {
+  //     navigation.navigate("Login");
+  //   }
+  // }, [userInfo, navigation]);
 
   const postPaidAdState = useSelector((state) => state.postPaidAdState);
   const { success, error, loading } = postPaidAdState;
@@ -866,6 +884,7 @@ function PostPaidAd() {
                   />
                 </TouchableOpacity>
               </View>
+              
               <View style={styles.formContainer}>
                 <Checkbox.Item
                   label="Show strike through promo price?"
@@ -1126,10 +1145,11 @@ function PostPaidAd() {
         </View>
 
         <View style={styles.formGroup}>
-          <TouchableOpacity onPress={handlePostPaidAd}>
+          <TouchableOpacity onPress={handlePostPaidAd} disabled={loading}>
             <Text style={styles.roundedPrimaryBtn}>Post Paid Ad</Text>
           </TouchableOpacity>
         </View>
+
       </View>
     </ScrollView>
   );  

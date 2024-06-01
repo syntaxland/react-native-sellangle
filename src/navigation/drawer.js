@@ -1,6 +1,6 @@
 // drawer.js
 import React, { useState, useEffect } from "react";
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity , Text, View, StyleSheet} from "react-native";
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
@@ -14,7 +14,6 @@ import {
   HomeTabsStack,
 } from "./stack";
 
-import { Text, View, StyleSheet } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import {
   useNavigation,
@@ -430,8 +429,8 @@ export const CustomDrawerContent = (props) => {
               style={styles.icon}
             />
             <DrawerItem
-              label="Seller Photo"
-              onPress={() => navigation.navigate("Seller Photo")}
+              label="Settings"
+              onPress={() => navigation.navigate("Edit Free Ad")}
               style={styles.drawerItem}
               labelStyle={styles.drawerItemLabel}
             />
@@ -473,7 +472,7 @@ export const CustomDrawerContent = (props) => {
                   />
                   <DrawerItem
                     label="Dashboard (Seller)"
-                    onPress={() => navigation.navigate("Dashboard")}
+                    onPress={() => navigation.navigate("Dashboard (Seller)")}
                     style={styles.drawerItem}
                     labelStyle={styles.drawerItemLabel}
                   />

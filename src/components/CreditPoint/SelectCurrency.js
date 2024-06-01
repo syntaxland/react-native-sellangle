@@ -1,68 +1,104 @@
 // SelectCurrency.js
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Col, Row } from "react-bootstrap";
+import { View, Text, StyleSheet, ScrollView, Modal } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import BuyCreditPoint from "./BuyCreditPoint";
 import BuyUsdCreditPoint from "./BuyUsdCreditPoint";
-import Select from "react-select";
+import RNPickerSelect from "react-native-picker-select";
 
-function SelectCurrency() {
+const SelectCurrency = () => {
+  const navigation = useNavigation();
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
   }, [userInfo]);
 
   const [selectedCurrency, setSelectedCurrency] = useState("USD");
 
-  const handleCurrencyChange = (selectedOption) => {
-    setSelectedCurrency(selectedOption.value);
+  const handleCurrencyChange = (value) => {
+    setSelectedCurrency(value);
   };
 
   const CURRENCY_CHOICES = [
-    ["NGN", "Nigerian Naira"],
-    ["USD", "United States Dollar"],
+    { label: "Nigerian Naira", value: "NGN" },
+    { label: "United States Dollar", value: "USD" },
   ];
 
   return (
-    <Row className="d-flex justify-content-center text-center">
-      <Col>
-        <Row className="py-2 d-flex justify-content-center">
-          <Col md={10}>
-            <div>
-              <Select
-                options={CURRENCY_CHOICES.map(([value, label]) => ({
-                  value,
-                  label,
-                }))}
-                value={{
-                  value: selectedCurrency,
-                  label: selectedCurrency,
-                }}
-                onChange={handleCurrencyChange}
-                placeholder="Currencies"
-                className="rounded py-2 mb-2"
-                required
-              />
-            </div>
-          </Col>
-        </Row>
+    <View style={styles.container}>
+      <View style={styles.pickerContainer}>
+        <Text style={styles.label}>Select Currency</Text>
+        <RNPickerSelect
+          onValueChange={handleCurrencyChange}
+          items={CURRENCY_CHOICES}
+          placeholder={{ label: "Select Currency", value: null }}
+          value={selectedCurrency}
+          style={pickerSelectStyles}
+        />
+      </View>
 
-        <div className="py-2">
-          {selectedCurrency === "NGN" && (
-            <BuyCreditPoint currency={selectedCurrency} />
-          )}
-          
-          {selectedCurrency === "USD" && (
-            <BuyUsdCreditPoint currency={selectedCurrency} />
-          )}
-        </div>
-      </Col>
-    </Row>
+      <View style={styles.content}>
+        {selectedCurrency === "NGN" && (
+          <BuyCreditPoint currency={selectedCurrency} />
+        )}
+        {selectedCurrency === "USD" && (
+          <BuyUsdCreditPoint currency={selectedCurrency} />
+        )}
+      </View>
+    </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    // justifyContent: "center",
+    // alignItems: "center",
+    padding: 2,
+  },
+  pickerContainer: {
+    width: "100%",
+    marginBottom: 20,
+  },
+  content: {
+    width: "100%",
+    alignItems: "center",
+  },
+  label: {
+    padding: 10,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  // inputIOS: {
+  //   fontSize: 16,
+  //   paddingVertical: 12,
+  //   paddingHorizontal: 10,
+  //   borderWidth: 1,
+  //   borderColor: "gray",
+  //   borderRadius: 4,
+  //   color: "black",
+  //   paddingRight: 30, // to ensure the text is never behind the icon
+  //   backgroundColor: "white",
+  // },
+  // inputAndroid: {
+  //   fontSize: 16,
+  //   paddingHorizontal: 10,
+  //   paddingVertical: 8,
+  //   borderWidth: 0.5,
+  //   borderColor: "purple",
+  //   borderRadius: 8,
+  //   color: "black",
+  //   paddingRight: 30, // to ensure the text is never behind the icon
+  //   backgroundColor: "white",
+  // },
+});
 
 export default SelectCurrency;

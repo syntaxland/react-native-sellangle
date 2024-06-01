@@ -13,7 +13,6 @@ import {
   Image,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { postFreeAd } from "../../redux/actions/marketplaceSellerActions";
 import { Picker } from "@react-native-picker/picker";
 import RNPickerSelect from "react-native-picker-select";
 import { Country, State, City } from "country-state-city";
@@ -22,9 +21,10 @@ import {
   RichEditor,
   RichToolbar,
 } from "react-native-pell-rich-editor";
+import { postFreeAd } from "../../redux/actions/marketplaceSellerActions";
+import { getUserProfile } from "../../redux/actions/userProfileActions";
 import Message from "../../Message";
 import Loader from "../../Loader";
-// import LoaderButton from "../../LoaderButton";
 import {
   FREE_AD_DURATION_CHOICES,
   AD_CONDITION_CHOICES, 
@@ -56,9 +56,20 @@ function PostFreeAd() {
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
+  const userProfile = useSelector((state) => state.userProfile);
+  const { profile } = userProfile;
+
+  useEffect(() => {
+    dispatch(getUserProfile());
+  }, [dispatch]);
+
   useEffect(() => {
     if (!userInfo) {
       navigation.navigate("Login");
+    } else if (userInfo && !profile.is_marketplace_seller) {
+      navigation.navigate("Create Seller Account");
+    } else {
+      navigation.navigate("Post Free Ad");
     }
   }, [userInfo, navigation]);
 
@@ -524,6 +535,7 @@ function PostFreeAd() {
             ) : null}
           </View>
         </View>
+        
         <View style={styles.formGroup}>
           <Text style={styles.label}>State/Province *</Text>
           <View style={styles.locationContainer}>
@@ -548,6 +560,7 @@ function PostFreeAd() {
             ) : null}
           </View>
         </View>
+
         <View style={styles.formGroup}>
           <Text style={styles.label}>City *</Text>
           <View style={styles.locationContainer}>
@@ -811,10 +824,9 @@ function PostFreeAd() {
             </Message>
           </View>
         )}
-
-        <View style={styles.formGroup}>
           {loading && <Loader />}
 
+        <View style={styles.formGroup}>
           <TouchableOpacity onPress={handlePostFreeAd} disabled={loading}>
             <Text style={styles.roundedPrimaryBtn}>Post Free Ad</Text>
           </TouchableOpacity>

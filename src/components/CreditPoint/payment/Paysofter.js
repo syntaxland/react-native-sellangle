@@ -1,60 +1,93 @@
 // Paysofter.js
 import React, { useState, useEffect } from "react";
-import { Row, Col, ListGroup } from "react-bootstrap";
-// import { useHistory } from "react-router-dom";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Button,
+  Modal,
+} from "react-native";
 import { useSelector } from "react-redux";
-import "react-datepicker/dist/react-datepicker.css";
+import { useNavigation } from "@react-navigation/native";
 import PaysofterButton from "./PaysofterButton";
-// import LoaderPaysofter from "../../LoaderPaysofter";
-// import Message from "../../Message";
-import "./Paysofter.css";
-import { formatAmount } from "../../FormatAmount";
+import { formatAmount } from "../../../FormatAmount";
 
-function Paysofter({ currency, amount, paysofterPublicKey, userEmail }) {
-  // const buyCreditPointState = useSelector((state) => state.buyCreditPointState); 
-  // const { success, error, loading } = buyCreditPointState;
+const Paysofter = ({ currency, amount, paysofterPublicKey, userEmail }) => {
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
   }, [userInfo]);
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
+  console.log("Paysofter", amount)
+
   return (
-    <>
-      <Row>
-        <div className="d-flex justify-content-center ">
-          <Col>
-            <h1 className="text-center py-3">Paysofter Payment Option</h1>
-            {/* {loading && <LoaderPaysofter />}
-            {error && <Message variant="danger">{error}</Message>} */}
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Paysofter Payment Option</Text>
+      </View>
+      
+      <View style={styles.details}>
+        <Text style={styles.amount}>
+          Amount: {formatAmount(amount)} {currency}
+        </Text>
+      </View>
 
-            <ListGroup variant="flush" className="text-center py-2">
-              <ListGroup.Item>
-                Amount: {formatAmount(amount)} {currency}
-              </ListGroup.Item>
-            </ListGroup>
+      <View style={styles.buttonContainer}>
+        <PaysofterButton
+          showPaymentModal={showPaymentModal}
+          setShowPaymentModal={setShowPaymentModal}
+          userEmail={userEmail}
+          currency={currency}
+          amount={amount}
+          paysofterPublicKey={paysofterPublicKey}
+        />
+      </View>
 
-            <div>
-              <PaysofterButton
-                showPaymentModal={showPaymentModal}
-                setShowPaymentModal={setShowPaymentModal}
-                userEmail={userEmail}
-                currency={currency}
-                amount={amount}
-                paysofterPublicKey={paysofterPublicKey}
-              />
-            </div>
-          </Col>
-        </div>
-      </Row>
-    </>
+      <Modal
+        visible={showPaymentModal}
+        onRequestClose={() => setShowPaymentModal(false)}
+      >
+
+
+        <Button title="Close" onPress={() => setShowPaymentModal(false)} />
+      </Modal>
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  header: {
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  details: {
+    marginBottom: 20,
+  },
+  amount: {
+    fontSize: 18,
+    textAlign: "center",
+  },
+  buttonContainer: {
+    marginTop: 20,
+  },
+});
 
 export default Paysofter;

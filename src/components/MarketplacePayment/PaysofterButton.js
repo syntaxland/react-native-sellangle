@@ -72,8 +72,6 @@ const PaysofterButton = ({
             </Text>
           </TouchableOpacity>
 
-          {/* <Button title="Close" onPress={() => setShowPaymentModal(false)} /> */}
-
           <Text style={styles.modalTitle}>Mock Payment (Test)</Text>
           <Text>{buyerEmail}</Text>
           <Text>{`${formatAmount(amount)} ${currency}`}</Text>
