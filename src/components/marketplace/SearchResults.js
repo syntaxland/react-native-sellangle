@@ -1,72 +1,80 @@
 // SearchResults.js
 import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-// import { useHistory } from "react-router-dom";
-import { Row, Col, Button, Form, Container } from "react-bootstrap";
-import { getUserProfile } from "../../actions/userProfileActions";
-import SearchFreeAdScreen from "./SearchFreeAdScreen";
-import SearchPaidAdScreen from "./SearchPaidAdScreen";
-import SellerSearchCard from "./SellerSearchCard";
-import SearchFilterBar from "./SearchFilterBar";
+import {
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+  RefreshControl,
+  StyleSheet,
+  Button,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faSearch, faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
+import { Picker } from "@react-native-picker/picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   getSellerUsernameSearch,
   searchAds,
   getAllPaidAd,
   getAllFreeAd,
-} from "../../actions/marketplaceSellerActions";
-import Message from "../Message";
-import LoaderButton from "../LoaderButton";
-import Select from "react-select";
+} from "../../redux/actions/marketplaceSellerActions";
+import { getUserProfile } from "../../redux/actions/userProfileActions";
+import Message from "../../Message";
+import Loader from "../../Loader";
+import SellerSearchCard from "./SellerSearchCard";
+import SearchFreeAdScreen from "./SearchFreeAdScreen";
+import SearchPaidAdScreen from "./SearchPaidAdScreen";
+// import SearchFilterBar from "./SearchFilterBar";
 import { Country, State, City } from "country-state-city";
-// import Slider, { Range } from 'rc-slider';
-// import 'rc-slider/assets/index.css';
 
-function SearchResults() {
+const SearchResults = () => {
   const dispatch = useDispatch();
-  // const history = useHistory();
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sellerUsername, setSellerUsername] = useState("");
-
-  const [searchSellerUsername, setSearchSellerUsername] = useState(null);
-  const [searchAdResult, setSearchAdResult] = useState(null);
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
-  // const userProfile = useSelector((state) => state.userProfile);
-  // const { profile } = userProfile;
-
   const getAllPaidAdState = useSelector((state) => state.getAllPaidAdState);
   const { paidAds } = getAllPaidAdState;
-  console.log("paidAds:", paidAds?.length);
 
   const getAllFreeAdState = useSelector((state) => state.getAllFreeAdState);
   const { freeAds } = getAllFreeAdState;
-  console.log("freeAds:", freeAds?.length);
 
   const searchAdsState = useSelector((state) => state.searchAdsState);
   const {
     loading: searchAdLoading,
-    // success: searchAdSuccess,
     error: searchAdError,
     freeSearchAds,
     paidSearchAds,
   } = searchAdsState;
-  console.log("freeSearchAds", freeSearchAds?.length);
-  console.log("paidSearchAds", paidSearchAds?.length);
 
   const getSellerUsernameSearchState = useSelector(
     (state) => state.getSellerUsernameSearchState
   );
   const {
     loading: sellerUsernameSearchLoading,
-    // success: sellerUsernameSearchSuccess,
     error: sellerUsernameSearchError,
     serachResults,
     sellerAvatarUrl,
   } = getSellerUsernameSearchState;
-  console.log("serachResults", serachResults);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sellerUsername, setSellerUsername] = useState("");
+  const [searchSellerUsername, setSearchSellerUsername] = useState(null);
+  const [searchAdResult, setSearchAdResult] = useState(null);
+
+  const [filteredFreeAds, setFilteredFreeAds] = useState([]);
+  const [filteredPaidAds, setFilteredPaidAds] = useState([]);
+
+  // const [selectedCategory, setSelectedCategory] = useState(null);
+  // const [selectedType, setSelectedType] = useState(null);
+
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
 
   const [freeAdSearchLength, setFreeAdSearchLength] = useState(0);
   const [paidAdSearchLength, setPaidAdSearchLength] = useState(0);
@@ -76,65 +84,16 @@ function SearchResults() {
     setPaidAdSearchLength(paidSearchAds ? paidSearchAds.length : 0);
   }, [freeSearchAds, paidSearchAds]);
 
-  const [filteredFreeAds, setFilteredFreeAds] = useState([]);
-  const [filteredPaidAds, setFilteredPaidAds] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedType, setSelectedType] = useState(null);
-
-  const handleCategoryChange = useCallback(
-    (category) => {
-      setSelectedCategory(category);
-      setSelectedType(null);
-
-      const filteredFreeAds = freeSearchAds?.filter(
-        (ad) => ad.ad_category === category
-      );
-      const filteredPaidAds = paidSearchAds?.filter(
-        (ad) => ad.ad_category === category
-      );
-      setFilteredFreeAds(filteredFreeAds);
-      setFilteredPaidAds(filteredPaidAds);
-
-      localStorage.setItem("selectedCategory", category);
-      localStorage.removeItem("selectedType");
-    },
-    [freeSearchAds, paidSearchAds]
-  );
-
-  const handleTypeChange = useCallback(
-    (type, filteredFreeAds, filteredPaidAds) => {
-      setSelectedType(type);
-      setFilteredFreeAds(filteredFreeAds);
-      setFilteredPaidAds(filteredPaidAds);
-
-      // localStorage.setItem("selectedType", type);
-    },
-    []
-  );
-
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedState, setSelectedState] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
-
-  const handleCountryChange = (selectedOption) => {
-    setSelectedCountry(selectedOption.value);
-    setSelectedState("");
-    setSelectedCity("");
-  };
-
-  const handleStateChange = (selectedOption) => {
-    setSelectedState(selectedOption.value);
-    setSelectedCity("");
-  };
-
-  const handleCityChange = (selectedOption) => {
-    setSelectedCity(selectedOption.value);
-  };
+  useEffect(() => {
+    if (userInfo) {
+      dispatch(getUserProfile());
+    }
+  }, [dispatch, userInfo]);
 
   useEffect(() => {
-    const savedCountry = localStorage.getItem("selectedCountry");
-    const savedState = localStorage.getItem("selectedState");
-    const savedCity = localStorage.getItem("selectedCity");
+    const savedCountry = AsyncStorage.getItem("selectedCountry");
+    const savedState = AsyncStorage.getItem("selectedState");
+    const savedCity = AsyncStorage.getItem("selectedCity");
 
     if (savedCountry) setSelectedCountry(savedCountry);
     if (savedState) setSelectedState(savedState);
@@ -143,12 +102,12 @@ function SearchResults() {
 
   useEffect(() => {
     if (selectedCountry)
-      localStorage.setItem("selectedCountry", selectedCountry);
-    // if (selectedState) localStorage.setItem("selectedState", selectedState);
-    // if (selectedCity) localStorage.setItem("selectedCity", selectedCity);
+      AsyncStorage.setItem("selectedCountry", JSON.stringify(selectedCountry));
+    if (selectedState)
+      AsyncStorage.setItem("selectedState", JSON.stringify(selectedState));
+    if (selectedCity)
+      AsyncStorage.setItem("selectedCity", JSON.stringify(selectedCity));
   }, [selectedCountry, selectedState, selectedCity]);
-
-  console.log("location", selectedCountry, selectedState, selectedCity);
 
   useEffect(() => {
     const adData = {
@@ -158,14 +117,57 @@ function SearchResults() {
     };
     dispatch(getAllPaidAd(adData));
     dispatch(getAllFreeAd(adData));
-    // eslint-disable-next-line
   }, [dispatch, selectedCountry, selectedState, selectedCity]);
 
-  useEffect(() => {
-    if (userInfo) {
-      dispatch(getUserProfile());
-    }
-  }, [dispatch, userInfo]);
+  // const handleCategoryChange = useCallback(
+  //   (category) => {
+  //     setSelectedCategory(category);
+  //     setSelectedType(null);
+
+  //     const filteredFreeAds = freeSearchAds?.filter(
+  //       (ad) => ad.ad_category === category
+  //     );
+  //     const filteredPaidAds = paidSearchAds?.filter(
+  //       (ad) => ad.ad_category === category
+  //     );
+  //     setFilteredFreeAds(filteredFreeAds);
+  //     setFilteredPaidAds(filteredPaidAds);
+
+  //     AsyncStorage.setItem("selectedCategory", category);
+  //     AsyncStorage.removeItem("selectedType");
+  //   },
+  //   [freeSearchAds, paidSearchAds]
+  // );
+
+  // const handleTypeChange = useCallback(
+  //   (type, filteredFreeAds, filteredPaidAds) => {
+  //     setSelectedType(type);
+  //     setFilteredFreeAds(filteredFreeAds);
+  //     setFilteredPaidAds(filteredPaidAds);
+  //   },
+  //   []
+  // );
+
+  const handleCountryChange = async (country) => {
+    setSelectedCountry(country);
+    setSelectedState("");
+    setSelectedCity("");
+    await AsyncStorage.setItem("selectedCountry", JSON.stringify(country));
+    await AsyncStorage.removeItem("selectedState");
+    await AsyncStorage.removeItem("selectedCity");
+  };
+
+  const handleStateChange = async (state) => {
+    setSelectedState(state);
+    setSelectedCity("");
+    await AsyncStorage.setItem("selectedState", JSON.stringify(state));
+    await AsyncStorage.removeItem("selectedCity");
+  };
+
+  const handleCityChange = async (city) => {
+    setSelectedCity(city);
+    await AsyncStorage.setItem("selectedCity", JSON.stringify(city));
+  };
 
   const handleSearchAds = (e) => {
     e.preventDefault();
@@ -185,15 +187,6 @@ function SearchResults() {
     }
   };
 
-  // useEffect(() => {
-  //   if (searchAdSuccess) {
-  //     const timer = setTimeout(() => {
-  //       window.location.reload();
-  //     }, 3000);
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [searchAdSuccess]);
-
   const handleSellerUsernameSearch = (e) => {
     e.preventDefault();
     if (sellerUsername.trim() !== "") {
@@ -206,276 +199,328 @@ function SearchResults() {
     }
   };
 
-//   const Slider = require('rc-slider');
-// const createSliderWithTooltip = Slider.createSliderWithTooltip;
-// const Range = createSliderWithTooltip(Slider.Range);
-
   return (
-    <Container>
-      <Row>
-        <Col>
-          <hr />
-          <h1 className="text-center py-3">
-            <i className="fas fa-search"></i> Search Ads
-          </h1>
-          <hr />
-
-          <div className="py-2 d-flex justify-content-center text-center">
-            {/* {searchAdSuccess && (
-              <Message variant="success" fixed>
-                Ad(s) found!
-              </Message>
-            )} */}
-
-            {searchAdError && (
-              <Message fixed variant="danger">
-                {searchAdError}
-              </Message>
-            )}
-
-            {/* {sellerUsernameSearchSuccess && (
-              <Message variant="success" fixed>
-                Seller found!
-              </Message>
-            )} */}
-
-            {sellerUsernameSearchError && (
-              <Message fixed variant="danger">
-                {sellerUsernameSearchError}
-              </Message>
-            )}
-          </div>
-
-          <Form onSubmit={handleSearchAds}>
-            <Row className="py-2 d-flex justify-content-center">
-              <Col md={8}>
-                <Row className="py-2 d-flex justify-content-betwwen">
-                  <Col md={10}>
-                    <Form.Group>
-                      <Form.Control
-                        type="search"
-                        placeholder="Search ads"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={2} className="d-flex justify-content-end">
-                    <Button
-                      variant="primary"
-                      className="rounded"
-                      size="sm"
-                      type="submit"
-                      // onClick={handleSearchAds}
-                    >
-                      <div className="d-flex justify-content-center">
-                        <span className="py-1">
-                          <i className="fas fa-search"></i>
-                          {/* Search */}
-                          {/* Ads */}
-                        </span>
-                        {searchAdLoading && <LoaderButton />}
-                      </div>
-                    </Button>
-                  </Col>
-                </Row>
-              </Col>
-            </Row>
-          </Form>
-
-          <hr />
-          <Col md={6}>
-            <Button
-              variant="outline-transparent"
-              size="sm"
-              className="py-2 rounded"
-              disabled
-            >
-              <i className="fas fa-map-marker-alt"></i> Ad Location (
-              {freeAdSearchLength + paidAdSearchLength} ads)
-            </Button>
-          </Col>
-          <Row className="py-2 d-flex justify-content-end">
-            <Col className="py-2">
-              <Col md={4}>
-                <Select
-                  options={Country.getAllCountries().map((country) => ({
-                    // value: country.name,
-                    value: country.isoCode,
-                    label: country.name,
-                  }))}
-                  value={{ value: selectedCountry, label: selectedCountry }}
-                  onChange={handleCountryChange}
-                  placeholder="Select Country"
-                  className="rounded"
-                  required
-                />
-              </Col>
-              <Col md={4}>
-                <Select
-                  options={
-                    selectedCountry
-                      ? State.getStatesOfCountry(selectedCountry).map(
-                          (state) => ({
-                            value: state.isoCode,
-                            // value: state.name,
-                            label: state.name,
-                          })
-                        )
-                      : []
-                  }
-                  value={{ value: selectedState, label: selectedState }}
-                  onChange={handleStateChange}
-                  placeholder="Select State/Province"
-                  className="rounded"
-                  required
-                />
-              </Col>
-              <Col md={4}>
-                <Select
-                  options={
-                    selectedState
-                      ? City.getCitiesOfState(
-                          selectedCountry,
-                          selectedState
-                        ).map((city) => ({
-                          value: city.name,
-                          label: city.name,
-                        }))
-                      : []
-                  }
-                  value={{ value: selectedCity, label: selectedCity }}
-                  onChange={handleCityChange}
-                  placeholder="Select City"
-                  className="rounded"
-                  required
-                />
-              </Col>
-            </Col>
-
-            <Col md={4} xs={12} sm={6} lg={4} xl={4} className="py-2">
-              <Form onSubmit={handleSellerUsernameSearch}>
-                <Row className="d-flex justify-content-betwwen">
-                  <Col md={10}>
-                    <Form.Group>
-                      <Form.Control
-                        type="search"
-                        placeholder="Search seller by username"
-                        value={sellerUsername}
-                        onChange={(e) => setSellerUsername(e.target.value)}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={2} className="d-flex justify-content-end">
-                    <Button
-                      variant="primary"
-                      className="rounded"
-                      size="sm"
-                      type="submit"
-                      // onClick={handleSellerUsernameSearch}
-                      required
-                    >
-                      <div className="d-flex justify-content-center">
-                        <span className="py-1">
-                          <i className="fas fa-search"></i>
-                          {/* Search */}
-                          {/* Seller */}
-                        </span>
-                        {sellerUsernameSearchLoading && <LoaderButton />}
-                      </div>
-                    </Button>
-                  </Col>
-                </Row>
-              </Form>
-            </Col>
-          </Row>
-
-          <div className="py-2 d-flex justify-content-center">
-            <SearchFilterBar
-              selectedCategory={selectedCategory}
-              selectedType={selectedType}
-              setSelectedType={setSelectedType}
-              setSelectedCategory={setSelectedCategory}
-              paidSearchAds={paidSearchAds}
-              freeSearchAds={freeSearchAds}
-              onCategoryChange={handleCategoryChange}
-              onTypeChange={handleTypeChange}
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        <View style={styles.container}>
+          <Text style={styles.sellerResults}>Search Results</Text>
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search ads"
+              value={searchTerm}
+              onChangeText={(text) => setSearchTerm(text)}
             />
-          </div>
+            <Button title="Search" onPress={handleSearchAds} />
+          </View>
 
-          {/* <div className="py-2 d-flex justify-content-center">
-          <Slider range />
-          </div> */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search by Seller Username"
+              value={sellerUsername}
+              onChangeText={(text) => setSellerUsername(text)}
+            />
+            <Button title="Search" onPress={handleSellerUsernameSearch} />
+          </View>
 
-          <div className="py-2 d-flex justify-content-center">
-            {searchSellerUsername && (
-              <Row className="py-2 d-flex justify-content-center">
-                <hr />
-                <Col md={6}>
-                  <div>
-                    {serachResults && (
-                      <SellerSearchCard
-                        serachResults={serachResults}
-                        sellerAvatarUrl={sellerAvatarUrl}
+          <View style={styles.locationContainer}>
+            <View style={styles.location}>
+              <Text style={styles.title}>
+                <FontAwesomeIcon icon={faMapMarkerAlt} size={14} />
+                Ad Location ({freeAdSearchLength + paidAdSearchLength} ads)
+              </Text>
+            </View>
+
+            <View>
+              <Text style={styles.pickerLabel}>Country:</Text>
+              <View style={styles.adLocation}>
+                <Picker
+                  selectedValue={selectedCountry}
+                  onValueChange={handleCountryChange}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select Country" value="" />
+                  {Country.getAllCountries().map((country) => (
+                    <Picker.Item
+                      key={country.isoCode}
+                      label={country.name}
+                      value={country.isoCode}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+
+            <View>
+              <Text style={styles.pickerLabel}>State/Province:</Text>
+              <View style={styles.adLocation}>
+                <Picker
+                  selectedValue={selectedState}
+                  onValueChange={handleStateChange}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select State/Province" value="" />
+                  {State.getStatesOfCountry(selectedCountry).map((state) => (
+                    <Picker.Item
+                      key={state.isoCode}
+                      label={state.name}
+                      value={state.isoCode}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+
+            <View>
+              <Text style={styles.pickerLabel}>City:</Text>
+              <View style={styles.adLocation}>
+                <Picker
+                  selectedValue={selectedCity}
+                  onValueChange={handleCityChange}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select City" value="" />
+                  {City.getCitiesOfState(selectedCountry, selectedState).map(
+                    (city) => (
+                      <Picker.Item
+                        key={city.name}
+                        label={city.name}
+                        value={city.name}
                       />
+                    )
+                  )}
+                </Picker>
+              </View>
+            </View>
+          </View>
+
+          {/* <SearchFilterBar
+            selectedCategory={selectedCategory}
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
+            setSelectedCategory={setSelectedCategory}
+            freeSearchAds={freeSearchAds}
+            paidSearchAds={paidSearchAds}
+            onCategoryChange={handleCategoryChange}
+            onTypeChange={handleTypeChange}
+          /> */}
+
+          <View style={styles.resultsContainer}>
+            {searchAdLoading || sellerUsernameSearchLoading ? (
+              <Loader />
+            ) : searchAdError || sellerUsernameSearchError ? (
+              <Message variant="danger">{searchAdError}</Message>
+            ) : (
+              <View>
+                {/* <View style={styles.adResults}>
+                  {freeSearchAds?.map((ad) => (
+                    <SearchFreeAdScreen key={ad.id} ad={ad} />
+                  ))}
+                </View>
+                <View style={styles.adResults}>
+                  {paidSearchAds?.map((ad) => (
+                    <SearchPaidAdScreen key={ad.id} ad={ad} />
+                  ))}
+                </View>
+                <View style={styles.sellerResults}>
+                  <Text style={styles.title}>
+                    <FontAwesomeIcon icon={faSearch} size={14} /> Search Found (
+                    {freeAdSearchLength + paidAdSearchLength} ads)
+                  </Text>
+                  {serachResults?.map((result) => (
+                    <SellerSearchCard key={result.id} result={result} />
+                  ))}
+                </View> */}
+
+                <View>
+                  <View>
+                    {searchSellerUsername && (
+                      <View>
+                        {serachResults && (
+                          <SellerSearchCard
+                            key={serachResults.id}
+                            serachResults={serachResults}
+                            sellerAvatarUrl={sellerAvatarUrl}
+                          />
+                        )}
+                      </View>
                     )}
-                  </div>
-                </Col>
-              </Row>
-            )}
-          </div>
+                  </View>
 
-          <hr />
+                  <View>
+                    <Text style={styles.sellerResults}>
+                      <Text style={styles.title}></Text> Search Found (
+                      {freeAdSearchLength + paidAdSearchLength})
+                    </Text>
+                    {searchAdResult && (
+                      <View>
+                        <View>
+                          <View>
+                            {freeSearchAds || paidSearchAds ? (
+                              <>
+                                {/* {paidSearchAds?.map((ad) => (
+                                  <View>
+                                    {paidSearchAds && (
+                                      <SearchPaidAdScreen
+                                        key={ad.id}
+                                        selectedCountry={selectedCountry}
+                                        selectedState={selectedState}
+                                        selectedCity={selectedCity}
+                                        paidSearchAds={
+                                          filteredPaidAds || paidSearchAds
+                                        }
+                                      />
+                                    )}
+                                  </View>
+                                ))} */}
 
-          <div className="py-2">
-            {searchAdResult && (
-              <Row className="py-2 d-flex justify-content-center">
-                <h1 className="text-center">
-                  <i className="fas fa-search"></i> Search Found (
-                  {freeAdSearchLength + paidAdSearchLength})
-                </h1>
-                <Col>
-                  <div>
-                    {freeSearchAds || paidSearchAds ? (
-                      <>
-                        {paidSearchAds?.map((paidSearchAds) => (
-                          <Col>
-                            {paidSearchAds && (
-                              <SearchPaidAdScreen
-                                selectedCountry={selectedCountry}
-                                selectedState={selectedState}
-                                selectedCity={selectedCity}
-                                paidSearchAds={filteredPaidAds || paidSearchAds}
-                              />
+                                {/* {freeSearchAds?.map((ad) => (
+                                  <View>
+                                    {freeSearchAds && (
+                                      <SearchFreeAdScreen
+                                        key={ad.id}
+                                        selectedCountry={selectedCountry}
+                                        selectedState={selectedState}
+                                        selectedCity={selectedCity}
+                                        freeSearchAds={
+                                          filteredFreeAds || freeSearchAds
+                                        }
+                                      />
+                                    )}
+                                  </View>
+                                ))} */}
+
+                                <View style={styles.resultsSection}>
+                                  <Text style={styles.sectionTitle}>
+                                    Paid Ads
+                                  </Text>
+                                  {filteredPaidAds.length > 0 ? (
+                                    filteredPaidAds.map((ad) => (
+                                      <SearchPaidAdScreen
+                                        key={ad.id}
+                                        selectedCountry={selectedCountry}
+                                        selectedState={selectedState}
+                                        selectedCity={selectedCity}
+                                        // ad={ad}
+                                        // paidSearchAds={
+                                        //   filteredPaidAds || paidSearchAds
+                                        // }
+                                      />
+                                    ))
+                                  ) : (
+                                    <></>
+                                  )}
+                                </View>
+
+                                <View style={styles.resultsSection}>
+                                  <Text style={styles.sectionTitle}>
+                                    Free Ads
+                                  </Text>
+                                  {filteredFreeAds.length > 0 ? (
+                                    filteredFreeAds.map((ad) => (
+                                      <SearchFreeAdScreen
+                                        key={ad.id}
+                                        selectedCountry={selectedCountry}
+                                        selectedState={selectedState}
+                                        selectedCity={selectedCity}
+                                        // freeSearchAds={
+                                        //   filteredFreeAds || freeSearchAds
+                                        // }
+                                        // ad={ad}
+                                      />
+                                    ))
+                                  ) : (
+                                    <></>
+                                  )}
+                                </View>
+                              </>
+                            ) : (
+                              <></>
                             )}
-                          </Col>
-                        ))}
-
-                        {freeSearchAds?.map((freeSearchAds) => (
-                          <Col>
-                            {freeSearchAds && (
-                              <SearchFreeAdScreen
-                                selectedCountry={selectedCountry}
-                                selectedState={selectedState}
-                                selectedCity={selectedCity}
-                                freeSearchAds={filteredFreeAds || freeSearchAds} 
-                              />
-                            )}
-                          </Col>
-                        ))}
-                      </>
-                    ) : (
-                      <p></p>
+                          </View>
+                        </View>
+                      </View>
                     )}
-                  </div>
-                </Col>
-              </Row>
+                  </View>
+                </View>
+              </View>
             )}
-          </div>
-        </Col>
-      </Row>
-    </Container>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  scrollViewContainer: {
+    flexGrow: 1,
+    paddingBottom: 50,
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  searchContainer: {
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  searchInput: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingLeft: 8,
+    marginBottom: 10,
+  },
+  locationContainer: {
+    marginBottom: 20,
+  },
+  location: {
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  pickerLabel: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  adLocation: {
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  picker: {
+    height: 50,
+    width: "100%",
+  },
+  resultsContainer: {
+    flex: 1,
+  },
+  searchResultText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  adResults: {
+    marginBottom: 20,
+  },
+  sellerResults: {
+    marginBottom: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+});
 
 export default SearchResults;

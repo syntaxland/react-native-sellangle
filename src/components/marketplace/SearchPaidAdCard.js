@@ -1,43 +1,53 @@
 // SearchPaidAdCard.js
 import React, { useState, useEffect } from "react";
-import { Card, Button, Modal, Row, Col } from "react-bootstrap";
-import { Link, useHistory } from "react-router-dom";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Modal,
+  StyleSheet,
+  ScrollView,
+  Button,
+} from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faEye,
+  faClock,
+  faMapMarkerAlt,
+  faFlag,
+  faMessage,
+} from "@fortawesome/free-solid-svg-icons";
+import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
-import RatingSeller from "../RatingSeller";
 import {
   getSellerAccount,
   getPaidAdDetail,
   trackPaidAdView,
-} from "../../actions/marketplaceSellerActions";
-import PromoTimer from "../PromoTimer";
+} from "../../redux/actions/marketplaceSellerActions";
 import ReportPaidAd from "./ReportPaidAd";
 import TogglePaidAdSave from "./TogglePaidAdSave";
 import ReviewPaidAdSeller from "./ReviewPaidAdSeller";
+import RatingSeller from "../../RatingSeller";
+import PromoTimer from "../../PromoTimer";
 
 function SearchPaidAdCard({ paidSearchAd }) {
-  console.log("paidSearchAd Card", paidSearchAd);
   const dispatch = useDispatch();
-
-  const history = useHistory();
-
-  const userLogin = useSelector((state) => state.userLogin);
-  const { userInfo } = userLogin;
+  const navigation = useNavigation();
 
   const getPaidAdDetailState = useSelector(
     (state) => state.getPaidAdDetailState
   );
-  const {
-    sellerAvatarUrl,
-    sellerRating,
-    sellerReviewCount,
-  } = getPaidAdDetailState;
-  // console.log("sellerAvatarUrl:", sellerAvatarUrl);
+  const { sellerAvatarUrl, sellerRating, sellerReviewCount } =
+    getPaidAdDetailState;
+
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
 
   const [reportAdModal, setReportAdModal] = useState(false);
-
   const handleReportAdOpen = () => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     } else {
       setReportAdModal(true);
     }
@@ -61,19 +71,17 @@ function SearchPaidAdCard({ paidSearchAd }) {
 
   const viewProductHandler = () => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     } else {
       dispatch(trackPaidAdView(adData));
-      history.push(`/paid-ad-detail/${paidSearchAd.id}`);
+      navigation.navigate("PaidAdDetail", { id: paidSearchAd.id });
     }
   };
 
   function formatCount(viewCount) {
     if (viewCount >= 1000000) {
-      // Format as million
       return (viewCount / 1000000).toFixed(1) + "m";
     } else if (viewCount >= 1000) {
-      // Format as thousand
       return (viewCount / 1000).toFixed(1) + "k";
     } else {
       return viewCount?.toString();
@@ -82,7 +90,7 @@ function SearchPaidAdCard({ paidSearchAd }) {
 
   const handleClickMessageSeller = () => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     } else {
       const queryParams = {
         id: paidSearchAd.id,
@@ -94,13 +102,9 @@ function SearchPaidAdCard({ paidSearchAd }) {
         seller_username: paidSearchAd.seller_username,
         expiration_date: paidSearchAd.expiration_date,
         ad_rating: sellerRating,
-        // ad_rating: paidSearchAd.ad_rating,
       };
 
-      history.push({
-        pathname: `/buyer/paid/ad/message/${paidSearchAd.id}`,
-        search: `?${new URLSearchParams(queryParams).toString()}`,
-      });
+      navigation.navigate("BuyerMessage", queryParams);
     }
   };
 
@@ -112,218 +116,204 @@ function SearchPaidAdCard({ paidSearchAd }) {
   }
 
   return (
-    <Row>
-      <Col>
-        <Card className="my-3 p-3 rounded">
-         
-          <Link onClick={viewProductHandler}>
-            <Card.Img src={paidSearchAd.image1} />
-          </Link>
+    <ScrollView style={styles.card}>
+      <TouchableOpacity onPress={viewProductHandler}>
+        <Image source={{ uri: paidSearchAd.image1 }} style={styles.image} />
+      </TouchableOpacity>
 
-          <Card.Body>
-            <Link onClick={viewProductHandler} className="py-2">
-              <Card.Title as="div">
-                <strong>{paidSearchAd.ad_name}</strong>
-              </Card.Title>
-            </Link>
+      <View style={styles.body}>
+        <TouchableOpacity onPress={viewProductHandler}>
+          <Text style={styles.title}>{paidSearchAd.ad_name}</Text>
+        </TouchableOpacity>
 
-            <div className="d-flex justify-content-between py-2">
-              <span>
-                <Button
-                  variant="outline-success"
-                  size="sm"
-                  className="rounded"
-                  disabled
-                >
-                  <i>Promoted</i>
-                </Button>
-              </span>
+        <View style={styles.ratingContainer}>
+          <RatingSeller
+            value={sellerRating}
+            text={`${formatCount(sellerReviewCount)} reviews `}
+            color={"green"}
+          />
+          <ReviewPaidAdSeller adId={paidSearchAd?.id} />
+        </View>
 
-              {/* <div>
-            <span>
-              {sellerAccount?.is_seller_verified ? (
-                <>
-                  <Button
-                    variant="outline-success"
-                    size="sm"
-                    className="rounded"
-                    disabled
-                  >
-                    <i className="fas fa-user-check"></i> <i>Verified ID</i>{" "}
-                    <i
-                      className="fas fa-check-circle"
-                      style={{ fontSize: "18px", color: "blue" }}
-                    ></i>
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    className="rounded"
-                    disabled
-                  >
-                    <i className="fas fa-user"></i> <i>ID Not Verified</i>{" "}
-                    <i
-                      // className="fas fa-check-circle"
-                      style={{ fontSize: "18px", color: "red" }}
-                    ></i>
-                  </Button>
-                </>
-              )}
-            </span>
-          </div> */}
-            </div>
+        <Text style={styles.views}>
+          <FontAwesomeIcon icon={faEye} size={16} />{" "}
+          {formatCount(paidSearchAd?.ad_view_count)} views
+        </Text>
 
-            <div className="d-flex justify-content-between">
-              <div as="div">
-                <div className="py-2">
-                  <RatingSeller
-                    value={sellerRating}
-                    text={`${formatCount(
-                      sellerReviewCount
-                    )} reviews `}
-                    color={"green"}
-                  />
-                  <ReviewPaidAdSeller adId={paidSearchAd?.id} />
-                </div>
-              </div>
+        <Text style={styles.price}>
+          {formatNumber(paidSearchAd?.price)} {paidSearchAd?.currency}{" "}
+          {paidSearchAd?.usd_price ? (
+            <Text> / {paidSearchAd?.usd_price} USD </Text>
+          ) : null}{" "}
+          {paidSearchAd?.is_price_negotiable ? <Text>(Negotiable)</Text> : null}
+        </Text>
 
-              <Card.Text as="div" className="py-2">
-                <span className="text-right" onClick={viewProductHandler}>
-                  <i className="fas fa-eye"></i>{" "}
-                  {formatCount(paidSearchAd?.ad_view_count)} views
-                </span>
-              </Card.Text>
-            </div>
+        <View style={styles.promoContainer}>
+          {paidSearchAd?.promo_code ? (
+            <Text style={styles.promoText}>
+              Promo Code: {paidSearchAd?.promo_code}{" "}
+              {paidSearchAd?.discount_percentage}% Off
+            </Text>
+          ) : null}
+        </View>
 
-            <div className="d-flex justify-content-between">
-              <Card.Text as="h5" className="py-2">
-                <span>
-                  {formatNumber(paidSearchAd?.price)} {paidSearchAd?.currency}{" "}
-                  {paidSearchAd?.usd_price ? (
-                    <span> / {paidSearchAd?.usd_price} USD </span>
-                  ) : (
-                    <></>
-                  )}{" "}
-                  {paidSearchAd?.is_price_negotiable ? (
-                    <i>(Negotiable)</i>
-                  ) : (
-                    <></>
-                  )}
-                </span>
-              </Card.Text>
-            </div>
+        <View style={styles.promoContainer}>
+          <Text style={styles.promoText}>
+            <FontAwesomeIcon icon={faClock} size={16} /> Expires in:{" "}
+            <PromoTimer expirationDate={paidSearchAd?.expiration_date} />
+          </Text>
+        </View>
 
-            <div className="d-flex justify-content-end">
-              <span className="py-2">
-                {paidSearchAd?.promo_code ? (
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
-                    className="py-2 rounded"
-                    disabled
-                  >
-                    <i>
-                      Promo Code: {paidSearchAd?.promo_code}{" "}
-                      {paidSearchAd?.discount_percentage}% Off
-                    </i>
-                  </Button>
-                ) : (
-                  <></>
-                )}
-              </span>
-            </div>
+        <View style={styles.buttonsContainer}>
+          <TogglePaidAdSave ad={paidSearchAd} />
+          <Button
+            title="Message Seller"
+            color="#007bff"
+            onPress={handleClickMessageSeller}
+          />
+        </View>
 
-            <div className="d-flex justify-content-between">
-              <span className="py-2">
-                <Button
-                  variant="outline-danger"
-                  size="sm"
-                  className="py-2 rounded"
-                  disabled
-                >
-                  <i className="fas fa-clock"></i> Expires in:{" "}
-                  <PromoTimer expirationDate={paidSearchAd?.expiration_date} />
-                </Button>
-              </span>
-            </div>
+        <View style={styles.locationContainer}>
+          <Text style={styles.locationText}>
+            <FontAwesomeIcon icon={faMapMarkerAlt} size={16} />{" "}
+            {paidSearchAd?.city} {paidSearchAd?.state_province},{" "}
+            {paidSearchAd?.country}.
+          </Text>
+        </View>
 
-            <div className="d-flex justify-content-between py-2">
-              <span className="py-2">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className="py-2 rounded"
-                  onClick={handleClickMessageSeller}
-                >
-                  <i className="fa fa-message"></i> Message Seller
-                </Button>
-              </span>
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleReportAdOpen}
+          >
+            <Text style={styles.buttonText}>Report Ad</Text>
+          </TouchableOpacity>
+        </View>
 
-              <span className="py-2">
-                <div>
-                  <TogglePaidAdSave ad={paidSearchAd} />
-                </div>
-                {/* <Button
-              onClick={toggleFavoriteHandler}
-              className="py-2 rounded"
-              type="button"
-              variant={paidSearchAdSaved ? "danger" : "outline-danger"}
-            >
-              <div className="mt-auto">
-                <i
-                  className={paidSearchAdSaved ? "fas fa-heart" : "far fa-heart"}
-                ></i>{" "}
-                {paidSearchAdSaved ? "Saved" : "Save"}{" "}
-                <span className="text-muted">({formatCount(totalSaves)})</span>
-              </div>
-            </Button> */}
-              </span>
-            </div>
-            <div className="d-flex justify-content-between py-2">
-              <span>
-                <Button
-                  variant="outline-transparent"
-                  size="sm"
-                  className="py-2 rounded"
-                  disabled
-                >
-                  <i className="fas fa-map-marker-alt"></i> {paidSearchAd?.city}{" "}
-                  {paidSearchAd?.state_province}, {paidSearchAd?.country}.
-                </Button>
-              </span>
-
-              <span>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  className="rounded py-2"
-                  onClick={handleReportAdOpen}
-                  // disabled
-                >
-                  <i className="fa fa-flag"></i> Report Ad
-                </Button>
-              </span>
-            </div>
-          </Card.Body>
-        </Card>
-        <div className="d-flex justify-content-center">
-          <Modal show={reportAdModal} onHide={handleReportAdClose}>
-            <Modal.Header closeButton>
-              <Modal.Title className="text-center w-100 py-2">
-                Report Ad
-              </Modal.Title>
-            </Modal.Header>
-            <Modal.Body className="d-flex justify-content-center py-2">
-              {reportAdModal && <ReportPaidAd adId={paidSearchAd?.id} />}
-            </Modal.Body>
+        <View style={styles.modalContainer}>
+          <Modal
+            visible={reportAdModal}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={handleReportAdClose}
+          >
+            <View style={styles.modalContent}>
+              <ReportPaidAd adId={paidSearchAd?.id} />
+              <TouchableOpacity onPress={handleReportAdClose}>
+                <Text style={styles.closeButton}>Close</Text>
+              </TouchableOpacity>
+            </View>
           </Modal>
-        </div>
-      </Col>
-    </Row>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    marginVertical: 10,
+    marginHorizontal: 15,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  image: {
+    width: "100%",
+    height: 200,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  body: {
+    padding: 10,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  views: {
+    color: "grey",
+    marginBottom: 5,
+  },
+  price: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  promoContainer: {
+    marginBottom: 5,
+  },
+  promoText: {
+    color: "green",
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  locationContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  locationText: {
+    color: "grey",
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  actionButton: {
+    padding: 10,
+    borderRadius: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 5,
+    backgroundColor: "#dc3545",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
+  },
+  closeButton: {
+    color: "#007bff",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  spaceBtwGroup: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 2,
+  },
+  spaceBtwElement: {
+    padding: 10,
+  },
+});
 
 export default SearchPaidAdCard;

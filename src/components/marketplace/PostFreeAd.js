@@ -990,7 +990,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   roundedSuccessBtn: {
-    backgroundColor: "#28a745)",
+    backgroundColor: "#28a745",
     color: "#fff",
     padding: 10,
     borderRadius: 25,

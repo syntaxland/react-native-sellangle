@@ -28,7 +28,7 @@ function Message({ variant, children, fixed }) {
       <TouchableOpacity
         onPress={() => setShowMessage(false)}
         style={{
-          backgroundColor: variant === "error" ? "red" : "green",
+          backgroundColor: variant === "danger" ? "#dc3545" : "#28a745",
           padding: 10,
           borderRadius: 5,
         }}

@@ -12,6 +12,17 @@ import {
   RefreshControl,
   useWindowDimensions,
 } from "react-native";
+import * as Clipboard from "expo-clipboard";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faEnvelope,
+  faPhone,
+  faShoppingCart,
+  faFlag,
+  faCheck,
+  faCopy,
+  faClock,
+} from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -67,10 +78,18 @@ const FreeAdProductDetail = () => {
     dispatch(getSellerAccount());
   }, [dispatch, id]);
 
-  const handleShowPhoneNumber = () => setShowPhoneNumber(!showPhoneNumber);
   const handleClickMore = () => setExpanded(!expanded);
   const handleReportAdOpen = () => setReportAdModal(true);
   const handleReportAdClose = () => setReportAdModal(false);
+
+  const handleShowPhoneNumber = () => setShowPhoneNumber(!showPhoneNumber);
+  const [isPhoneCopied, setIsPhoneCopied] = useState(false);
+
+  const handleCopyPhoneNumber = async () => {
+    await Clipboard.setStringAsync(ads?.seller_phone);
+    setIsPhoneCopied(true);
+    setTimeout(() => setIsPhoneCopied(false), 2000);
+  };
 
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = useCallback(() => {
@@ -156,7 +175,9 @@ const FreeAdProductDetail = () => {
   };
 
   const handleSellerShopFront = () => {
-    navigation.navigate("SellerShopFront", { username: ads?.seller_username });
+    navigation.navigate("Seller Shop Front", {
+      seller_username: ads?.seller_username,
+    });
   };
 
   return (
@@ -166,7 +187,7 @@ const FreeAdProductDetail = () => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <Button title="Go Back" onPress={() => navigation.goBack()} />
+      {/* <Button title="Go Back" onPress={() => navigation.goBack()} /> */}
       {loading ? (
         <Loader />
       ) : error ? (
@@ -198,7 +219,8 @@ const FreeAdProductDetail = () => {
             )}
             <View style={styles.card}>
               <Text>
-                Expires in: <PromoTimer expirationDate={ads?.expiration_date} />
+                <FontAwesomeIcon icon={faClock} color="#fff" /> Expires in:{" "}
+                <PromoTimer expirationDate={ads?.expiration_date} />
               </Text>
               <Text>
                 Price: {formatAmount(ads.price)} {ads.currency}
@@ -233,33 +255,104 @@ const FreeAdProductDetail = () => {
                 )}
               </TouchableOpacity>
               <Text>{calculateLastSeen(ads?.user_last_login)}</Text>
+
               <Text>
                 {isSellerVerified ? "Verified ID" : "ID Not Verified"}
               </Text>
+
               <RatingSeller
                 value={sellerRating}
                 text={`${formatCount(sellerReviewCount)} reviews`}
                 color="green"
               />
-              <ReviewFreeAdSeller adId={ads?.id} />
-              <Button
-                title={showPhoneNumber ? "Hide Contact" : "Show Contact"}
-                onPress={handleShowPhoneNumber}
-              />
-              {showPhoneNumber && <Text>{ads?.seller_phone}</Text>}
-              <View style={styles.buttonGroup}>
-                <Button
-                  title="Message Seller"
-                  onPress={handleClickMessageSeller}
-                />
-                <Button
-                  title="Go to Seller Shopfront"
-                  onPress={handleSellerShopFront}
-                />
-              </View>
               <Text>
                 Joined since {calculateDuration(ads?.seller_joined_since)}
               </Text>
+              <ReviewFreeAdSeller adId={ads?.id} />
+
+              <View style={styles.spaceBtwGroup}>
+                <TouchableOpacity
+                  style={styles.squaredPrimaryButton}
+                  onPress={handleShowPhoneNumber}
+                >
+                  <Text style={styles.btnText}>
+                    <FontAwesomeIcon icon={faPhone} color="#fff" />{" "}
+                    {showPhoneNumber ? "Hide Contact" : "Show Contact"}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.squaredPrimaryButton}
+                  onPress={handleClickMessageSeller}
+                >
+                  <Text style={styles.btnText}>
+                    <FontAwesomeIcon icon={faEnvelope} color="#fff" /> Message
+                    Seller
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {showPhoneNumber && (
+                <View style={styles.spaceBtwGrou}>
+                  <Text style={styles.phoneNumber}>
+                    <TouchableOpacity
+                      style={styles.copyPhone}
+                      onPress={handleCopyPhoneNumber}
+                    >
+                      <Text style={styles.label}>
+                        {isPhoneCopied ? (
+                          <Text style={styles.label}>
+                            Phone number copied{" "}
+                            <FontAwesomeIcon
+                              icon={faCheck}
+                              size={16}
+                              color="#007bff"
+                            />
+                          </Text>
+                        ) : (
+                          <Text style={styles.label}>
+                            <Text>{ads?.seller_phone} </Text>{" "}
+                            <FontAwesomeIcon
+                              icon={faCopy}
+                              size={16}
+                              color="#007bff"
+                            />
+                          </Text>
+                        )}
+                      </Text>
+                    </TouchableOpacity>
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.shopfront}>
+              <TouchableOpacity
+                style={styles.shopfrontButton}
+                onPress={handleSellerShopFront}
+              >
+                <Text style={styles.shopfrontButtonText}>
+                  <FontAwesomeIcon icon={faShoppingCart} /> Go to Seller
+                  Shopfront
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.buttonGroup}>
+              <View style={styles.spaceBtwElement}>
+                <ToggleFreeAdSave adId={ads?.id} />
+              </View>
+
+              <View style={styles.spaceBtwElement}>
+                <TouchableOpacity
+                  style={styles.squaredDangerBtn}
+                  onPress={handleReportAdOpen}
+                >
+                  <Text style={styles.btnText}>
+                    <FontAwesomeIcon icon={faFlag} color="#fff" /> Report Ad
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
           <Modal visible={reportAdModal} onRequestClose={handleReportAdClose}>
@@ -273,7 +366,7 @@ const FreeAdProductDetail = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    padding: 5,
   },
   image: {
     width: 300,
@@ -311,6 +404,109 @@ const styles = StyleSheet.create({
   buttonGroup: {
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  shopfront: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+  },
+  shopfrontButton: {
+    backgroundColor: "#007bff",
+    padding: 8,
+    borderRadius: 4,
+  },
+  shopfrontButtonText: {
+    color: "#fff",
+  },
+  sellerDetails: {
+    marginVertical: 10,
+  },
+  sellerAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  buttonGroup: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 10,
+  },
+  spaceBtwGroup: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 2,
+  },
+  spaceBtwElement: {
+    padding: 10,
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 10,
+    width: "80%",
+    alignItems: "center",
+  },
+  modalLabelBody: {
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    padding: 10,
+  },
+  modalLabelTitle: {
+    fontWeight: "bold",
+    fontSize: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    padding: 10,
+  },
+  icon: {
+    marginLeft: 10,
+    color: "#007bff",
+  },
+  shopfront: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+  },
+  squaredPrimaryButton: {
+    backgroundColor: "#007bff",
+    padding: 5,
+    borderRadius: 5,
+  },
+  squaredDangerBtn: {
+    backgroundColor: "#dc3545",
+    padding: 5,
+    borderRadius: 5,
+    color: "#fff",
+  },
+  btnText: {
+    color: "#fff",
+  },
+  payBtn: {
+    padding: 20,
+  },
+  label: {
+    color: "#007bff",
+  },
+  phoneNumber: {
+    color: "#007bff",
+    padding: 20,
   },
 });
 

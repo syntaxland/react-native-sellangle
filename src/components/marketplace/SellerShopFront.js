@@ -1,58 +1,66 @@
 // SellerShopFront.js
 import React, { useEffect } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
-import { Row, Col } from "react-bootstrap";
-import { getUserProfile } from "../../actions/userProfileActions";
-
+import { useRoute, useNavigation } from "@react-navigation/native";
+import { getUserProfile } from "../../redux/actions/userProfileActions";
 import SellerActiveFreeAdScreen from "./SellerActiveFreeAdScreen";
 import SellerActivePaidAdScreen from "./SellerActivePaidAdScreen";
 import GetSellerDetail from "./GetSellerDetail";
 
-function SellerShopFront() {
+const SellerShopFront = () => {
   const dispatch = useDispatch();
+  const route = useRoute();
+  const navigation = useNavigation();
 
-  const { seller_username } = useParams();
-  console.log("seller_username:", seller_username);
+  const { seller_username } = route.params;
+  console.log("SellerShopFront seller_username:", seller_username);
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     } else {
       dispatch(getUserProfile());
     }
-  }, [dispatch, userInfo]);
+  }, [dispatch, userInfo, navigation]);
 
   return (
-    <div>
-      <Row>
-        <Col>
-          <hr />
-          <h1 className="text-center py-3">
-            <i className="fas fa-shopping-cart"></i> Seller Shop Front
-          </h1>
-          <hr />
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>
+       Seller Shop Front
+      </Text>
 
-          <div>
-            <GetSellerDetail seller_username={seller_username} />
-          </div>
+      <View style={styles.section}>
+        <GetSellerDetail seller_username={seller_username} />
+      </View>
 
-          <div>
-            <SellerActiveFreeAdScreen seller_username={seller_username} />
-          </div>
+      <View style={styles.section}>
+        <SellerActiveFreeAdScreen seller_username={seller_username} />
+      </View>
 
-          <div>
-            <SellerActivePaidAdScreen seller_username={seller_username} />
-          </div>
-        
-          <hr />
-        </Col>
-      </Row>
-    </div>
+      <View style={styles.section}>
+        <SellerActivePaidAdScreen seller_username={seller_username} />
+      </View>
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 2,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 10,
+    textAlign: "center",
+  },
+  section: {
+    marginBottom: 20,
+  },
+});
 
 export default SellerShopFront;

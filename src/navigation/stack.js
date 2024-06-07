@@ -20,8 +20,13 @@ import SellerPhoto from "../components/marketplace/SellerPhoto";
 import EditFreeAd from "../components/marketplace/EditFreeAd";
 import EditPaidAd from "../components/marketplace/EditPaidAd";
 import CurrentAds from "../components/marketplace/CurrentAds";
-// import SellerPhoto from "../components/marketplace/SellerPhoto";
-// import SellerPhoto from "../components/marketplace/SellerPhoto";
+import SearchResults from "../components/marketplace/SearchResults";
+import SellerShopFront from "../components/marketplace/SellerShopFront";
+import BuyerFreeAdMessage from "../components/marketplace/BuyerFreeAdMessage";
+import BuyerPaidAdMessage from "../components/marketplace/BuyerPaidAdMessage";
+import SellerFreeAdMessage from "../components/marketplace/SellerFreeAdMessage";
+import SellerPaidAdMessage from "../components/marketplace/SellerPaidAdMessage";
+// import SellerShopFront from "../components/marketplace/SellerShopFront";
 // CreditPoint
 import GetBuyCreditPoint from "../components/CreditPoint/GetBuyCreditPoint";
 import GetUserCpsBonuses from "../components/CreditPoint/GetUserCpsBonuses";
@@ -35,10 +40,14 @@ import GetBuyerCreditPoint from "../components/CreditPoint/GetBuyerCreditPoint";
 import PaysofterButton from "../components/CreditPoint/payment/PaysofterButton";
 // import PaysofterButton from "../components/CreditPoint/PaysofterButton";
 // profiles
-import Dashboard from "../components/profiles/Dashboard"; 
-// import Inbox from "../components/profiles/Inbox"; 
-// import Inbox from "../components/profiles/Inbox"; 
-// import Inbox from "../components/profiles/Inbox"; 
+import Dashboard from "../components/profiles/Dashboard";
+import ViewedAds from "../components/profiles/ViewedAds";
+import SavedAds from "../components/profiles/SavedAds";
+import RecommendedAds from "../components/recommender/RecommendedAds";
+import Inbox from "../components/profiles/Inbox";
+// import Inbox from "../components/profiles/Inbox";
+// import Inbox from "../components/profiles/Inbox";
+// import Inbox from "../components/profiles/Inbox";
 
 const Stack = createStackNavigator();
 
@@ -53,30 +62,47 @@ export const HomeStack = () => {
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="VerifyEmailOtp" component={VerifyEmailOtp} />
       <Stack.Screen name="Dashboard" component={Dashboard} />
-      {/* <Stack.Screen name="Inbox" component={Inbox} /> */}
+      <Stack.Screen name="Inbox" component={Inbox} />
       {/* marketplace */}
-      <Stack.Screen name="Bought NGN CPS List" component={GetBuyCreditPoint} /> 
-      <Stack.Screen name="CPS Bonuses" component={GetUserCpsBonuses} /> 
-      <Stack.Screen name="CPS Ad Charges" component={GetAdCpsCharges} /> 
-      <Stack.Screen name="Bought USD CPS List" component={GetUsdBuyCreditPoint} /> 
-      <Stack.Screen name="Sold CPS List" component={GetSellCreditPoint} /> 
-      <Stack.Screen name="Recieved CPS List" component={GetBuyerCreditPoint} /> 
-      <Stack.Screen name="Post Free Ad" component={PostFreeAd} /> 
-      <Stack.Screen name="Post Paid Ad" component={PostPaidAd} /> 
-      <Stack.Screen name="Ad Detail" component={FreeAdProductDetail} /> 
-      <Stack.Screen name="Promoted Ad Detail" component={PaidAdProductDetail} /> 
-      <Stack.Screen name="Shop Front Link" component={ShopFrontLink} /> 
-      <Stack.Screen name="Create Seller Account" component={CreateMarketplaceSeller} /> 
-      <Stack.Screen name="Seller Photo" component={SellerPhoto} /> 
-      <Stack.Screen name="Current Ads" component={CurrentAds} /> 
-      <Stack.Screen name="Edit Free Ad" component={EditFreeAd} /> 
-      <Stack.Screen name="Edit Paid Ad" component={EditPaidAd} /> 
-      {/* <Stack.Screen name="EditPaidAd" component={EditPaidAd} />  */}
-      {/* <Stack.Screen name="EditPaidAd" component={EditPaidAd} />  */}
-      {/* <Stack.Screen name="EditPaidAd" component={EditPaidAd} />  */}
+      <Stack.Screen name="Bought NGN CPS List" component={GetBuyCreditPoint} />
+      <Stack.Screen name="CPS Bonuses" component={GetUserCpsBonuses} />
+      <Stack.Screen name="CPS Ad Charges" component={GetAdCpsCharges} />
+      <Stack.Screen
+        name="Bought USD CPS List"
+        component={GetUsdBuyCreditPoint}
+      />
+      <Stack.Screen name="Sold CPS List" component={GetSellCreditPoint} />
+      <Stack.Screen name="Recieved CPS List" component={GetBuyerCreditPoint} />
+      <Stack.Screen name="Post Free Ad" component={PostFreeAd} />
+      <Stack.Screen name="Post Paid Ad" component={PostPaidAd} />
+      <Stack.Screen name="Ad Detail" component={FreeAdProductDetail} />
+      <Stack.Screen name="Promoted Ad Detail" component={PaidAdProductDetail} />
+      <Stack.Screen name="Shop Front Link" component={ShopFrontLink} />
+      <Stack.Screen
+        name="Create Seller Account"
+        component={CreateMarketplaceSeller}
+      />
+      <Stack.Screen name="Seller Photo" component={SellerPhoto} />
+      <Stack.Screen name="Current Ads" component={CurrentAds} />
+      <Stack.Screen name="Edit Free Ad" component={EditFreeAd} />
+      <Stack.Screen name="Edit Paid Ad" component={EditPaidAd} />
+      <Stack.Screen name="Viewed Ads" component={ViewedAds} />
+      <Stack.Screen name="Saved Ads" component={SavedAds} />
+      <Stack.Screen name="Recommended Ads" component={RecommendedAds} />
+      <Stack.Screen name="Search Results" component={SearchResults} />
+      <Stack.Screen name="Seller Shop Front" component={SellerShopFront} />
 
-      <Stack.Screen name="PaysofterButton" component={PaysofterButton} /> 
 
+      <Stack.Screen name="Buyer Free Ad Message" component={BuyerFreeAdMessage} /> 
+      <Stack.Screen name="Buyer Paid Ad Message" component={BuyerPaidAdMessage} /> 
+      <Stack.Screen name="Seller Free Ad Message" component={SellerFreeAdMessage} /> 
+      <Stack.Screen name="Seller Paid Ad Message" component={SellerPaidAdMessage} /> 
+      {/* <Stack.Screen name="SellerFreeAdMessage" component={SellerFreeAdMessage} />  */}
+      {/* <Stack.Screen name="SellerFreeAdMessage" component={SellerFreeAdMessage} />  */}
+      {/* <Stack.Screen name="SellerFreeAdMessage" component={SellerFreeAdMessage} />  */}
+      {/* <Stack.Screen name="SellerFreeAdMessage" component={SellerFreeAdMessage} />  */}
+
+      <Stack.Screen name="PaysofterButton" component={PaysofterButton} />
     </Stack.Navigator>
   );
 };
@@ -85,7 +111,7 @@ export const HomeStack = () => {
 //   const navigation = useNavigation();
 //   return (
 //     <Stack.Navigator screenOptions={() => navOptions(navigation)}>
-//       <Stack.Screen name="HomeTabs" component={HomeTabs} />    
+//       <Stack.Screen name="HomeTabs" component={HomeTabs} />
 
 //     </Stack.Navigator>
 //   );

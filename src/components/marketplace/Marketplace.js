@@ -122,12 +122,12 @@ const Marketplace = () => {
   useEffect(() => {
     const fetchData = async () => {
       const savedCountry = await AsyncStorage.getItem("selectedCountry");
-      const savedState = await AsyncStorage.getItem("selectedState");
-      const savedCity = await AsyncStorage.getItem("selectedCity");
+      // const savedState = await AsyncStorage.getItem("selectedState");
+      // const savedCity = await AsyncStorage.getItem("selectedCity");
 
       if (savedCountry) setSelectedCountry(savedCountry);
-      if (savedState) setSelectedState(savedState);
-      if (savedCity) setSelectedCity(savedCity);
+      // if (savedState) setSelectedState(savedState);
+      // if (savedCity) setSelectedCity(savedCity);
     };
 
     fetchData();
@@ -213,7 +213,7 @@ const Marketplace = () => {
   };
 
   const handleSearchAds = () => {
-    navigation.navigate("SearchAd");
+    navigation.navigate("Search Results");
   };
 
   const handleSellerUsernameSearch = async (e) => {
@@ -243,13 +243,13 @@ const Marketplace = () => {
   const handleStateChange = async (state) => {
     setSelectedState(state);
     setSelectedCity("");
-    await AsyncStorage.setItem("selectedState", state);
-    await AsyncStorage.removeItem("selectedCity");
+    // await AsyncStorage.setItem("selectedState", state);
+    // await AsyncStorage.removeItem("selectedCity");
   };
 
   const handleCityChange = async (city) => {
     setSelectedCity(city);
-    await AsyncStorage.setItem("selectedCity", city);
+    // await AsyncStorage.setItem("selectedCity", city);
   };
 
   console.log("Hey Sellangle!");
@@ -312,81 +312,100 @@ const Marketplace = () => {
                 Ad Location ({freeAdLength + paidAdLength} ads)
               </Text>
             </View>
-            <Text style={styles.pickerLabel}>Country:</Text>
 
-            <View style={styles.adLocation}>
-              <Picker
-                selectedValue={selectedCountry}
-                onValueChange={handleCountryChange}
-                style={styles.picker}
-              >
-                {Country.getAllCountries().map((country) => (
-                  <Picker.Item
-                    key={country.isoCode}
-                    label={country.name}
-                    value={country.isoCode}
-                  />
-                ))}
-              </Picker>
+            <View>
+              <Text style={styles.pickerLabel}>Country:</Text>
+              <View style={styles.adLocation}>
+                <Picker
+                  selectedValue={selectedCountry}
+                  onValueChange={handleCountryChange}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select Country" value="" />
+                  {Country.getAllCountries().map((country) => (
+                    <Picker.Item
+                      key={country.isoCode}
+                      label={country.name}
+                      value={country.isoCode}
+                    />
+                  ))}
+                </Picker>
+              </View>
             </View>
 
-            {selectedCountry && (
-              <>
-                <Text style={styles.pickerLabel}>State/Province:</Text>
+            <View>
+              <Text style={styles.pickerLabel}>State/Province:</Text>
+              <View style={styles.adLocation}>
+                <Picker
+                  selectedValue={selectedState}
+                  onValueChange={handleStateChange}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select State/Province" value="" />
+                  {State.getStatesOfCountry(selectedCountry).map((state) => (
+                    <Picker.Item
+                      key={state.isoCode}
+                      label={state.name}
+                      value={state.isoCode}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
 
-                <View style={styles.adLocation}>
-                  <Picker
-                    selectedValue={selectedState}
-                    onValueChange={handleStateChange}
-                    style={styles.picker}
-                  >
-                    {State.getStatesOfCountry(selectedCountry).map((state) => (
+            <View>
+              <Text style={styles.pickerLabel}>City:</Text>
+              <View style={styles.adLocation}>
+                <Picker
+                  selectedValue={selectedCity}
+                  onValueChange={handleCityChange}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select City" value="" />
+                  {City.getCitiesOfState(selectedCountry, selectedState).map(
+                    (city) => (
                       <Picker.Item
-                        key={state.isoCode}
-                        label={state.name}
-                        value={state.isoCode}
+                        key={city.name}
+                        label={city.name}
+                        value={city.name}
                       />
-                    ))}
-                  </Picker>
-                </View>
-              </>
-            )}
-
-            {selectedState && (
-              <>
-                <Text style={styles.pickerLabel}>City:</Text>
-
-                <View style={styles.adLocation}>
-                  <Picker
-                    selectedValue={selectedCity}
-                    onValueChange={handleCityChange}
-                    style={styles.picker}
-                  >
-                    {City.getCitiesOfState(selectedCountry, selectedState).map(
-                      (city) => (
-                        <Picker.Item
-                          key={city.name}
-                          label={city.name}
-                          value={city.name}
-                        />
-                      )
-                    )}
-                  </Picker>
-                </View>
-              </>
-            )}
+                    )
+                  )}
+                </Picker>
+              </View>
+            </View>
           </View>
 
-          <FilterBar
-            selectedCategory={selectedCategory}
-            selectedType={selectedType}
-            setSelectedType={setSelectedType}
-            setSelectedCategory={setSelectedCategory}
-            freeAds={freeAds}
-            paidAds={paidAds}
-            onCategoryChange={handleCategoryChange}
-            onTypeChange={handleTypeChange}
-          />
+          <View>
+            <FilterBar
+              selectedCategory={selectedCategory}
+              selectedType={selectedType}
+              setSelectedType={setSelectedType}
+              setSelectedCategory={setSelectedCategory}
+              freeAds={freeAds}
+              paidAds={paidAds}
+              onCategoryChange={handleCategoryChange}
+              onTypeChange={handleTypeChange}
+            />
+          </View>
+
+          <View>
+            {searchAdLoading && <Loader />}
+            {searchAdError && <Message>{searchAdError}</Message>}
+
+            {sellerUsernameSearchLoading && <Loader />}
+            {sellerUsernameSearchError && (
+              <Message>{sellerUsernameSearchError}</Message>
+            )}
+
+            {searchSellerUsername && (
+              <SellerSearchCard
+                sellerUsername={searchSellerUsername}
+                searchResults={serachResults}
+                sellerAvatarUrl={sellerAvatarUrl}
+              />
+            )}
+          </View>
 
           <View style={styles.adContainer}>
             <AllPaidAdScreen
@@ -407,22 +426,6 @@ const Marketplace = () => {
               freeAds={filteredFreeAds || freeAds}
             />
           </View>
-
-          {searchAdLoading && <Loader />}
-          {searchAdError && <Message>{searchAdError}</Message>}
-
-          {sellerUsernameSearchLoading && <Loader />}
-          {sellerUsernameSearchError && (
-            <Message>{sellerUsernameSearchError}</Message>
-          )}
-
-          {searchSellerUsername && (
-            <SellerSearchCard
-              sellerUsername={searchSellerUsername}
-              searchResults={serachResults}
-              sellerAvatarUrl={sellerAvatarUrl}
-            />
-          )}
         </View>
       </ScrollView>
     </SafeAreaView>

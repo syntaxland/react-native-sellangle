@@ -1,21 +1,20 @@
 // SellerActiveFreeAdScreen.js
 import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Row, Col } from "react-bootstrap";
-import {
-   getSellerActiveFreeAds, 
-} from "../../actions/marketplaceSellerActions";
-
 import AllFreeAdCard from "./AllFreeAdCard";
-import Message from "../Message";
-import Loader from "../Loader";
+import { getSellerActiveFreeAds } from "../../redux/actions/marketplaceSellerActions";
+import Loader from "../../Loader";
+import Message from "../../Message";
+import { Pagination } from "../../Pagination";
 
-function SellerActiveFreeAdScreen({seller_username}) {
+const SellerActiveFreeAdScreen = ({ seller_username }) => {
   const dispatch = useDispatch();
 
-  const getSellerActiveFreeAdsState = useSelector((state) => state.getSellerActiveFreeAdsState); 
+  const getSellerActiveFreeAdsState = useSelector(
+    (state) => state.getSellerActiveFreeAdsState
+  );
   const { loading, error, ads } = getSellerActiveFreeAdsState;
-  console.log("All Free Ads:", ads);
 
   useEffect(() => {
     dispatch(getSellerActiveFreeAds(seller_username));
@@ -28,87 +27,72 @@ function SellerActiveFreeAdScreen({seller_username}) {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = ads?.slice(indexOfFirstItem, indexOfLastItem);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const totalPages = Math.ceil(ads?.length / itemsPerPage);
 
-  const pageNumbers = [];
-  for (let i = 1; i <= Math.ceil(ads?.length / itemsPerPage); i++) {
-    pageNumbers.push(i);
-  }
+  const handlePagination = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   return (
-    <div>
-      <Row>
-        <Col>
-          <hr />
-          <h1 className="text-center">Running Ads</h1>
-          <hr />
-          {loading ? (
-            <Loader />
-          ) : error ? (
-            <Message variant="danger">{error}</Message>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Running Ads</Text>
+      {loading ? (
+        <Loader />
+      ) : error ? (
+        <Message variant="danger">{error}</Message>
+      ) : (
+        <>
+          {currentItems?.length === 0 ? (
+            <Text style={styles.noData}>Running ads appear here.</Text>
           ) : (
-            <>
-              {currentItems?.length === 0 ? (
-                <div className="text-center">Running ads appear here.</div>
-              ) : (
-                <Row>
-                  {currentItems?.map((product) => (
-                    <Col key={product.id} xs={12} sm={12} md={6} lg={4} xl={4}>
-                      <AllFreeAdCard product={product} />
-                    </Col>
-                  ))}
-                </Row>
-              )} 
-              <nav className="mt-4">
-                <ul className="pagination justify-content-center">
-                  <li
-                    className={`page-item ${
-                      currentPage === 1 ? "disabled" : ""
-                    }`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => paginate(currentPage - 1)}
-                    >
-                      Previous
-                    </button>
-                  </li>
-                  {pageNumbers.map((number) => (
-                    <li
-                      key={number}
-                      className={`page-item ${
-                        currentPage === number ? "active" : ""
-                      }`}
-                    >
-                      <button
-                        className="page-link"
-                        onClick={() => paginate(number)}
-                      >
-                        {number}
-                      </button>
-                    </li>
-                  ))}
-                  <li
-                    className={`page-item ${
-                      currentPage === pageNumbers.length ? "disabled" : ""
-                    }`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => paginate(currentPage + 1)}
-                    >
-                      Next
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            </>
+            <View style={styles.cardContainer}>
+              {currentItems?.map((product) => (
+                <View key={product.id} style={styles.card}>
+                  <AllFreeAdCard product={product} />
+                </View>
+              ))}
+            </View>
           )}
-          <hr />
-        </Col>
-      </Row>
-    </div>
+          <View style={styles.pagination}>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              paginate={handlePagination}
+            />
+          </View>
+        </>
+      )}
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 10,
+    textAlign: "center",
+  },
+  noData: {
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  cardContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
+  },
+  card: {
+    width: "100%",
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+});
 
 export default SellerActiveFreeAdScreen;

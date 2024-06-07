@@ -1,38 +1,71 @@
 // BuyerPaidAdMessage.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TextInput,
+  StyleSheet,
+  Image,
+  RefreshControl,
+  TouchableOpacity,
+} from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faUser,
+  faPaperPlane,
+  faClock,
+} from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory, useLocation } from "react-router-dom";
-import { Form, Button, Row, Col, ListGroup, Container } from "react-bootstrap";
 import {
   buyerCreatePaidAdMessage,
   listPaidAdMessages,
-} from "../../actions/marketplaceSellerActions";
-import Loader from "../Loader";
-import Message from "../Message";
-import RatingSeller from "../RatingSeller";
-import PromoTimer from "../PromoTimer";
-import LoaderButton from "../LoaderButton";
-import { formatAmount } from "../FormatAmount";
+} from "../../redux/actions/marketplaceSellerActions";
+import Loader from "../../Loader";
+import Message from "../../Message";
+import RatingSeller from "../../RatingSeller";
+import PromoTimer from "../../PromoTimer";
+import { formatAmount } from "../../FormatAmount";
 
-function BuyerPaidAdMessage() {
+const BuyerPaidAdMessage = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
+  const route = useRoute();
 
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
+  const {
+    id,
+    paid_ad_message_id,
+    image1,
+    ad_name,
+    price,
+    currency,
+    sellerAvatarUrl,
+    seller_username,
+    expiration_date,
+    ad_rating,
+  } = route.params;
 
-  const id = queryParams.get("id");
-  const paid_ad_message_id = queryParams.get("paid_ad_message_id");
-  const image1 = queryParams.get("image1");
-  const ad_name = queryParams.get("ad_name");
-  const price = queryParams.get("price");
-  const currency = queryParams.get("currency");
-  const sellerAvatarUrl = queryParams.get("sellerAvatarUrl");
-  const seller_username = queryParams.get("seller_username");
-  const expiration_date = queryParams.get("expiration_date");
-  const ad_rating = queryParams.get("ad_rating");
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+
+  useEffect(() => {
+    if (!userInfo) {
+      navigation.navigate("Login");
+    }
+  }, [userInfo, navigation]);
 
   const [message, setMessage] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      dispatch(listPaidAdMessages({ ad_id: id, paid_ad_message_id }));
+      setMessage("");
+      setRefreshing(false);
+    }, 2000);
+  }, [dispatch, id, paid_ad_message_id]);
 
   const createPaidAdMessageState = useSelector(
     (state) => state.createPaidAdMessageState
@@ -47,258 +80,321 @@ function BuyerPaidAdMessage() {
     error: listPaidAdMessageError,
     adMessages,
   } = listPaidAdMessageState;
-  console.log("adMessages:", adMessages);
 
   useEffect(() => {
-    // const pk = id;
-
-    const messageData = {
-      ad_id: id,
-      paid_ad_message_id: paid_ad_message_id,
-    };
-    dispatch(listPaidAdMessages(messageData));
+    dispatch(listPaidAdMessages({ ad_id: id, paid_ad_message_id }));
   }, [dispatch, id, paid_ad_message_id]);
 
-  const handleSubmitReply = (e) => {
-    e.preventDefault();
-
+  const handleSubmitReply = () => {
     const messageData = {
       ad_id: id,
-      message: message,
-      paid_ad_message_id: paid_ad_message_id,
+      paid_ad_message_id,
+      message,
     };
 
     dispatch(buyerCreatePaidAdMessage(messageData));
   };
 
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => {
-        // history.push("/dashboard");
-        window.location.reload();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [success, history]);
-
-  // Function to format the timestamp
-  const formatTimestamp = (timestamp) => {
-    const messageDate = new Date(timestamp);
-    return messageDate.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  // Function to determine if a message is the first of the day
   const isFirstMessageOfDay = (currentIndex, messages) => {
-    if (currentIndex === 0) return true;
+    if (currentIndex === 0)
+      return formatDateLabel(new Date(messages[0].timestamp));
 
     const currentDate = new Date(messages[currentIndex].timestamp);
     const prevDate = new Date(messages[currentIndex - 1].timestamp);
 
-    // Check if the messages were sent on different dates
     if (currentDate.toLocaleDateString() !== prevDate.toLocaleDateString()) {
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
+      return formatDateLabel(currentDate);
+    }
+    return "";
+  };
 
-      // Check if the current message was sent today
-      if (currentDate.toLocaleDateString() === today.toLocaleDateString()) {
-        return "Today";
-      }
-      // Check if the current message was sent yesterday
-      else if (
-        currentDate.toLocaleDateString() === yesterday.toLocaleDateString()
-      ) {
-        return "Yesterday";
-      } else {
-        // If it's beyond yesterday, return the full date
-        return currentDate.toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-      }
+  const formatDateLabel = (date) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (isSameDay(date, today)) {
+      return "Today";
+    } else if (isSameDay(date, yesterday)) {
+      return "Yesterday";
+    } else {
+      return date.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
     }
   };
 
+  const isSameDay = (date1, date2) => {
+    return (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    );
+  };
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        onRefresh();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [success, onRefresh]);
+
   return (
-    <Container>
-      <div>
-        <Row className="d-flex justify-content-center">
-          <Col className="border rounded p-4 bg-secondary" xs={10} md={8}>
-            <div className=" py-2 ">
-              {loading && <Loader />}
-              {error && (
-                <Message variant="danger" fixed>
-                  {error}
-                </Message>
-              )}
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <View style={styles.container}>
+        <View style={styles.adDetails}>
+          <Text style={styles.header}>Ad Details</Text>
+          <View style={styles.adInfo}>
+            <View>
+              <Image source={{ uri: image1 }} style={styles.adImage} />
+              <Text style={styles.detailItem}>{ad_name}</Text>
+              <Text style={styles.detailItem}>
+                {currency} {formatAmount(price)}
+              </Text>
+              <Text style={styles.timer}>
+                <FontAwesomeIcon icon={faClock} color="#dc3545"/> Expires in:{" "}
+                <PromoTimer expirationDate={expiration_date} />
+              </Text>
+              <Image source={{ uri: sellerAvatarUrl }} style={styles.avatar} />
+              <Text>{seller_username}</Text>
+              <Text style={styles.detailItem}>
+                <RatingSeller value={ad_rating} color="green" />
+              </Text>
+            </View>
+          </View>
+        </View>
 
-              {listPaidAdMessageLoading && <Loader />}
-              {listPaidAdMessageError && (
-                <Message variant="danger" fixed>
-                  {listPaidAdMessageError}
-                </Message>
-              )}
-            </div>
+        {adMessages?.map((message, index) => (
+          <View key={index}>
+            {isFirstMessageOfDay(index, adMessages) && (
+              <Text style={styles.dateLabel}>
+                {isFirstMessageOfDay(index, adMessages)}
+              </Text>
+            )}
+            <View
+              style={[
+                styles.messageItem,
+                message.seller ? styles.sellerMessage : styles.buyerMessage,
+              ]}
+            >
+              <View
+                style={[
+                  styles.messageBubble,
+                  message.seller ? styles.sellerBubble : styles.buyerBubble,
+                ]}
+              >
+                <Text style={styles.username}>
+                  <FontAwesomeIcon icon={faUser} />{" "}
+                  {message.buyer_username
+                    ? message.buyer_username
+                    : message.seller_username}
+                </Text>
+                <Text>{message.message}</Text>
+                <Text style={styles.timestamp}>
+                  {new Date(message.timestamp).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </View>
+            </View>
+          </View>
+        ))}
 
-            <ListGroup className="py-2">
-              <ListGroup.Item>
-                <h3 className="rounded py-2 text-center">Ad Details</h3>
-                <Row>
-                  <Col>
-                    <ListGroup.Item>
-                      <Row>
-                        <Col md={4}>
-                          <img
-                            src={image1}
-                            alt={ad_name}
-                            className="img-fluid"
-                          />
-                        </Col>
-                        <Col md={8}>
-                          <p>{ad_name}</p>
-                        </Col>
-                        <Col md={12} className="py-2">
-                          <ListGroup.Item>
-                            <p>
-                              {currency} {formatAmount(price)}
-                            </p>
-                          </ListGroup.Item>
-                        </Col>
-                        <Col md={12} className="py-2">
-                          <Button
-                            variant="outline-danger"
-                            size="sm"
-                            className="rounded"
-                            disabled
-                          >
-                            <i className="fas fa-clock"></i> Expires in:{" "}
-                            <PromoTimer expirationDate={expiration_date} />
-                          </Button>
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>
-                  </Col>
-                  <Col>
-                    <ListGroup.Item>
-                      <Row>
-                        <Col md={4}>
-                          <img
-                            src={sellerAvatarUrl}
-                            alt={seller_username}
-                            className="img-fluid"
-                            style={{
-                              // maxWidth: "80px",
-                              // maxHeight: "80px",
-                              borderRadius: "50%",
-                            }}
-                          />
-                        </Col>
-                        <Col md={8}>
-                          <p>{seller_username}</p>
-                        </Col>
+        {/* {adMessages?.map((message, index) => (
+          <View
+            key={index}
+            style={[
+              styles.messageItem,
+              message.seller ? styles.sellerMessage : styles.buyerMessage,
+            ]}
+          >
+            {isFirstMessageOfDay(index, adMessages) && (
+              <Text style={styles.dateLabel}>
+                {isFirstMessageOfDay(index, adMessages)}
+              </Text>
+            )}
+            <View
+              style={[
+                styles.messageBubble,
+                message.seller ? styles.sellerBubble : styles.buyerBubble,
+              ]}
+            >
+              <Text style={styles.username}>
+                <FontAwesomeIcon icon={faUser} />{" "}
+                {message.buyer_username
+                  ? message.buyer_username
+                  : message.seller_username}
+              </Text>
+              <Text>{message.message}</Text>
+              <Text style={styles.timestamp}>
+                {new Date(message.timestamp).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Text>
+            </View>
+          </View>
+        ))} */}
 
-                        <Col className="mt-2">
-                          <ListGroup.Item>
-                            <RatingSeller value={ad_rating} color={"green"} />
-                          </ListGroup.Item>
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>
-                  </Col>
-                </Row>
-              </ListGroup.Item>
-            </ListGroup>
+        {loading && <Loader />}
+        {listPaidAdMessageLoading && <Loader />}
+        {listPaidAdMessageError && (
+          <Message variant="danger">{listPaidAdMessageError}</Message>
+        )}
+        {error && (
+          <Message variant="danger" fixed>
+            {error}
+          </Message>
+        )}
+        {success && (
+          <Message variant="success" fixed>
+            Message sent successfully.
+          </Message>
+        )}
 
-            {adMessages?.map((message, index) => (
-              <div key={message.id}>
-                {isFirstMessageOfDay(index, adMessages) && (
-                  <p className="text-center mb-0 mt-3">
-                    {new Date(message.timestamp).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </p> 
-                )}
-                <div
-                  className={`${
-                    message.seller
-                      ? "d-flex justify-content-left"
-                      : "d-flex justify-content-end"
-                  }`}
-                  style={{ maxWidth: "75%" }}
-                >
-                  <div>
-                    <div
-                      className={`border rounded p-3 my-2 ${
-                        message.seller
-                          ? "bg-light"
-                          : "bg-success justify-content-end"
-                      }`}
-                    >
-                      <p>
-                      <i className="fas fa-user"></i>{" "}
-                        {message.buyer_username
-                          ? message.buyer_username?.charAt(0).toUpperCase() +
-                            message.buyer_username?.slice(1)
-                          : message.seller_username?.charAt(0).toUpperCase() +
-                            message.seller_username?.slice(1)}
-                      </p>
-                      <p>{message.message}</p>
-                      <p className="d-flex justify-content-end">
-                        {" "}
-                        {formatTimestamp(message.timestamp)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+        <View style={styles.replyForm}>
+          <TextInput
+            style={[styles.input, styles.textarea]}
+            placeholder="Type your message"
+            value={message}
+            onChangeText={setMessage}
+            multiline
+            numberOfLines={4}
+          />
+        </View>
 
-            <Form onSubmit={handleSubmitReply}>
-              <Form.Group controlId="message">
-                <Form.Label>Message</Form.Label>
-                <Form.Control
-                  required
-                  as="textarea"
-                  placeholder="Type your message"
-                  rows={2}
-                  value={message}
-                  maxLength={500}
-                  onChange={(e) => setMessage(e.target.value)}
-                ></Form.Control>
-              </Form.Group>
-
-              <div className="py-2">
-                <Button
-                  className="w-100 rounded"
-                  type="submit"
-                  variant="primary"
-                  disabled={loading}
-                >
-                  <div className="d-flex justify-content-center">
-                    <span className="py-1">Send <i className="fa fa-paper-plane"></i></span>
-                    {loading && <LoaderButton />}
-                  </div>
-                </Button>
-              </div> 
-              {success && (
-                <Message variant="success" fixed>
-                  Message sent successfully.
-                </Message>
-              )}
-            </Form>
-          </Col>
-        </Row>
-      </div>
-    </Container>
+        <View style={styles.formGroup}>
+          <TouchableOpacity onPress={handleSubmitReply} disabled={loading}>
+            <Text style={styles.roundedPrimaryBtn}>
+              Send <FontAwesomeIcon icon={faPaperPlane} color="#fff" />
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+  },
+  detailItem: {
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 5,
+    textAlign: "center",
+  },
+  timer: {
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 5,
+    textAlign: "center",
+    color: "#dc3545",
+  },
+  adDetails: {
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 5,
+    textAlign: "center",
+  },
+  adInfo: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  adImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 5,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  messageItem: {
+    marginBottom: 10,
+    maxWidth: "75%",
+  },
+  sellerMessage: {
+    alignSelf: "flex-start",
+  },
+  buyerMessage: {
+    alignSelf: "flex-end",
+  },
+  messageBubble: {
+    borderRadius: 10,
+    padding: 10,
+  },
+  sellerBubble: {
+    backgroundColor: "#f8f9fa",
+  },
+  buyerBubble: {
+    backgroundColor: "#28a745",
+  },
+  username: {
+    fontWeight: "bold",
+  },
+  timestamp: {
+    textAlign: "right",
+    fontSize: 10,
+  },
+  dateLabel: {
+    textAlign: "center",
+    fontSize: 12,
+    color: "#888",
+    marginVertical: 5,
+  },
+  replyForm: {
+    marginTop: 20,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  textarea: {
+    height: 100,
+    textAlignVertical: "top",
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+});
 
 export default BuyerPaidAdMessage;

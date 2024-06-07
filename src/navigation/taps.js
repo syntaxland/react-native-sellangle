@@ -8,7 +8,7 @@ import Marketplace from "../components/marketplace/Marketplace";
 import PostFreeAd from "../components/marketplace/PostFreeAd";
 import CurrentAds from "../components/marketplace/CurrentAds";
 import Dashboard from "../components/profiles/Dashboard";
-// import Inbox from "../components/profiles/Inbox";
+import Inbox from "../components/profiles/Inbox";
 import { Ionicons } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
@@ -41,11 +41,9 @@ export const HomeTabs = () => {
             iconName = focused ? "home" : "home-outline";
           } else if (route.name === "Dashboard") {
             iconName = focused ? "speedometer" : "speedometer-outline";
-          }
-          // else if (route.name === "Inbox") {
-          //   iconName = focused ? "mail" : "mail-outline";
-          // }
-          else if (route.name === "Post Free Ad") {
+          } else if (route.name === "Inbox") {
+            iconName = focused ? "mail" : "mail-outline";
+          } else if (route.name === "Post Free Ad") {
             iconName = focused ? "add" : "add-outline";
           } else if (route.name === "Current Ads") {
             iconName = focused ? "megaphone " : "megaphone -outline";
@@ -66,7 +64,7 @@ export const HomeTabs = () => {
         component={Marketplace}
       />
       <Tab.Screen name="Dashboard" component={Dashboard} />
-      {/* <Tab.Screen name="Inbox" component={Inbox} /> */}
+      <Tab.Screen name="Inbox" component={Inbox} />
 
       {userInfo && profile?.is_marketplace_seller && (
         <>

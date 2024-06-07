@@ -1,372 +1,314 @@
 // GetSellerDetail.js
 import React, { useState, useEffect } from "react";
-// import { Link } from "react-router-dom";
 import {
-  Row,
-  Col,
-  // Image,
-  ListGroup,
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
   Button,
-  // Card,
-  Container,
-} from "react-bootstrap";
-import RatingSeller from "../RatingSeller";
-import Loader from "../Loader";
-import Message from "../Message";
+} from "react-native";
+import * as Clipboard from "expo-clipboard";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faEnvelope,
+  faPhone,
+  faShoppingCart,
+  faFlag,
+  faCheck,
+  faCopy,
+} from "@fortawesome/free-solid-svg-icons";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getSellerAccount,
-  getPaidAdDetail,
+  // getPaidAdDetail,
   getSellerDetail,
-} from "../../actions/marketplaceSellerActions";
-// import { Carousel } from "react-responsive-carousel";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
-// import Paysofter from "../MarketplacePayment/Paysofter";
-// import PromoTimer from "../PromoTimer";
+} from "../../redux/actions/marketplaceSellerActions";
+import Loader from "../../Loader";
+import Message from "../../Message";
+import RatingSeller from "../../RatingSeller";
 
-function GetSellerDetail({ match, history, seller_username }) {
+function GetSellerDetail() {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { seller_username } = route.params;
+  console.log("GetSellerDetail seller_username:", seller_username);
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
   }, [userInfo]);
-
-  // const getSellerAccountState = useSelector(
-  //   (state) => state.getSellerAccountState
-  // );
-  // const { sellerDetail } = getSellerAccountState;
 
   const getSellerDetailState = useSelector(
     (state) => state.getSellerDetailState
   );
-  const {
-    loading,
-    error,
-    sellerAvatarUrl,
-
-    sellerDetail,
-  } = getSellerDetailState;
-  console.log("sellerDetail", sellerDetail);
-
-  // const [showPaysofterOption, setShowPaysofterOption] = useState(false);
-
-  // const handlePaysofterOption = () => {
-  //   setShowPaysofterOption(!showPaysofterOption);
-  // };
+  const { loading, error, sellerAvatarUrl, sellerDetail } =
+    getSellerDetailState;
 
   const [showPhoneNumber, setShowPhoneNumber] = useState(false);
+  const handleShowPhoneNumber = () => setShowPhoneNumber(!showPhoneNumber);
+  const [isPhoneCopied, setIsPhoneCopied] = useState(false);
 
-  const handleShowPhoneNumber = () => {
-    setShowPhoneNumber(!showPhoneNumber);
+  const handleCopyPhoneNumber = async () => {
+    await Clipboard.setStringAsync(sellerDetail?.seller_phone);
+    setIsPhoneCopied(true);
+    setTimeout(() => setIsPhoneCopied(false), 2000);
   };
 
-  // const getPaidAdDetailState = useSelector(
-  //   (state) => state.getPaidAdDetailState
-  // );
-  // const {
-  //   // loading,
-  //   // error,
-  //   // sellerDetail,
-  //   // sellerApiKey,
-  //   sellerAvatarUrl,
-  // } = getPaidAdDetailState;
-  // console.log("sellerAvatarUrl", sellerAvatarUrl);
-
   useEffect(() => {
-    dispatch(getPaidAdDetail(match?.params.id));
+    // dispatch(getPaidAdDetail(ad_id));
     dispatch(getSellerAccount());
     dispatch(getSellerDetail(seller_username));
-  }, [dispatch, seller_username, match]);
-
-  // const images = [sellerDetail?.image1, sellerDetail?.image2, sellerDetail?.image3].filter(Boolean);
-
-  // function formatCount(viewCount) {
-  //   if (viewCount >= 1000000) {
-  //     // Format as million
-  //     return (viewCount / 1000000).toFixed(1) + "m";
-  //   } else if (viewCount >= 1000) {
-  //     // Format as thousand
-  //     return (viewCount / 1000).toFixed(1) + "k";
-  //   } else {
-  //     return viewCount?.toString();
-  //   }
-  // }
+  }, [dispatch, seller_username]);
 
   function calculateDuration(joinedTimestamp) {
     const now = new Date();
     const joinedDate = new Date(joinedTimestamp);
     const duration = now - joinedDate;
 
-    const seconds = Math.floor(duration / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-    const weeks = Math.floor(days / 7);
-    const months = Math.floor(days / 30);
-    const years = Math.floor(days / 365);
+    const years = Math.floor(duration / (1000 * 60 * 60 * 24 * 365));
+    const months = Math.floor(
+      (duration % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30)
+    );
+    const weeks = Math.floor(
+      (duration % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24 * 7)
+    );
+    const days = Math.floor(
+      (duration % (1000 * 60 * 60 * 24 * 7)) / (1000 * 60 * 60 * 24)
+    );
 
-    if (years > 0) {
-      return `${years} year${years > 1 ? "s" : ""}`;
-    } else if (months > 0) {
-      return `${months} month${months > 1 ? "s" : ""}`;
-    } else if (weeks > 0) {
-      return `${weeks} week${weeks > 1 ? "s" : ""}`;
-    } else if (days > 0) {
-      return `${days} day${days > 1 ? "s" : ""}`;
-    } else if (hours > 0) {
-      return `${hours} hour${hours > 1 ? "s" : ""}`;
-    } else if (minutes > 0) {
-      return `${minutes} minute${minutes > 1 ? "s" : ""}`;
-    } else {
-      return `${seconds} second${seconds > 1 ? "s" : ""}`;
-    }
+    if (years > 0) return `${years} year${years > 1 ? "s" : ""}`;
+    if (months > 0) return `${months} month${months > 1 ? "s" : ""}`;
+    if (weeks > 0) return `${weeks} week${weeks > 1 ? "s" : ""}`;
+    if (days > 0) return `${days} day${days > 1 ? "s" : ""}`;
+    return "Less than a day";
   }
 
   function calculateLastSeen(lastLoginTimestamp) {
     const now = new Date();
     const lastLoginDate = new Date(lastLoginTimestamp);
     const duration = now - lastLoginDate;
+    const days = Math.floor(duration / (1000 * 60 * 60 * 24));
 
-    const days = Math.floor(duration / (24 * 60 * 60 * 1000));
-    const weeks = Math.floor(days / 7);
-    const months = Math.floor(days / 30);
-
-    console.log("days:", days,);
-
-    if (days < 3) {
-      return "Last seen recently";
-    } else if (weeks < 1) {
-      return "Last seen within a week";
-    } else if (months < 1) {
-      return "Last seen within a month";
-      // } else if (months > 1) {
-      //   return "Last seen a long time ago";
-    } else {
-      return "Last seen a long time ago";
-    }
+    if (days < 3) return "Last seen recently";
+    if (days < 7) return "Last seen within a week";
+    if (days < 30) return "Last seen within a month";
+    return "Last seen a long time ago";
   }
 
-  // function calculateDuration(joinedTimestamp) {
-  //   const now = new Date();
-  //   const joinedDate = new Date(joinedTimestamp);
-  //   const duration = now - joinedDate;
-
-  //   const days = Math.floor(duration / (24 * 60 * 60 * 1000));
-  //   const hours = Math.floor(
-  //     (duration % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)
-  //   );
-  //   const minutes = Math.floor((duration % (60 * 60 * 1000)) / (60 * 1000));
-  //   const seconds = Math.floor((duration % (60 * 1000)) / 1000);
-
-  //   const parts = [];
-
-  //   if (days > 0) {
-  //     parts.push(`${days} days`);
-  //   }
-
-  //   if (hours > 0) {
-  //     parts.push(`${hours} hours`);
-  //   }
-
-  //   if (minutes > 0) {
-  //     parts.push(`${minutes} minutes`);
-  //   }
-
-  //   if (seconds > 0) {
-  //     parts.push(`${seconds} seconds`);
-  //   }
-
-  //   return parts.join(", ");
-  // }
-
-  // const handleClickMessageSeller = () => {
-  //   const queryParams = {
-  //     id: sellerDetail.id,
-  //     image1: sellerDetail.image1,
-  //     ad_name: sellerDetail.ad_name,
-  //     price: sellerDetail.price,
-  //     sellerAvatarUrl,
-  //     seller_username: sellerDetail.seller_username,
-  //     expiration_date: sellerDetail.expiration_date,
-  //     rating: sellerDetail.rating,
-  //   };
-
-  //   history.push({
-  //     pathname: `/paid/ad/message/${sellerDetail.id}`,
-  //     search: `?${new URLSearchParams(queryParams).toString()}`,
-  //   });
-  // };
-
-  // const handleSellerShopFront = () => {
-  //   history.push(`/seller-shop-front/${sellerDetail?.seller_username}/`);
-  // };
-
   return (
-    <Container>
-      <Row>
-        <Col>
-          {/* <Link to="/marketplace" className="btn btn-dark my-3">
-            {" "}
-            Go Back
-          </Link> */}
+    <View style={styles.container}>
+      {loading ? (
+        <Loader />
+      ) : error ? (
+        <Message variant="danger">{error}</Message>
+      ) : (
+        <View>
+          <View style={styles.card}>
+            <Text style={styles.header}>Seller Details</Text>
+            <View style={styles.sellerInfo}>
+              {/* {sellerAvatarUrl && (
+                <Image
+                  source={{ uri: sellerAvatarUrl }}
+                  style={styles.avatar}
+                />
+              )} */}
+              {sellerAvatarUrl && typeof sellerAvatarUrl === "string" && (
+                <Image
+                  source={{ uri: sellerAvatarUrl }}
+                  style={styles.avatar}
+                />
+              )}
+              <View style={styles.sellerDetails}>
+                <Text>{sellerDetail?.seller_username}</Text>
+                <Text>{calculateLastSeen(sellerDetail?.user_last_login)}</Text>
+              </View>
+            </View>
+            <View style={styles.verified}>
+              {sellerDetail?.is_seller_verified ? (
+                <Text style={styles.verifiedText}>Verified ID</Text>
+              ) : (
+                <Text style={styles.notVerifiedText}>ID Not Verified</Text>
+              )}
+            </View>
+            <RatingSeller value={sellerDetail?.rating} color={"green"} />
 
-          {loading ? (
-            <Loader />
-          ) : error ? (
-            <Message variant="danger">{error} </Message>
-          ) : (
-            <Row>
-              <ListGroup className="py-2">
-                <ListGroup.Item>
-                  <ListGroup.Item>Seller Details</ListGroup.Item>
-                  <ListGroup.Item>
-                    <Row>
-                      <Col md={4}>
-                        {/* <Link
-                          to={`/seller-shop-front/${sellerDetail?.seller_username}/`}
-                        > */}
-                        <span className="d-flex justify-content-between py-2">
-                          {sellerAvatarUrl && (
-                            <img
-                              src={sellerAvatarUrl}
-                              alt="Seller"
-                              style={{
-                                maxWidth: "80px",
-                                maxHeight: "80px",
-                                borderRadius: "50%",
-                              }}
-                            />
-                          )}
-                          {sellerDetail?.seller_username}
-                        </span>
-                        {/* </Link> */}
-                        {calculateLastSeen(sellerDetail?.user_last_login)}
-                      </Col> 
-                    </Row>
-                  </ListGroup.Item>
-                  <ListGroup.Item>
-                    <div>
-                      <span>
-                        {sellerDetail?.is_seller_verified ? (
-                          <>
-                            <Button
-                              variant="outline-success"
-                              size="sm"
-                              className="rounded"
-                              disabled
-                            >
-                              <i className="fas fa-user"></i> <i>Verified ID</i>{" "}
-                              <i
-                                className="fas fa-check-circle"
-                                style={{ fontSize: "18px", color: "blue" }}
-                              ></i>
-                            </Button>
-                          </>
-                        ) : (
-                          <>
-                            <Button
-                              variant="outline-danger"
-                              size="sm"
-                              className="rounded"
-                              disabled
-                            >
-                              <i className="fas fa-user"></i>{" "}
-                              <i>ID Not Verified</i>{" "}
-                              <i style={{ fontSize: "18px", color: "red" }}></i>
-                            </Button>
-                          </>
-                        )}
-                      </span>
-                    </div>
-                  </ListGroup.Item>
+            {/* <TouchableOpacity
+              style={styles.button}
+              onPress={handleShowPhoneNumber}
+            >
+              <Text style={styles.buttonText}>
+                {showPhoneNumber ? "Hide" : "Show"} Seller Phone Number
+              </Text>
+            </TouchableOpacity> */}
 
-                  <ListGroup.Item>
-                    <span>
-                      <RatingSeller
-                        value={sellerDetail?.rating}
-                        // text={`${formatCount(
-                        //   sellerDetail?.review_count
-                        // )} reviews `}
-                        color={"green"}
-                      />
-                    </span>
-                    {/* <span>
-                      {userInfo ? (
-                        <Link to={`/review-list/${sellerDetail.id}`}>
-                          (Seller Reviews)
-                        </Link>
+            <View style={styles.spaceBtwGroup}>
+                <TouchableOpacity
+                  style={styles.squaredPrimaryButton}
+                  onPress={handleShowPhoneNumber}
+                >
+                  <Text style={styles.btnText}>
+                    <FontAwesomeIcon icon={faPhone} color="#fff" />{" "}
+                    {showPhoneNumber ? "Hide Contact" : "Show Contact"}
+                  </Text>
+                </TouchableOpacity>
+
+                
+              </View>
+
+            {/* {showPhoneNumber && <Text>{sellerDetail?.seller_phone}</Text>} */}
+            {showPhoneNumber && (
+              <View style={styles.spaceBtwGrou}>
+                <Text style={styles.phoneNumber}>
+                  <TouchableOpacity
+                    style={styles.copyPhone}
+                    onPress={handleCopyPhoneNumber}
+                  >
+                    <Text style={styles.label}>
+                      {isPhoneCopied ? (
+                        <Text style={styles.label}>
+                          Phone number copied{" "}
+                          <FontAwesomeIcon
+                            icon={faCheck}
+                            size={16}
+                            color="#007bff"
+                          />
+                        </Text>
                       ) : (
-                        <Link onClick={() => history.push("/login")}>
-                          (Seller Reviews)
-                        </Link>
+                        <Text style={styles.label}>
+                          <Text>{sellerDetail?.seller_phone} </Text>{" "}
+                          <FontAwesomeIcon
+                            icon={faCopy}
+                            size={16}
+                            color="#007bff"
+                          />
+                        </Text>
                       )}
-                    </span> */}
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      className="py-2 rounded"
-                      onClick={handleShowPhoneNumber}
-                    >
-                      <i className="fa fa-phone"></i>{" "}
-                      {showPhoneNumber ? "Hide" : "Show"} Seller Phone Number
-                    </Button>
-                    <p className="mt-2">
-                      {showPhoneNumber && <p>{sellerDetail?.seller_phone}</p>}
-                    </p>
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    Business Name: {sellerDetail?.business_name}
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    Category: {sellerDetail?.business_category}
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    Description: {sellerDetail?.business_description}
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    Website: {sellerDetail?.business_website}
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    Business Address: {sellerDetail?.business_address}
-                  </ListGroup.Item>
-
-                  <ListGroup.Item>
-                    Country: {sellerDetail?.country}
-                  </ListGroup.Item>
-                </ListGroup.Item>
-                <ListGroup.Item>
-                  Joined since{" "}
-                  {calculateDuration(sellerDetail?.seller_joined_since)}
-                </ListGroup.Item>
-              </ListGroup>
-            </Row>
-          )}
-
-          <div className="text-center mt-4 mb-2 text-muted">
-            <p style={{ color: "red" }}>
-              <strong>Disclaimer:</strong> Buyers are advised to exercise
-              caution and conduct thorough verification when dealing with
-              sellers. Ensure the authenticity of both the product and the
-              seller before proceeding with any transactions.
-            </p>
-          </div>
-        </Col>
-      </Row>
-    </Container>
+                    </Text>
+                  </TouchableOpacity>
+                </Text>
+              </View>
+            )}
+            <Text>Business Name: {sellerDetail?.business_name}</Text>
+            <Text>Category: {sellerDetail?.business_category}</Text>
+            <Text>Description: {sellerDetail?.business_description}</Text>
+            <Text>Website: {sellerDetail?.business_website}</Text>
+            <Text>Business Address: {sellerDetail?.business_address}</Text>
+            <Text>Country: {sellerDetail?.country}</Text>
+            <Text>
+              Joined since{" "}
+              {calculateDuration(sellerDetail?.seller_joined_since)}
+            </Text>
+          </View>
+          <Text style={styles.disclaimer}>
+            <Text style={styles.disclaimerBold}>Disclaimer:</Text> Buyers are
+            advised to exercise caution and conduct thorough verification when
+            dealing with sellers. Ensure the authenticity of both the product
+            and the seller before proceeding with any transactions.
+          </Text>
+        </View>
+      )}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 4,
+    backgroundColor: "#f5f5f5",
+    flex: 1,
+  },
+  card: {
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
+  header: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  sellerInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginRight: 10,
+  },
+  sellerDetails: {
+    flex: 1,
+  },
+  verified: {
+    marginBottom: 10,
+  },
+  verifiedText: {
+    color: "green",
+  },
+  notVerifiedText: {
+    color: "red",
+  },
+  button: {
+    backgroundColor: "#007bff",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+  },
+  disclaimer: {
+    marginTop: 20,
+    textAlign: "center",
+    color: "red",
+  },
+  disclaimerBold: {
+    fontWeight: "bold",
+  },
+  label: {
+    color: "#007bff",
+  },
+  phoneNumber: {
+    color: "#007bff",
+    padding: 10,
+  },
+  spaceBtwGroup: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 2,
+  },
+  spaceBtwElement: {
+    padding: 10,
+  },
+  squaredPrimaryButton: {
+    backgroundColor: "#007bff",
+    padding: 5,
+    borderRadius: 5,
+  },
+  squaredDangerBtn: {
+    backgroundColor: "#dc3545",
+    padding: 5,
+    borderRadius: 5,
+    color: "#fff",
+  },
+  btnText: {
+    color: "#fff",
+  },
+});
 
 export default GetSellerDetail;

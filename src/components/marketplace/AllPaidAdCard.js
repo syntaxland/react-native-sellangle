@@ -138,15 +138,21 @@ function AllPaidAdCard({ product }) {
         </View>
 
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleClickMessageSeller}
-          >
-            <Text style={styles.buttonText}>
-              <FontAwesomeIcon icon={faMessage} size={16} /> Message Seller
-            </Text>
-          </TouchableOpacity>
-          <TogglePaidAdSave ad={product} />
+          <View>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleClickMessageSeller}
+            >
+              <Text style={styles.buttonText}>
+                <FontAwesomeIcon icon={faMessage} size={16} color="#fff" />{" "}
+                Message Seller
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View>
+            <TogglePaidAdSave ad={product} />
+          </View>
         </View>
 
         <View style={styles.locationContainer}>
@@ -160,7 +166,7 @@ function AllPaidAdCard({ product }) {
             onPress={handleReportAdOpen}
           >
             <Text style={styles.buttonText}>
-              <FontAwesomeIcon icon={faFlag} size={16} /> Report Ad
+              <FontAwesomeIcon icon={faFlag} size={16} color="#fff" /> Report Ad
             </Text>
           </TouchableOpacity>
         </View>
@@ -229,7 +235,7 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    // alignItems: "center",
     marginBottom: 5,
   },
   button: {
@@ -280,6 +286,14 @@ const styles = StyleSheet.create({
     marginTop: 15,
     color: "blue",
     textAlign: "center",
+  },
+  spaceBtwGroup: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 2,
+  },
+  spaceBtwElement: {
+    padding: 10,
   },
 });
 

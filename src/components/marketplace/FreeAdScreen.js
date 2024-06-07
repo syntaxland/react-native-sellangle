@@ -193,6 +193,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 20,
   },
+  spaceBtwGroup: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 2,
+  },
+  spaceBtwElement: {
+    padding: 10,
+  },
 });
 
 export default FreeAdScreen;

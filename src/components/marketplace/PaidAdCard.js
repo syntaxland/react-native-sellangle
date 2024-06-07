@@ -135,16 +135,12 @@ function PaidAdCard({ product }) {
           </View>
         )}
 
-        {/* <Text style={styles.expiration}>
-          Expires in: <PromoTimer expirationDate={product?.expiration_date} />
-        </Text> */}
-
         <View style={styles.promoContainer}>
-            <Text style={styles.expiration}>
-              <FontAwesomeIcon icon={faClock} size={16} /> Expires in:{" "}
-              <PromoTimer expirationDate={product?.expiration_date} />
-            </Text>
-          </View>
+          <Text style={styles.expiration}>
+            <FontAwesomeIcon icon={faClock} size={16} /> Expires in:{" "}
+            <PromoTimer expirationDate={product?.expiration_date} />
+          </Text>
+        </View>
 
         <TogglePaidAdSave ad={product} />
 
@@ -337,6 +333,14 @@ const styles = StyleSheet.create({
   closeButton: {
     marginTop: 10,
     color: "#007bff",
+  },
+  spaceBtwGroup: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 2,
+  },
+  spaceBtwElement: {
+    padding: 10,
   },
 });
 

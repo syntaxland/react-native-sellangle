@@ -3,133 +3,13 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  // Button,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Select from "react-native-picker-select";
-
-const AD_CATEGORY_CHOICES = [
-  ["Home Appliances", "Home Appliances"],
-  ["Pets", "Pets"],
-  ["Fashion", "Fashion"],
-  ["Mobile Phones", "Mobile Phones"],
-  ["Properties", "Properties"],
-  ["Electronics", "Electronics"],
-  ["Vehicles", "Vehicles"],
-  ["Services", "Services"],
-  ["Health & Beauty", "Health & Beauty"],
-  ["Sports", "Sports"],
-  ["Jobs", "Jobs"],
-  ["Babies and Kids", "Babies and Kids"],
-  ["Agric & Food", "Agric & Food"],
-  ["Repairs", "Repairs"],
-  ["Equipment & Tools", "Equipment & Tools"],
-  ["CVs", "CVs"],
-  ["Others", "Others"],
-];
-
-const AD_TYPE_CHOICES = {
-  "Home Appliances": [
-    ["Washing Machine", "Washing Machine"],
-    ["Refrigerator", "Refrigerator"],
-    ["Microwave", "Microwave"],
-    ["Coffee Machine", "Coffee Machine"],
-    ["Air Conditioner", "Air Conditioner"],
-    ["Solar", "Solar"],
-    ["Kitchen Appliances", "Kitchen Appliances"],
-  ],
-  Pets: [
-    ["Dog", "Dog"],
-    ["Cat", "Cat"],
-    ["Fish", "Fish"],
-    ["Bird", "Bird"],
-  ],
-  Properties: [
-    ["House", "House"],
-    ["Apartment", "Apartment"],
-    ["Land", "Land"],
-    ["Commercial Property", "Commercial Property"],
-  ],
-  Electronics: [
-    ["Laptop", "Laptop"],
-    ["Smartphone", "Smartphone"],
-    ["Camera", "Camera"],
-    ["Headphones", "Headphones"],
-    ["Television", "Television"],
-  ],
-  Fashion: [
-    ["Clothing", "Clothing"],
-    ["Shoes", "Shoes"],
-    ["Accessories", "Accessories"],
-  ],
-  Vehicles: [
-    ["Car", "Car"],
-    ["Motorcycle", "Motorcycle"],
-    ["Bicycle", "Bicycle"],
-  ],
-  Services: [
-    ["Cleaning", "Cleaning"],
-    ["Plumbing", "Plumbing"],
-    ["Electrician", "Electrician"],
-    ["Catering", "Catering"],
-    ["Tutoring", "Tutoring"],
-  ],
-  "Mobile Phones": [
-    ["iPhone", "iPhone"],
-    ["Samsung", "Samsung"],
-    ["Google Pixel", "Google Pixel"],
-    ["OnePlus", "OnePlus"],
-  ],
-  "Health & Beauty": [
-    ["Skincare", "Skincare"],
-    ["Haircare", "Haircare"],
-    ["Makeup", "Makeup"],
-    ["Fitness Equipment", "Fitness Equipment"],
-  ],
-  Sports: [
-    ["Soccer", "Soccer"],
-    ["Basketball", "Basketball"],
-    ["Tennis", "Tennis"],
-    ["Golf", "Golf"],
-  ],
-  Jobs: [
-    ["IT", "IT"],
-    ["Sales", "Sales"],
-    ["Marketing", "Marketing"],
-    ["Administrative", "Administrative"],
-  ],
-  "Babies and Kids": [
-    ["Toys", "Toys"],
-    ["Clothing Kids", "Clothing"],
-    ["Strollers", "Strollers"],
-  ],
-  "Agric & Food": [
-    ["Farm Products", "Farm Products"],
-    ["Processed Food", "Processed Food"],
-    ["Beverages", "Beverages"],
-  ],
-  Repairs: [
-    ["Electronic Repair", "Electronic Repair"],
-    ["Appliance Repair", "Appliance Repair"],
-    ["Car Repair", "Car Repair"],
-  ],
-  "Equipment & Tools": [
-    ["Power Tools", "Power Tools"],
-    ["Hand Tools", "Hand Tools"],
-    ["Kitchen Tools", "Kitchen Tools"],
-  ],
-  CVs: [
-    ["Engineering", "Engineering"],
-    ["Marketing CVs", "Marketing"],
-    ["Design", "Design"],
-    ["Education", "Education"],
-  ],
-
-  Others: [["Others", "Others"]],
-};
+import { AD_CATEGORY_CHOICES, AD_TYPE_CHOICES } from "../../constants";
 
 const FilterBar = ({
   freeAds,
@@ -141,6 +21,14 @@ const FilterBar = ({
   onCategoryChange,
   onTypeChange,
 }) => {
+  const [adCategoryChoices, setAdCategoryChoices] = useState([]);
+  const [adTypeChoices, setAdTypeChoices] = useState([]);
+
+  useEffect(() => {
+    setAdCategoryChoices(AD_CATEGORY_CHOICES);
+    setAdTypeChoices(AD_TYPE_CHOICES);
+  }, []);
+  
   const [categoryCounts, setCategoryCounts] = useState({});
   const [typeCounts, setTypeCounts] = useState({});
   const [selectedTypeLabel, setSelectedTypeLabel] = useState("");
@@ -150,7 +38,7 @@ const FilterBar = ({
 
   useEffect(() => {
     const categoryCountsObj = {};
-    AD_CATEGORY_CHOICES.forEach(([value]) => {
+    adCategoryChoices.forEach(([value]) => {
       const filteredFreeAds = freeAds?.filter((ad) => ad.ad_category === value);
       const filteredPaidAds = paidAds?.filter((ad) => ad.ad_category === value);
       categoryCountsObj[value] = {
@@ -161,8 +49,8 @@ const FilterBar = ({
     setCategoryCounts(categoryCountsObj);
 
     const typeCountsObj = {};
-    Object.keys(AD_TYPE_CHOICES).forEach((category) => {
-      AD_TYPE_CHOICES[category].forEach(([value]) => {
+    Object.keys(adTypeChoices).forEach((category) => {
+      adTypeChoices[category].forEach(([value]) => {
         const filteredFreeAds = freeAds?.filter(
           (ad) => ad.ad_category === category && ad.ad_type === value
         );
@@ -232,7 +120,7 @@ const FilterBar = ({
         horizontal={true}
         contentContainerStyle={styles.scrollContainer}
       >
-        {AD_CATEGORY_CHOICES.map(([value, label]) => (
+        {adCategoryChoices.map(([value, label]) => (
           <TouchableOpacity
             key={value}
             style={[
@@ -255,7 +143,7 @@ const FilterBar = ({
         <View style={styles.selectContainer}>
           <Select
             onValueChange={(type) => handleTypeChange(type)}
-            items={AD_TYPE_CHOICES[selectedCategory].map(([value, label]) => ({
+            items={adTypeChoices[selectedCategory].map(([value, label]) => ({
               value,
               label: `${label} (${
                 typeCounts[value] &&

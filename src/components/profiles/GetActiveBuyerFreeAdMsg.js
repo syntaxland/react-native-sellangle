@@ -1,21 +1,30 @@
 // GetActiveBuyerFreeAdMsg.js
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { ListGroup, Button, Container, Row, Col, Card } from "react-bootstrap";
-import { getUserProfile } from "../../actions/userProfileActions";
+import { useNavigation } from "@react-navigation/native";
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faMessage, faUser } from "@fortawesome/free-solid-svg-icons";
+import RenderHtml from "react-native-render-html";
+import { getUserProfile } from "../../redux/actions/userProfileActions";
 import {
   GetActiveBuyerFreeAdMessages,
   clearBuyerFreeAdMessageCounter,
-} from "../../actions/marketplaceSellerActions";
-import Message from "../Message";
-import Loader from "../Loader";
-import DOMPurify from "dompurify";
-import Pagination from "../Pagination";
+} from "../../redux/actions/marketplaceSellerActions";
+import Loader from "../../Loader";
+import Message from "../../Message";
+import { Pagination } from "../../Pagination";
 
 const GetActiveBuyerFreeAdMsg = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -25,19 +34,15 @@ const GetActiveBuyerFreeAdMsg = () => {
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
-  }, [userInfo]);
+  }, [userInfo, navigation]);
 
   const GetActiveBuyerFreeAdMessageState = useSelector(
     (state) => state.GetActiveBuyerFreeAdMessageState
   );
-  const {
-    loading,
-    activeBuyerFreeAdMessages,
-    loadingError,
-  } = GetActiveBuyerFreeAdMessageState;
-  console.log("activeBuyerFreeAdMessages:", activeBuyerFreeAdMessages);
+  const { loading, activeBuyerFreeAdMessages, loadingError } =
+    GetActiveBuyerFreeAdMessageState;
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -76,9 +81,9 @@ const GetActiveBuyerFreeAdMsg = () => {
       ad_rating: message?.free_ad_rating,
     };
 
-    history.push({
-      pathname: `/buyer/free/ad/message/${message.id}`,
-      search: `?${new URLSearchParams(queryParams).toString()}`,
+    navigation.navigate("Buyer Free Ad Message", {
+      id: message.id,
+      ...queryParams,
     });
   };
 
@@ -89,108 +94,81 @@ const GetActiveBuyerFreeAdMsg = () => {
     dispatch(clearBuyerFreeAdMessageCounter(counterData));
   };
 
+  const renderItem = ({ item: message }) => (
+    <View style={styles.messageItem}>
+      <Text style={styles.title}>{message?.subject}</Text>
+      <Text style={styles.subtitle}>
+        <FontAwesomeIcon icon={faUser} /> {message?.free_ad_seller_username}
+      </Text>
+      <RenderHtml
+        contentWidth={300}
+        source={{
+          html: expandedMessages.includes(message.id)
+            ? message.message
+            : `${message.message.split(" ").slice(0, 10).join(" ")}...`,
+        }}
+      />
+      {!expandedMessages.includes(message.id) && (
+        <TouchableOpacity onPress={() => expandMessage(message.id)}>
+          <Text style={styles.link}>Read More</Text>
+        </TouchableOpacity>
+      )}
+
+      <View style={styles.replyMsg}>
+        <TouchableOpacity
+          onPress={() => {
+            handleReplyBuyer(message);
+            clearMsgCounter(message.free_ad_message_id);
+          }}
+        >
+          <Text style={styles.roundedPrimaryBtn}>
+            Reply Message{" "}
+            {message.buyer_free_ad_msg_count > 0 && (
+              <Text style={styles.msgCounter}>
+                {message.buyer_free_ad_msg_count}
+              </Text>
+            )}{" "}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.footer}>
+        <Text style={styles.timestamp}>
+          {new Date(message?.modified_at).toLocaleString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+            hour12: true,
+          })}
+        </Text>
+      </View>
+    </View>
+  );
+
   return (
-    <Container>
-      {currentItems?.length > 0 && profile.is_marketplace_seller && (
-        <Row>
-          <Col>
-            <h2 className="text-center py-3">
-              <hr />
-              <i className="fa fa-message"></i> Buyer Free Ad Inbox
-              <hr />
-            </h2>
+    <ScrollView>
+      <View style={styles.container}>
+        {currentItems?.length > 0 && profile.is_marketplace_seller && (
+          <View>
+            <Text style={styles.header}>
+              <FontAwesomeIcon icon={faMessage} /> Buyer Free Ad Inbox
+            </Text>
             {loadingError && <Message variant="danger">{loadingError}</Message>}
             {loading ? (
               <Loader />
             ) : (
               <>
                 {currentItems?.length === 0 ? (
-                  <div className="text-center py-3">
+                  <Text style={styles.empty}>
                     Buyer free ad inbox messages appear here.
-                  </div>
+                  </Text>
                 ) : (
-                  <Card className="py-3">
-                    <Card.Body>
-                      <ListGroup>
-                        {currentItems?.map((message) => (
-                          <ListGroup.Item
-                            key={message.id}
-                            className={`message-list-item ${
-                              !message?.is_read ? "unread-message" : ""
-                            }`}
-                          >
-                            <Card.Title>{message?.subject}</Card.Title>
-                            <Card.Subtitle className="mb-2 text-muted">
-                              {/* Seller:  */}
-                              <i className="fas fa-user"></i>{" "}
-                              {message?.free_ad_seller_username}
-                              {/* | Buyer:{" "}
-                            <i className="fas fa-user"></i> {message?.username} */}
-                            </Card.Subtitle>
-
-                            <Card.Text
-                              dangerouslySetInnerHTML={{
-                                __html: DOMPurify.sanitize(
-                                  expandedMessages.includes(message.id)
-                                    ? message.message
-                                    : message?.message?.split(" ")?.length > 10
-                                    ? message.message
-                                        .split(" ")
-                                        ?.slice(0, 10)
-                                        .join(" ") + " ..."
-                                    : message.message
-                                ),
-                              }}
-                            />
-
-                            {message?.message?.split(" ")?.length > 10 &&
-                              !expandedMessages?.includes(message.id) && (
-                                <>
-                                  <Button
-                                    variant="link"
-                                    onClick={() => {
-                                      expandMessage(message.id);
-                                    }}
-                                  >
-                                    {" "}
-                                    Read More
-                                  </Button>
-                                </>
-                              )}
-                            <div className="d-flex justify-content-between text-muted">
-                              <small>
-                                {new Date(message?.modified_at).toLocaleString("en-US",
-                                  {
-                                    weekday: "long",
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                    hour: "numeric",
-                                    minute: "numeric",
-                                    hour12: true,
-                                  })}
-                              </small>
-                              <Button
-                                variant="outline-primary"
-                                size="sm"
-                                onClick={() => {
-                                  handleReplyBuyer(message);
-                                  clearMsgCounter(message.free_ad_message_id);
-                                }}
-                              >
-                                Reply Message{" "}
-                                {message.buyer_free_ad_msg_count > 0 && (
-                                  <span className="msg-counter">
-                                    {message.buyer_free_ad_msg_count}
-                                  </span>
-                                )}
-                              </Button>
-                            </div>
-                          </ListGroup.Item>
-                        ))}
-                      </ListGroup>
-                    </Card.Body>
-                  </Card>
+                  currentItems?.map((item, index) => (
+                    <View key={index}>{renderItem({ item })}</View>
+                  ))
                 )}
                 <Pagination
                   itemsPerPage={itemsPerPage}
@@ -200,11 +178,67 @@ const GetActiveBuyerFreeAdMsg = () => {
                 />
               </>
             )}
-          </Col>
-        </Row>
-      )}
-    </Container>
+          </View>
+        )}
+      </View>
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  empty: {
+    textAlign: "center",
+    padding: 20,
+  },
+  messageItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#777",
+  },
+  link: {
+    color: "#007bff",
+    marginTop: 5,
+  },
+  replyMsg: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  timestamp: {
+    fontSize: 12,
+    color: "#888",
+  },
+  msgCounter: {
+    fontSize: 12,
+    backgroundColor: "red",
+    color: "#fff",
+    fontWeight: "bold",
+    padding: 6,
+    borderRadius: 50,
+    marginLeft: 5,
+  },
+});
 
 export default GetActiveBuyerFreeAdMsg;

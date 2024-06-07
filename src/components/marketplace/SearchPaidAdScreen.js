@@ -1,90 +1,105 @@
 // SearchPaidAdScreen.js
 import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Row, Col } from "react-bootstrap";
-// import { searchAds } from "../../actions/marketplaceSellerActions";
+import { searchAds } from "../../redux/actions/marketplaceSellerActions"; 
 import SearchPaidAdCard from "./SearchPaidAdCard";
-import Message from "../Message";
-import Loader from "../Loader";
-import Pagination from "../Pagination";
+import Message from "../../Message";
+import Loader from "../../Loader";
+import { Pagination } from "../../Pagination";
 
-function SearchPaidAdScreen({
+const SearchPaidAdScreen = ({
   selectedCountry,
   selectedState,
   selectedCity,
-
-  // paidSearchAds
-}) {
+}) => {
   const dispatch = useDispatch();
 
   const searchAdsState = useSelector((state) => state.searchAdsState);
   const { loading, error, paidSearchAds } = searchAdsState;
-  // console.log("paidSearchAds", paidSearchAds?.length);
 
   useEffect(() => {
-    // const adData = {
-    //   selected_country: selectedCountry,
-    //   selected_state: selectedState,
-    //   selected_city: selectedCity,
-    // };
-    // dispatch(searchAds(result));
-    // eslint-disable-next-line
+    const adData = {
+      selected_country: selectedCountry,
+      selected_state: selectedState,
+      selected_city: selectedCity,
+    };
+    dispatch(searchAds(adData));
   }, [dispatch, selectedCountry, selectedState, selectedCity]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = paidSearchAds?.slice(indexOfFirstItem, indexOfLastItem);
 
-  return (
-    <div>
-      <Row>
-        <Col>
-          <hr />
-          <h1 className="text-center">Promoted Ads</h1>
-          <hr />
-          {loading ? (
-            <Loader />
-          ) : error ? (
-            <Message variant="danger">{error}</Message>
-          ) : (
-            <>
-              {currentItems?.length === 0 ? (
-                <div className="text-center">Promoted ads appear here.</div>
-              ) : (
-                <Row>
-                  {currentItems?.map((paidSearchAd) => (
-                    <Col
-                      key={paidSearchAd.id}
-                      xs={12}
-                      sm={12}
-                      md={6}
-                      lg={4}
-                      xl={4}
-                    >
-                      <SearchPaidAdCard paidSearchAd={paidSearchAd} />
-                    </Col>
-                  ))}
-                </Row>
-              )}
+  const totalPages = Math.ceil(paidSearchAds?.length / itemsPerPage);
 
-              <Pagination
-                itemsPerPage={itemsPerPage}
-                totalItems={paidSearchAds.length}
-                currentPage={currentPage}
-                paginate={paginate}
-              />
-            </>
+  const handlePagination = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Promoted Ads</Text>
+      {loading ? (
+        <Loader />
+      ) : error ? (
+        <Message variant="danger">{error}</Message>
+      ) : (
+        <>
+          {currentItems?.length === 0 ? (
+            <Text style={styles.noData}>Promoted ads appear here.</Text>
+          ) : (
+            <View style={styles.cardContainer}>
+              {currentItems?.map((paidSearchAd) => (
+                <View key={paidSearchAd.id} style={styles.card}>
+                  <SearchPaidAdCard paidSearchAd={paidSearchAd} />
+                </View>
+              ))}
+            </View>
           )}
-          <hr />
-        </Col>
-      </Row>
-    </div>
+          <View style={styles.pagination}>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              paginate={handlePagination}
+            />
+          </View>
+        </>
+      )}
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 10,
+    textAlign: "center",
+  },
+  noData: {
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  cardContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
+  },
+  card: {
+    width: "100%",
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+});
 
 export default SearchPaidAdScreen;

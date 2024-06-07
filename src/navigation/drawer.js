@@ -1,6 +1,6 @@
 // drawer.js
 import React, { useState, useEffect } from "react";
-import { TouchableOpacity , Text, View, StyleSheet} from "react-native";
+import { TouchableOpacity, Text, View, StyleSheet } from "react-native";
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
@@ -45,6 +45,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { logout } from "../redux/actions/userActions";
 import { getUserProfile } from "../redux/actions/userProfileActions";
+import { getUserMessages } from "../redux/actions/messagingActions";
+import {
+  GetActiveBuyerFreeAdMessages,
+  GetActiveBuyerPaidAdMessages,
+  listBuyerFreeAdMessages,
+  listBuyerPaidAdMessages,
+} from "../redux/actions/marketplaceSellerActions";
+import { listSupportTicket } from "../redux/actions/supportActions";
 
 const Drawer = createDrawerNavigator();
 
@@ -114,8 +122,75 @@ export const CustomDrawerContent = (props) => {
   };
 
   useEffect(() => {
-    dispatch(getUserProfile());
+    if (userInfo) {
+      dispatch(getUserProfile());
+      dispatch(getUserMessages());
+      dispatch(GetActiveBuyerFreeAdMessages());
+      dispatch(GetActiveBuyerPaidAdMessages());
+      dispatch(listBuyerFreeAdMessages());
+      dispatch(listBuyerPaidAdMessages());
+      dispatch(listSupportTicket());
+    }
   }, [dispatch, userInfo]);
+
+  const getUserMessagesState = useSelector(
+    (state) => state.getUserMessagesState
+  );
+  const { messages } = getUserMessagesState;
+
+  const msgCounted = messages?.reduce(
+    (total, userMessages) => total + userMessages.msg_count,
+    0
+  );
+  const listBuyerFreeAdMessagesState = useSelector(
+    (state) => state.listBuyerFreeAdMessagesState
+  );
+  const { freeAdMessages } = listBuyerFreeAdMessagesState;
+
+  const listBuyerPaidAdMessagesState = useSelector(
+    (state) => state.listBuyerPaidAdMessagesState
+  );
+  const { paidAdMessages } = listBuyerPaidAdMessagesState;
+
+  const msgFreeAdCounted = freeAdMessages?.reduce(
+    (total, userMessages) => total + userMessages.seller_free_ad_msg_count,
+    0
+  );
+
+  const msgPaidAdCounted = paidAdMessages?.reduce(
+    (total, userMessages) => total + userMessages.seller_paid_ad_msg_count,
+    0
+  );
+
+  const GetActiveBuyerFreeAdMessageState = useSelector(
+    (state) => state.GetActiveBuyerFreeAdMessageState
+  );
+  const { activeBuyerFreeAdMessages } = GetActiveBuyerFreeAdMessageState;
+
+  const GetActiveBuyerPaidAdMessageState = useSelector(
+    (state) => state.GetActiveBuyerPaidAdMessageState
+  );
+  const { activeBuyerPaidAdMessages } = GetActiveBuyerPaidAdMessageState;
+
+  const msgActiveFreeAdCounted = activeBuyerFreeAdMessages?.reduce(
+    (total, userMessages) => total + userMessages.buyer_free_ad_msg_count,
+    0
+  );
+
+  const msgActivePaidAdCounted = activeBuyerPaidAdMessages?.reduce(
+    (total, userMessages) => total + userMessages.buyer_paid_ad_msg_count,
+    0
+  );
+
+  const listSupportTicketState = useSelector(
+    (state) => state.listSupportTicketState
+  );
+  const { tickets } = listSupportTicketState;
+
+  const supportMsgCounted = tickets?.reduce(
+    (total, userMessages) => total + userMessages.user_msg_count,
+    0
+  );
 
   useEffect(() => {
     const currentHour = new Date().getHours();
@@ -338,12 +413,31 @@ export const CustomDrawerContent = (props) => {
               size={styles.iconSize}
               style={styles.icon}
             />
-            <DrawerItem
-              label="Inbox"
-              onPress={() => navigation.navigate("Inbox")}
-              style={styles.drawerItem}
-              labelStyle={styles.drawerItemLabel}
-            />
+
+            <View style={styles.inboxContainer}>
+              <DrawerItem
+                label="Inbox"
+                onPress={() => navigation.navigate("Inbox")}
+                style={styles.drawerItem}
+                labelStyle={styles.drawerItemLabel}
+              />
+              <Text style={styles.msgCounter}>
+                {msgCounted +
+                  msgPaidAdCounted +
+                  msgFreeAdCounted +
+                  msgActiveFreeAdCounted +
+                  msgActivePaidAdCounted >
+                  0 && (
+                  <>
+                    {msgCounted +
+                      msgPaidAdCounted +
+                      msgFreeAdCounted +
+                      msgActiveFreeAdCounted +
+                      msgActivePaidAdCounted}
+                  </>
+                )}
+              </Text>
+            </View>
           </View>
 
           <View style={styles.drawerItemContainer}>
@@ -413,12 +507,27 @@ export const CustomDrawerContent = (props) => {
               size={styles.iconSize}
               style={styles.icon}
             />
-            <DrawerItem
+
+            <View style={styles.inboxContainer}>
+              <DrawerItem
+                label="Support"
+                onPress={() => navigation.navigate("Support")}
+                style={styles.drawerItem}
+                labelStyle={styles.drawerItemLabel}
+              />
+              <Text style={styles.msgCounter}>
+                {supportMsgCounted > 0 && <>{supportMsgCounted}</>}
+              </Text>
+            </View>
+
+            {/* <DrawerItem
               label="Support"
               onPress={() => navigation.navigate("Support")}
               style={styles.drawerItem}
               labelStyle={styles.drawerItemLabel}
             />
+
+            <Text>{supportMsgCounted > 0 && <>{supportMsgCounted}</>}</Text> */}
           </View>
 
           <View style={styles.drawerItemContainer}>
@@ -430,7 +539,7 @@ export const CustomDrawerContent = (props) => {
             />
             <DrawerItem
               label="Settings"
-              onPress={() => navigation.navigate("Edit Free Ad")}
+              onPress={() => navigation.navigate("Buyer Free Ad Message")}
               style={styles.drawerItem}
               labelStyle={styles.drawerItemLabel}
             />
@@ -696,6 +805,23 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   toggleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  msgCounter: {
+    fontSize: 14,
+    backgroundColor: "red",
+    color: "#fff",
+    fontWeight: "bold",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 50,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: "red",
+  },
+  inboxContainer: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,

@@ -1,37 +1,46 @@
 // SavedAds.js
 import React, { useEffect } from  "react";
-import {
-  // useDispatch,
-  useSelector,
-} from "react-redux";
-import { useHistory } from "react-router-dom";
-import { Row, Col } from "react-bootstrap";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 import SavedFreeAds from "../marketplace/SavedFreeAds";
 import SavedPaidAds from "../marketplace/SavedPaidAds";
 
 function SavedAds() {
-  const history = useHistory();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     }
-  }, [userInfo, history]);
+  }, [userInfo, navigation]);
 
   return (
-    <div>
-      <Row>
-        <Col>
-          <h1 className="text-center py-3">Saved Ads</h1>
-          <SavedFreeAds />
-          <SavedPaidAds />
-        </Col>
-      </Row>
-    </div>
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.header}>Saved Ads</Text>
+        <SavedFreeAds />
+        <SavedPaidAds />
+      </View>
+    </ScrollView>
   );
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 2,
+  },
+  header: {
+    fontSize: 24,
+    textAlign: "center",
+    paddingVertical: 10,
+    fontWeight: "bold",
+  },
+});
+
 export default SavedAds;
+

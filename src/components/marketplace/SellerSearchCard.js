@@ -13,12 +13,15 @@ import {
   faSearch,
   faCheckCircle,
   faTimesCircle,
-  faShoppingCart
+  faShoppingCart,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigation } from "@react-navigation/native";
 
 function SellerSearchCard({ searchResults, sellerAvatarUrl }) {
   const navigation = useNavigation();
+
+  console.log("seller_username:", searchResults?.seller_username);
+
 
   function calculateDuration(joinedTimestamp) {
     const now = new Date();
@@ -51,8 +54,8 @@ function SellerSearchCard({ searchResults, sellerAvatarUrl }) {
   }
 
   const handleSellerShopFront = () => {
-    navigation.navigate("SellerShopFront", {
-      sellerUsername: searchResults?.seller_username,
+    navigation.navigate("Seller Shop Front", {
+      seller_username: searchResults?.seller_username,
     });
   };
 
@@ -88,6 +91,9 @@ function SellerSearchCard({ searchResults, sellerAvatarUrl }) {
         <Text>
           Joined since {calculateDuration(searchResults?.seller_joined_since)}
         </Text>
+      </View>
+
+      <View style={styles.shopfront}>
         <TouchableOpacity
           style={styles.shopfrontButton}
           onPress={handleSellerShopFront}
@@ -97,6 +103,7 @@ function SellerSearchCard({ searchResults, sellerAvatarUrl }) {
           </Text>
         </TouchableOpacity>
       </View>
+      
     </View>
   );
 }
@@ -157,6 +164,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  shopfront: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
   },
   shopfrontButton: {
     backgroundColor: "#007bff",

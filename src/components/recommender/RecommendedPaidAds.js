@@ -1,14 +1,14 @@
 // RecommendedPaidAds.js
 import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Row, Col } from "react-bootstrap";
-import { getUserRecommendedPaidAds } from "../../actions/recommenderActions";
-import Message from "../Message";
-import Loader from "../Loader";
-import Pagination from "../Pagination";
+import { getUserRecommendedPaidAds } from "../../redux/actions/recommenderActions";
 import AllPaidAdCard from "../marketplace/AllPaidAdCard";
+import Message from "../../Message";
+import Loader from "../../Loader";
+import { Pagination } from "../../Pagination";
 
-function RecommendedPaidAds() {
+const RecommendedPaidAds = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -30,44 +30,66 @@ function RecommendedPaidAds() {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div>
-      <Row>
-        <Col>
-          <hr />
-          <h1 className="text-center py-2">Promoted Ads</h1>
-          <hr />
-          {loading ? (
-            <Loader />
-          ) : error ? (
-            <Message variant="danger">{error}</Message>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Promoted Ads</Text>
+      </View>
+      {loading ? (
+        <Loader />
+      ) : error ? (
+        <Message variant="danger">{error}</Message>
+      ) : (
+        <>
+          {currentItems?.length === 0 ? (
+            <View style={styles.emptyMessage}>
+              <Text>Recommended promoted ads appear here.</Text>
+            </View>
           ) : (
-            <>
-              {currentItems.length === 0 ? (
-                <div className="text-center py-3">
-                  Recommended promoted ads appear here.
-                </div>
-              ) : (
-                <Row>
-                  {currentItems.map((product) => (
-                    <Col key={product._id} xs={12} sm={12} md={6} lg={4} xl={3}>
-                      <AllPaidAdCard product={product} />
-                    </Col>
-                  ))}
-                </Row>
-              )}
-
-              <Pagination
-                itemsPerPage={itemsPerPage}
-                totalItems={recommendedAds?.length}
-                currentPage={currentPage}
-                paginate={paginate}
-              />
-            </>
+            <View style={styles.adsContainer}>
+              {currentItems?.map((product) => (
+                <View key={product.id} style={styles.adCard}>
+                  <AllPaidAdCard product={product} />
+                </View>
+              ))}
+            </View>
           )}
-        </Col>
-      </Row>
-    </div>
+          <Pagination
+            itemsPerPage={itemsPerPage}
+            totalItems={recommendedAds?.length}
+            currentPage={currentPage}
+            paginate={paginate}
+          />
+        </>
+      )}
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 4,
+  },
+  header: {
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  emptyMessage: {
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  adsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  adCard: {
+    flexBasis: "98%",
+    marginBottom: 20,
+  },
+});
 
 export default RecommendedPaidAds;

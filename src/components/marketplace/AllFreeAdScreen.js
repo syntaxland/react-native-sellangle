@@ -93,8 +93,6 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    // marginVertical: 10,
-    // padding: 10,
   },
   pagination: {
     flexDirection: "row",

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Text } from "react-native";
+import { Text, StyleSheet } from "react-native";
 import moment from "moment";
 
 const PromoTimer = ({ expirationDate }) => {
-  const calculateTimeRemaining = () => { 
+  const calculateTimeRemaining = () => {
     const now = moment();
     const expirationDateObj = moment(expirationDate);
 
@@ -30,7 +30,13 @@ const PromoTimer = ({ expirationDate }) => {
     return () => clearInterval(timer);
   }, [expirationDate]);
 
-  return <Text>{timeRemaining}</Text>;
+  return <Text style={styles.timerText}>{timeRemaining}</Text>;
 };
+
+const styles = StyleSheet.create({
+  timerText: {
+    color: "#dc3545",
+  },
+});
 
 export default PromoTimer;

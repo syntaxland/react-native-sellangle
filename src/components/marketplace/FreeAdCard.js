@@ -65,11 +65,6 @@ function FreeAdCard({ product }) {
   const handleReactivateAdOpen = () => setReactivateAdModal(true);
   const handleReactivateAdClose = () => setReactivateAdModal(false);
 
-  // const handleEditAd = () => {
-  //   const id = product.id;
-  //   navigation.navigate("EditFreeAd", { id });
-  // };
-
   const handleEditAd = () => {
     const id = product?.id;
     if (id) {
@@ -78,7 +73,6 @@ function FreeAdCard({ product }) {
       console.error("Product ID is undefined");
     }
   };
-  
 
   function formatCount(viewCount) {
     if (viewCount >= 1000000) {
@@ -141,8 +135,8 @@ function FreeAdCard({ product }) {
 
           <View style={styles.locationContainer}>
             <Text style={styles.locationText}>
-              <FontAwesomeIcon icon={faMapMarkerAlt} size={16} /> {product?.city}{" "}
-              {product?.state_province}, {product?.country}.
+              <FontAwesomeIcon icon={faMapMarkerAlt} size={16} />{" "}
+              {product?.city} {product?.state_province}, {product?.country}.
             </Text>
           </View>
 

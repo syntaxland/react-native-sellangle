@@ -12,6 +12,17 @@ import {
   RefreshControl,
   useWindowDimensions,
 } from "react-native";
+import * as Clipboard from "expo-clipboard";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faEnvelope,
+  faPhone,
+  faShoppingCart,
+  faFlag,
+  faCheck,
+  faCopy,
+  faClock,
+} from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -77,12 +88,20 @@ const PaidAdProductDetail = () => {
     dispatch(getSellerAccount());
   }, [dispatch, id]);
 
-  const handleShowPhoneNumber = () => setShowPhoneNumber(!showPhoneNumber);
   const handleClickMore = () => setExpanded(!expanded);
   const handleReportAdOpen = () => setReportAdModal(true);
   const handleReportAdClose = () => setReportAdModal(false);
   const handlePaysofterOption = () =>
     setShowPaysofterOption(!showPaysofterOption);
+
+  const handleShowPhoneNumber = () => setShowPhoneNumber(!showPhoneNumber);
+  const [isPhoneCopied, setIsPhoneCopied] = useState(false);
+
+  const handleCopyPhoneNumber = async () => {
+    await Clipboard.setStringAsync(ads?.seller_phone);
+    setIsPhoneCopied(true);
+    setTimeout(() => setIsPhoneCopied(false), 2000);
+  };
 
   function formatCount(viewCount) {
     if (viewCount >= 1000000) {
@@ -161,12 +180,18 @@ const PaidAdProductDetail = () => {
   };
 
   const handleSellerShopFront = () => {
-    navigation.navigate("SellerShopFront", { username: ads?.seller_username });
+    navigation.navigate("Seller Shop Front", {
+      seller_username: ads?.seller_username,
+    });
   };
 
   const descriptionHtml = {
     html: ads?.description || "<div>No description available.</div>",
   };
+
+  const truncatedDescription = ads?.description
+    ? ads.description.split(" ").slice(0, 10).join(" ") + "..."
+    : "";
 
   return (
     <ScrollView
@@ -175,7 +200,7 @@ const PaidAdProductDetail = () => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <Button title="Go Back" onPress={() => navigation.goBack()} />
+      {/* <Button title="Go Back" onPress={() => navigation.goBack()} /> */}
       {loading ? (
         <Loader />
       ) : error ? (
@@ -210,8 +235,9 @@ const PaidAdProductDetail = () => {
               Promo Code: {ads?.promo_code} ({ads?.discount_percentage}% Off)
             </Text>
             <View style={styles.card}>
-              <Text>
-                Expires in: <PromoTimer expirationDate={ads?.expiration_date} />
+              <Text style={styles.expirationText}>
+                <FontAwesomeIcon icon={faClock} color="#fff" /> Expires in:{" "}
+                <PromoTimer expirationDate={ads?.expiration_date} />
               </Text>
               <Text>
                 Price: {formatAmount(ads.price)} {ads.currency}
@@ -226,20 +252,64 @@ const PaidAdProductDetail = () => {
               )}
             </View>
 
+            {/* <View style={styles.description}>
+              <Text>Ad Description:</Text>
+              {ads?.description && (
+                <Text style={styles.description}>
+                  {expanded
+                    ? ads.description
+                    : ads.description.split(" ").slice(0, 10).join(" ") + "..."}
+                </Text>
+              )}
+              {ads?.description?.split(" ").length > 10 && (
+                <TouchableOpacity onPress={handleClickMore}>
+                  <Text style={styles.toggleDescription}>
+                    {expanded ? "Less" : "More"}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View> */}
+
+            {/* <View style={styles.description}>
+              <Text>Ad Description:</Text>
+              <RenderHtml
+                contentWidth={width}
+                source={descriptionHtml}
+                tagsStyles={{
+                  div: {
+                    maxHeight: expanded ? undefined : 100,
+                    overflow: "hidden",
+                  },
+                }}
+              />
+              {ads?.description?.split(" ").length > 10 && (
+                <TouchableOpacity onPress={handleClickMore}>
+                  <Text style={styles.toggleDescription}>
+                    {expanded ? "Less" : "More"}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View> */}
+
             <View style={styles.description}>
               <Text>Ad Description:</Text>
               <RenderHtml
                 contentWidth={width}
-                source={{ html: ads?.description }}
+                source={descriptionHtml}
                 tagsStyles={{
-                  div: { height: expanded ? "auto" : 100, overflow: "hidden" },
+                  div: {
+                    maxHeight: expanded ? undefined : 100,
+                    overflow: expanded ? "visible" : "hidden",
+                  },
                 }}
               />
-              {ads?.description?.split(" ")?.length > 10 && (
-                <Button
-                  title={expanded ? "Less" : "More"}
-                  onPress={handleClickMore}
-                />
+              {/* {!expanded && <Text>{truncatedDescription}</Text>} */}
+              {ads?.description?.split(" ").length > 10 && (
+                <TouchableOpacity onPress={handleClickMore}>
+                  <Text style={styles.toggleDescription}>
+                    {expanded ? "Less" : "More"}
+                  </Text>
+                </TouchableOpacity>
               )}
             </View>
 
@@ -257,31 +327,123 @@ const PaidAdProductDetail = () => {
               <Text>
                 {isSellerVerified ? "Verified ID" : "ID Not Verified"}
               </Text>
+              <Text>
+                Joined since {calculateDuration(ads?.seller_joined_since)}
+              </Text>
               <RatingSeller
                 value={sellerRating}
                 text={`${formatCount(sellerReviewCount)} reviews`}
                 color="green"
               />
+
               <ReviewPaidAdSeller adId={ads?.id} />
-              <Button
-                title={showPhoneNumber ? "Hide Contact" : "Show Contact"}
-                onPress={handleShowPhoneNumber}
-              />
-              {showPhoneNumber && <Text>{ads?.seller_phone}</Text>}
+
               <View style={styles.spaceBtwGroup}>
-                <Button
-                  title="Message Seller"
+                <TouchableOpacity
+                  style={styles.squaredPrimaryButton}
+                  onPress={handleShowPhoneNumber}
+                >
+                  <Text style={styles.btnText}>
+                    <FontAwesomeIcon icon={faPhone} color="#fff" />{" "}
+                    {showPhoneNumber ? "Hide Contact" : "Show Contact"}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.squaredPrimaryButton}
                   onPress={handleClickMessageSeller}
-                />
-                <Button
-                  title="Go to Seller Shopfront"
+                >
+                  <Text style={styles.btnText}>
+                    <FontAwesomeIcon icon={faEnvelope} color="#fff" /> Message
+                    Seller
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {showPhoneNumber && (
+                <View style={styles.spaceBtwGrou}>
+                  <Text style={styles.phoneNumber}>
+                    <TouchableOpacity
+                      style={styles.copyPhone}
+                      onPress={handleCopyPhoneNumber}
+                    >
+                      <Text style={styles.label}>
+                        {isPhoneCopied ? (
+                          <Text style={styles.label}>
+                            Phone number copied{" "}
+                            <FontAwesomeIcon
+                              icon={faCheck}
+                              size={16}
+                              color="#007bff"
+                            />
+                          </Text>
+                        ) : (
+                          <Text style={styles.label}>
+                            <Text>{ads?.seller_phone} </Text>{" "}
+                            <FontAwesomeIcon
+                              icon={faCopy}
+                              size={16}
+                              color="#007bff"
+                            />
+                          </Text>
+                        )}
+                      </Text>
+                    </TouchableOpacity>
+                  </Text>
+                </View>
+              )}
+
+              <View style={styles.shopfront}>
+                <TouchableOpacity
+                  style={styles.squaredPrimaryButton}
                   onPress={handleSellerShopFront}
-                />
+                >
+                  <Text style={styles.btnText}>
+                    <FontAwesomeIcon icon={faShoppingCart} color="#fff" /> Go to
+                    Seller Shopfront
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
+
+            <View style={styles.buttonGroup}>
+              <View style={styles.spaceBtwElement}>
+                <TogglePaidAdSave adId={ads?.id} />
+              </View>
+
+              <View style={styles.spaceBtwElement}>
+                <TouchableOpacity
+                  style={styles.squaredDangerBtn}
+                  onPress={handleReportAdOpen}
+                >
+                  <Text style={styles.btnText}>
+                    <FontAwesomeIcon icon={faFlag} color="#fff" /> Report Ad
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <Modal
+              visible={reportAdModal}
+              animationType="slide"
+              onRequestClose={handleReportAdClose}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalLabelTitle}>
+                    Pay With Paysofter Promise
+                  </Text>
+                  <View style={styles.modalLabelBody}>
+                    <ReportPaidAd adId={ads?.id} />
+                  </View>
+
+                  <Button title="Close" onPress={handleReportAdClose} />
+                </View>
+              </View>
+            </Modal>
           </View>
 
-          <View style={styles.formGroup}>
+          <View style={styles.payBtn}>
             <TouchableOpacity onPress={handlePaysofterOption}>
               <Text style={styles.roundedPrimaryBtn}>
                 Pay With Paysofter Promise
@@ -300,35 +462,6 @@ const PaidAdProductDetail = () => {
               sellerApiKey={sellerApiKey}
             />
           )}
-
-          <Modal
-            visible={reportAdModal}
-            animationType="slide"
-            onRequestClose={handleReportAdClose}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalLabelTitle}>
-                  Pay With Paysofter Promise
-                </Text>
-                <View style={styles.modalLabelBody}>
-                  <ReportPaidAd adId={ads?.id} />
-                </View>
-
-                <Button title="Close" onPress={handleReportAdClose} />
-              </View>
-            </View>
-          </Modal>
-
-          <View style={styles.buttonGroup}>
-            <View style={styles.spaceBtwElement}>
-              <TogglePaidAdSave adId={ads?.id} />
-            </View>
-
-            <View style={styles.spaceBtwElement}>
-              <Button title="Report Ad" onPress={handleReportAdOpen} />
-            </View>
-          </View>
         </>
       )}
     </ScrollView>
@@ -364,6 +497,11 @@ const styles = StyleSheet.create({
   description: {
     marginVertical: 10,
   },
+  toggleDescription: {
+    color: "#007bff",
+    textAlign: "center",
+    marginTop: 5,
+  },
   sellerDetails: {
     marginVertical: 10,
   },
@@ -380,7 +518,7 @@ const styles = StyleSheet.create({
   spaceBtwGroup: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 10,
+    padding: 2,
   },
   spaceBtwElement: {
     padding: 10,
@@ -424,6 +562,35 @@ const styles = StyleSheet.create({
   icon: {
     marginLeft: 10,
     color: "#007bff",
+  },
+  shopfront: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+  },
+  squaredPrimaryButton: {
+    backgroundColor: "#007bff",
+    padding: 5,
+    borderRadius: 5,
+  },
+  squaredDangerBtn: {
+    backgroundColor: "#dc3545",
+    padding: 5,
+    borderRadius: 5,
+    color: "#fff",
+  },
+  btnText: {
+    color: "#fff",
+  },
+  payBtn: {
+    padding: 20,
+  },
+  label: {
+    color: "#007bff",
+  },
+  phoneNumber: {
+    color: "#007bff",
+    padding: 20,
   },
 });
 

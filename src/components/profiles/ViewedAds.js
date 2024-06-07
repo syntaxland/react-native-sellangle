@@ -1,36 +1,44 @@
 // ViewedAds.js
-import React, { useEffect } from  "react";
-import {
-  // useDispatch,
-  useSelector,
-} from "react-redux";
-import { Row, Col } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 import ViewedFreeAds from "../marketplace/ViewedFreeAds";
 import ViewedPaidAds from "../marketplace/ViewedPaidAds";
 
 function ViewedAds() {
-  const history = useHistory();
+  const navigation = useNavigation();
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     }
-  }, [userInfo, history]);
+  }, [userInfo, navigation]);
 
   return (
-    <div>
-      <Row>
-        <Col>
-          <h1 className="text-center py-3">Viewed Ads</h1>
-          <ViewedFreeAds />
-          <ViewedPaidAds />
-        </Col>
-      </Row>
-    </div>
+    <ScrollView >
+      <View style={styles.container}>
+        <Text style={styles.header}>Viewed Ads</Text>
+        <ViewedFreeAds />
+        <ViewedPaidAds />
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 2,
+  },
+  header: {
+    fontSize: 24,
+    textAlign: "center",
+    paddingVertical: 10,
+    fontWeight: "bold",
+  },
+});
 
 export default ViewedAds;

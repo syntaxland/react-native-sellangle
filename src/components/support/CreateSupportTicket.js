@@ -9,7 +9,7 @@ import {
 import Loader from "../Loader"; 
 import Message from "../Message";
  
-function CreateSupportTicket() { 
+function CreateSupportTicket() {  
   const dispatch = useDispatch();  
     const history = useHistory();
   
