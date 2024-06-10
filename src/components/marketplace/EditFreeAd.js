@@ -38,7 +38,7 @@ const EditFreeAd = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const route = useRoute();
-  const { id } = route.params;
+  const { adId } = route.params;
   const richText = useRef();
 
   const [durationChoices, setDurationChoices] = useState([]);
@@ -71,8 +71,8 @@ const EditFreeAd = () => {
   }, [userInfo, navigation]);
 
   useEffect(() => {
-    dispatch(getFreeAdDetail(id));
-  }, [dispatch, id]);
+    dispatch(getFreeAdDetail(adId));
+  }, [dispatch, adId]);
 
   const editFreeAdState = useSelector((state) => state.editFreeAdState);
   const { success, error, loading } = editFreeAdState;
@@ -221,7 +221,7 @@ const EditFreeAd = () => {
       "is_price_negotiable",
       editAdData.is_price_negotiable
     );
-    editAdFormData.append("ad_id", id);
+    editAdFormData.append("ad_id", adId);
 
     if (editAdFormData.image1 instanceof File) {
       editAdFormData.append("image1", editAdData.image1);

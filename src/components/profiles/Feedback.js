@@ -1,51 +1,121 @@
 // Feedback.js
 import React, { useEffect } from "react";
-import { Button, Row, Col } from "react-bootstrap";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faComments } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { listFeedbacks } from "../../actions/feedbackActions";
+import { useNavigation } from "@react-navigation/native";
+import { listFeedbacks } from "../../redux/actions/feedbackActions";
+import Loader from "../../Loader";
+import Message from "../../Message";
 
-function Feedback() {
-  const history = useHistory();
+const Feedback = () => {
+  const navigation = useNavigation();
   const dispatch = useDispatch();
 
   const feedbackList = useSelector((state) => state.feedbackList);
-  const {
-    // loading: listSupportTicketLoading,
-    feedbacks,
-    // error: listSupportTicketError,
-  } = feedbackList;
-  console.log("feedbacks:", feedbacks);
+  const { loading, error, feedbacks } = feedbackList;
 
   useEffect(() => {
     dispatch(listFeedbacks());
   }, [dispatch]);
 
   const handleSendFeedback = () => {
-    history.push("/create-feedback");
+    navigation.navigate("Send Feedback");
   };
 
   return (
-    <Row>
-      <Col>
-        <div className="py-3">
-          <div className="d-flex justify-content-center mt-5 py-3"> 
-            <p>Would you want to send us a feedback?</p>
-            {"  "}
-            <p>
-              <Button
-                variant="primary"
-                onClick={handleSendFeedback}
-                className="rounded"
-              >
-                Send Feedback
-              </Button>
-            </p>
-          </div>
-        </div>
-      </Col>
-    </Row>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollView}>
+        <View style={styles.container}>
+          <Text style={styles.title}>
+            <FontAwesomeIcon icon={faComments} /> Feedback
+          </Text>
+          {loading ? (
+            <Loader />
+          ) : error ? (
+            <Message variant="danger">{error}</Message>
+          ) : (
+            <>
+              {/* {feedbacks && feedbacks.length > 0 ? (
+                feedbacks.map((feedback, index) => (
+                  <View key={index} style={styles.feedbackItem}>
+                    <Text>{feedback.message}</Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.noFeedbackText}>
+                  No feedback available.
+                </Text>
+              )} */}
+
+              <View style={styles.feedbackPrompt}>
+                <Text style={styles.feedbackText}>
+                  Would you like to send us a feedback?
+                </Text>
+                <TouchableOpacity onPress={handleSendFeedback}>
+                  <Text style={styles.roundedPrimaryBtn}>Send Feedback</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  scrollView: {
+    flexGrow: 1,
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  feedbackPrompt: {
+    marginTop: 30,
+    padding: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  feedbackText: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    textAlign: "center",
+  },
+  feedbackItem: {
+    marginVertical: 10,
+    padding: 15,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 10,
+  },
+  noFeedbackText: {
+    textAlign: "center",
+    paddingTop: 10,
+  },
+});
 
 export default Feedback;

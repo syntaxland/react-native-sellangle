@@ -1,59 +1,91 @@
 // AdChargeCalculator.js
 import React, { useState } from "react";
-import { Form, Button, Row, Col } from "react-bootstrap";
-import { formatAmount } from "../FormatAmount";
-import { formatUserInput } from "../formatUserInput"; 
+import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { formatAmount } from "../../FormatAmount";
 
-function AdChargeCalculator() {
-  const [numberOfAds, setNumberOfAds] = useState(1);
-  const [numberOfHours, setNumberOfHours] = useState(1);
+const formatUserInput = (input) => {
+  const formattedInput = input.replace(/[^0-9]/g, "");
+  return formattedInput;
+};
 
-  const totalCPS = (numberOfAds * numberOfHours * 1.2).toFixed(2);
+const AdChargeCalculator = () => {
+  const [numberOfAds, setNumberOfAds] = useState("1");
+  const [numberOfHours, setNumberOfHours] = useState("1");
+
+  const totalCPS = (
+    parseInt(numberOfAds) *
+    parseInt(numberOfHours) *
+    1.2
+  ).toFixed(2);
+
+  const handleNumberOfAdsChange = (value) => {
+    setNumberOfAds(formatUserInput(value));
+  };
+
+  const handleNumberOfHoursChange = (value) => {
+    setNumberOfHours(formatUserInput(value));
+  };
 
   return (
-    <div className="d-flex justify-content-center py-2 mt-4">
-      <Row>
-        <Col>
-          <h3 className="text-center py-2">Ad Charge Calculator</h3>
-          <p className="text-center">1.2 cps per hour (promoted ad)</p>
+    <View style={styles.container}>
+      <Text style={styles.title}>Ad Charge Calculator</Text>
+      <Text style={styles.info}>1.2 cps per hour (promoted ad)</Text>
 
-          <Form>
-            <Form.Group controlId="numberOfAds">
-              <Form.Label>Enter Number of Ads</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="Enter number of ads"
-                value={numberOfAds}
-                // onChange={(e) => setNumberOfAds(e.target.value)}
-                onChange={(e) => setNumberOfAds(formatUserInput(e.target.value))}
-              />
-            </Form.Group>
+      <View style={styles.form}>
+        <TextInput
+          style={styles.input}
+          keyboardType="numeric"
+          placeholder="Enter number of ads"
+          value={numberOfAds}
+          onChangeText={handleNumberOfAdsChange}
+        />
 
-            <Form.Group controlId="numberOfHours">
-              <Form.Label>Enter Hours</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="Enter number of hours"
-                value={numberOfHours}
-                // onChange={(e) => setNumberOfHours(e.target.value)}
-                onChange={(e) => setNumberOfHours(formatUserInput(e.target.value))}
-              />
-            </Form.Group>
-          </Form>
-          <div className="d-flex justify-content-center py-2 text-center">
-            <Button
-              variant="outline-transparent"
-            //   size="sm"
-              className="rounded w-100"
-              disabled
-            >
-              <strong>Total CPS: {formatAmount(totalCPS)}</strong> 
-            </Button>
-          </div>
-        </Col>
-      </Row>
-    </div>
+        <TextInput
+          style={styles.input}
+          keyboardType="numeric"
+          placeholder="Enter number of hours"
+          value={numberOfHours}
+          onChangeText={handleNumberOfHoursChange}
+        />
+      </View>
+
+      <View style={styles.totalCPSContainer}>
+        <Button title={`Total CPS: ${formatAmount(totalCPS)}`} disabled />
+      </View>
+    </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 20,
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  info: {
+    marginBottom: 10,
+  },
+  form: {
+    width: "80%",
+    marginBottom: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 4,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  totalCPSContainer: {
+    width: "80%",
+  },
+});
 
 export default AdChargeCalculator;

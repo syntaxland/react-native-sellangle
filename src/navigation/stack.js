@@ -10,6 +10,7 @@ import RegisterScreen from "../components/screens/RegisterScreen";
 import VerifyEmailOtp from "../components/emailOtp/VerifyEmailOtp";
 // marketplace
 import Marketplace from "../components/marketplace/Marketplace";
+import DashboardSeller from "../components/marketplace/DashboardSeller";
 import PostFreeAd from "../components/marketplace/PostFreeAd";
 import PostPaidAd from "../components/marketplace/PostPaidAd";
 import FreeAdProductDetail from "../components/marketplace/FreeAdProductDetail";
@@ -26,7 +27,9 @@ import BuyerFreeAdMessage from "../components/marketplace/BuyerFreeAdMessage";
 import BuyerPaidAdMessage from "../components/marketplace/BuyerPaidAdMessage";
 import SellerFreeAdMessage from "../components/marketplace/SellerFreeAdMessage";
 import SellerPaidAdMessage from "../components/marketplace/SellerPaidAdMessage";
-// import SellerShopFront from "../components/marketplace/SellerShopFront";
+import Billing from "../components/marketplace/Billing";
+// import DashboardSeller from "../components/marketplace/DashboardSeller";
+// import Billing from "../components/marketplace/Billing";
 // CreditPoint
 import GetBuyCreditPoint from "../components/CreditPoint/GetBuyCreditPoint";
 import GetUserCpsBonuses from "../components/CreditPoint/GetUserCpsBonuses";
@@ -45,9 +48,26 @@ import ViewedAds from "../components/profiles/ViewedAds";
 import SavedAds from "../components/profiles/SavedAds";
 import RecommendedAds from "../components/recommender/RecommendedAds";
 import Inbox from "../components/profiles/Inbox";
-// import Inbox from "../components/profiles/Inbox";
-// import Inbox from "../components/profiles/Inbox";
-// import Inbox from "../components/profiles/Inbox";
+import Referrals from "../components/profiles/Referrals";
+// import Referrals from "../components/profiles/Referrals";
+// import Referrals from "../components/profiles/Referrals";
+// import Referrals from "../components/profiles/Referrals";
+// support
+import SupportTicket from "../components/support/SupportTicket";
+import CreateSupportTicket from "../components/support/CreateSupportTicket";
+import UserReplySupportTicket from "../components/support/UserReplySupportTicket";
+import AdminReplySupportTicket from "../components/support/AdminReplySupportTicket";
+
+import FeedbackScreen from "../components/screens/FeedbackScreen";
+import AdminFeedback from "../components/admin/AdminFeedback";
+import Feedback from "../components/profiles/Feedback";
+
+import AdminSupportTicket from "../components/admin/AdminSupportTicket";
+// import AdminSupportTicket from "../components/admin/AdminSupportTicket";
+// import AdminSupportTicket from "../components/admin/AdminSupportTicket";
+// import AdminSupportTicket from "../components/admin/AdminSupportTicket";
+
+
 
 const Stack = createStackNavigator();
 
@@ -63,6 +83,9 @@ export const HomeStack = () => {
       <Stack.Screen name="VerifyEmailOtp" component={VerifyEmailOtp} />
       <Stack.Screen name="Dashboard" component={Dashboard} />
       <Stack.Screen name="Inbox" component={Inbox} />
+      <Stack.Screen name="Referrals" component={Referrals} />
+      <Stack.Screen name="Dashboard (Seller)" component={DashboardSeller} />
+      {/* <Stack.Screen name="Referrals" component={Referrals} /> */}
       {/* marketplace */}
       <Stack.Screen name="Bought NGN CPS List" component={GetBuyCreditPoint} />
       <Stack.Screen name="CPS Bonuses" component={GetUserCpsBonuses} />
@@ -92,17 +115,38 @@ export const HomeStack = () => {
       <Stack.Screen name="Search Results" component={SearchResults} />
       <Stack.Screen name="Seller Shop Front" component={SellerShopFront} />
 
+      <Stack.Screen
+        name="Buyer Free Ad Message"
+        component={BuyerFreeAdMessage}
+      />
+      <Stack.Screen
+        name="Buyer Paid Ad Message"
+        component={BuyerPaidAdMessage}
+      />
+      <Stack.Screen
+        name="Seller Free Ad Message"
+        component={SellerFreeAdMessage}
+      />
+      <Stack.Screen
+        name="Seller Paid Ad Message"
+        component={SellerPaidAdMessage}
+      />
+      <Stack.Screen name="Billing" component={Billing} />
+      {/* <Stack.Screen name="Billing" component={Billing} /> */}
+      {/* <Stack.Screen name="Billing" component={Billing} /> */}
 
-      <Stack.Screen name="Buyer Free Ad Message" component={BuyerFreeAdMessage} /> 
-      <Stack.Screen name="Buyer Paid Ad Message" component={BuyerPaidAdMessage} /> 
-      <Stack.Screen name="Seller Free Ad Message" component={SellerFreeAdMessage} /> 
-      <Stack.Screen name="Seller Paid Ad Message" component={SellerPaidAdMessage} /> 
-      {/* <Stack.Screen name="SellerFreeAdMessage" component={SellerFreeAdMessage} />  */}
-      {/* <Stack.Screen name="SellerFreeAdMessage" component={SellerFreeAdMessage} />  */}
-      {/* <Stack.Screen name="SellerFreeAdMessage" component={SellerFreeAdMessage} />  */}
-      {/* <Stack.Screen name="SellerFreeAdMessage" component={SellerFreeAdMessage} />  */}
+      <Stack.Screen name="Support" component={SupportTicket} />
+      <Stack.Screen name="Create Ticket" component={CreateSupportTicket} /> 
+      <Stack.Screen name="User Reply Ticket" component={UserReplySupportTicket} /> 
+      <Stack.Screen name="Admin Reply Ticket" component={AdminReplySupportTicket} /> 
+      <Stack.Screen name="Admin Support" component={AdminSupportTicket} />
+      <Stack.Screen name="Send Feedback" component={FeedbackScreen} />
+      <Stack.Screen name="Admin Feedback" component={AdminFeedback} />
+      <Stack.Screen name="Feedback" component={Feedback} />
 
       <Stack.Screen name="PaysofterButton" component={PaysofterButton} />
+      {/* <Stack.Screen name="PaysofterButton" component={PaysofterButton} /> */}
+      {/* <Stack.Screen name="PaysofterButton" component={PaysofterButton} /> */}
     </Stack.Navigator>
   );
 };

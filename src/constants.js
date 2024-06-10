@@ -10,6 +10,19 @@
 //   ["1 month", "1 month (Free)"],
 // ];
 
+export const SUPPORT_CHOICES = [
+  ["Support", "Support"],
+  ["Account Fund", "Account Fund"],
+  ["Billing", "Billing"],
+  ["Abuse", "Abuse"],
+  ["OTP", "OTP"],
+  ["Payments", "Payments"],
+  ["Services", "Services"],
+  ["Credit Points", "Credit Points"],
+  ["Referrals", "Referrals"],
+  ["Others", "Others"],
+];
+
 export const FREE_AD_DURATION_CHOICES = [
   ["1 day", "1 day (Free)"],
   ["2 days", "2 days (Free)"],

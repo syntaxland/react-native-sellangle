@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUserSavedPaidAds } from "../../redux/actions/marketplaceSellerActions";
 import AllPaidAdCard from "./AllPaidAdCard";
 import Message from "../../Message";
-import Loader from "../../Loader";
+import Loader from "../../Loader"; 
 import { Pagination } from "../../Pagination";
 
 const SavedPaidAds = () => {

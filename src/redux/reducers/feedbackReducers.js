@@ -1,12 +1,13 @@
 // feedbackReducers.js
 import {
   CREATE_FEEDBACK_REQUEST,
-    CREATE_FEEDBACK_SUCCESS,
-    CREATE_FEEDBACK_FAIL,
-    LIST_FEEDBACK_REQUEST,
-    LIST_FEEDBACK_SUCCESS,
-    LIST_FEEDBACK_FAIL,
-} from "../constants/feedbackConstants"; 
+  CREATE_FEEDBACK_SUCCESS,
+  CREATE_FEEDBACK_FAIL,
+  RESET_FEEDBACK,
+  LIST_FEEDBACK_REQUEST,
+  LIST_FEEDBACK_SUCCESS,
+  LIST_FEEDBACK_FAIL,
+} from "../constants/feedbackConstants";
 
 const initialState = {
   feedbacks: [],
@@ -32,6 +33,8 @@ export const feedbackCreateReducer = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+    case RESET_FEEDBACK:
+      return {};
     default:
       return state;
   }

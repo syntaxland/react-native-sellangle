@@ -66,12 +66,8 @@ function FreeAdCard({ product }) {
   const handleReactivateAdClose = () => setReactivateAdModal(false);
 
   const handleEditAd = () => {
-    const id = product?.id;
-    if (id) {
-      navigation.navigate("Edit Free Ad", { id });
-    } else {
-      console.error("Product ID is undefined");
-    }
+    const adId = product?.id;
+    navigation.navigate("Edit Free Ad", { adId: adId });
   };
 
   function formatCount(viewCount) {

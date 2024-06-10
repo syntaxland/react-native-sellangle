@@ -1,98 +1,97 @@
 // PayAdCharges.js
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { payAdCharges } from "../../actions/marketplaceSellerActions";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
-import Message from "../Message";
-import Loader from "../Loader";
-import { formatAmount } from "../FormatAmount";
+import { View, Text, Button, StyleSheet, Modal } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { payAdCharges } from "../../redux/actions/marketplaceSellerActions";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import Loader from "../../Loader";
+import Message from "../../Message";
+import { formatAmount } from "../../FormatAmount";
 
-function PayAdCharges({ totalAdCharges }) {
+const PayAdCharges = ({ totalAdCharges, visible, onClose }) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     }
-  }, [userInfo, history]);
+  }, [userInfo]);
 
-  const payAdChargesState = useSelector(
-    (state) => state.payAdChargesState
-  );
+  const payAdChargesState = useSelector((state) => state.payAdChargesState);
   const { success, error, loading } = payAdChargesState;
-
-  // const [password, setPassword] = useState("");
 
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
-        window.location.reload();
-        // history.push("/dashboard");
+        onClose();
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [success, history]);
+  }, [success]);
 
   const adData = {
-    // password: password,
     ad_charges_amt: totalAdCharges,
   };
-  console.log("totalAdCharges:", totalAdCharges);
 
   const handlePayAdCharges = () => {
     dispatch(payAdCharges(adData));
   };
 
   return (
-    <Container>
-      <Row className="justify-content-center py-2">
-        <Col>
-          {/* <h2 className="mb-4">Seller Confirm Promises</h2> */}
+    <Modal visible={visible} onRequestClose={onClose} transparent={true}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
           {loading && <Loader />}
           {success && (
             <Message variant="success">Ad charges paid successfully.</Message>
           )}
           {error && <Message variant="danger">{error}</Message>}
 
-          <p className="rounded mt-2 py-1 text-center">
-            <i
-              className="fa fa-warning text-warning"
-              style={{
-                fontSize: "18px",
-                //  color: "yellow"
-              }}
-            ></i>{" "}
-            Warning! This action will deduct the ad charges of {formatAmount(totalAdCharges)}{" "}
-            from your CPS wallet.
-          </p>
+          <View style={styles.warningContainer}>
+            <FontAwesomeIcon icon={faExclamationTriangle} size={18} color="orange" />
+            <Text style={styles.warningText}>
+              Warning! This action will deduct the ad charges of {formatAmount(totalAdCharges)} from your CPS wallet.
+            </Text>
+          </View>
 
-          <Form>
-            {/* <Form.Group>
-              <Form.Control
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="rounded mt-2"
-              />
-            </Form.Group> */}
-            <Button
-              variant="primary"
-              onClick={handlePayAdCharges}
-              className="rounded mt-2 text-center w-100"
-            >
-              Pay Now 
-            </Button>
-          </Form>
-        </Col>
-      </Row>
-    </Container>
+          <Button title="Pay Now" onPress={handlePayAdCharges} />
+          <Button title="Close" onPress={onClose} />
+        </View>
+      </View>
+    </Modal>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  warningContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  warningText: {
+    marginLeft: 10,
+    color: "orange",
+    textAlign: "center",
+  },
+});
 
 export default PayAdCharges;

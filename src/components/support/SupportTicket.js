@@ -1,24 +1,41 @@
 // SupportTicket.js
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
-import { Table, Button, Container, ListGroup } from "react-bootstrap";
+import React, { useEffect, useState, useCallback } from "react";
 import {
-  clearUserSupportMsgCounter,
-  listSupportTicket,
-} from "../../actions/supportActions";
-import Message from "../Message";
-import Loader from "../Loader";
-import Pagination from "../Pagination";
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+  StyleSheet,
+  RefreshControl,
+  TouchableOpacity,
+} from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faPaperPlane, faTicket } from "@fortawesome/free-solid-svg-icons";
+import { useDispatch, useSelector } from "react-redux";
+import { Button, DataTable } from "react-native-paper";
+import { useNavigation } from "@react-navigation/native";
+import { listSupportTicket } from "../../redux/actions/supportActions";
+import Message from "../../Message";
+import Loader from "../../Loader";
+import { Pagination } from "../../Pagination";
 
-function SupportTicket() {
+const SupportTicket = () => {
+  const navigation = useNavigation();
   const dispatch = useDispatch();
-  const history = useHistory();
+
   const listSupportTicketState = useSelector(
     (state) => state.listSupportTicketState
   );
   const { loading, tickets, error } = listSupportTicketState;
-  console.log("tickets:", tickets);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      dispatch(listSupportTicket());
+      setRefreshing(false);
+    }, 2000);
+  }, [dispatch]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -36,132 +53,162 @@ function SupportTicket() {
   }, [dispatch]);
 
   const handleCreateTicket = () => {
-    history.push("/create-support-ticket");
-  };
-
-  const clearMessageCounter = (ticketId) => {
-    const ticketData = {
-      ticket_id: ticketId,
-    };
-    dispatch(clearUserSupportMsgCounter(ticketData));
+    navigation.navigate("Create Ticket");
   };
 
   return (
-    <Container>
-      <h1 className="text-center py-3">
-        <i className="fas fa-ticket"></i> Support Ticket
-      </h1>
-      {loading ? (
-        <Loader />
-      ) : error ? (
-        <Message variant="danger">{error}</Message>
-      ) : (
-        <>
-          {currentItems.length === 0 ? (
-            <div className="text-center py-3">Support Ticket appear here.</div>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>
+            <Text style={styles.icon}>
+              {" "}
+              <FontAwesomeIcon icon={faTicket} />
+            </Text>{" "}
+            Support Tickets
+          </Text>
+          {loading ? (
+            <Loader />
+          ) : error ? (
+            <Message variant="danger">{error}</Message>
           ) : (
-            <Table striped bordered hover responsive className="table-sm">
-              <thead>
-                <tr>
-                  <th>SN</th>
-                  <th>Ticket ID</th>
-                  {/* <th>User</th> */}
-                  <th>Subject</th>
-                  <th>Category</th>
-                  {/* <th>Message</th> */}
-                  <th>Status</th>
-                  <th>Resolved</th>
-                  <th>Created At</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.map((ticket, index) => (
-                  <tr key={ticket.id}>
-                    <td>{index + 1}</td>
-                    <td className="text-center">
-                      <ListGroup className="text-center py-2">
-                        <ListGroup.Item>#{ticket.ticket_id}</ListGroup.Item>
-                      </ListGroup>
-                      <Button
-                        variant="outline-primary"
-                        size="sm"
-                        onClick={() => clearMessageCounter(ticket.ticket_id)}
-                      >
-                        <Link
-                          to={`/user-reply-support-ticket/${ticket.ticket_id}`}
-                          style={{ textDecoration: "none" }}
-                        >
-                          Reply Support{" "}
-                          {ticket?.user_msg_count > 0 && (
-                            <span className="msg-counter">
-                              {ticket?.user_msg_count}
-                            </span>
+            <>
+              {currentItems.length === 0 ? (
+                <Text style={styles.noTicketsText}>
+                  Support Ticket appear here.
+                </Text>
+              ) : (
+                <ScrollView horizontal={true}>
+                  <DataTable>
+                    <DataTable.Header>
+                      <DataTable.Title>SN</DataTable.Title>
+                      <DataTable.Title>Ticket ID</DataTable.Title>
+                      <DataTable.Title>Subject</DataTable.Title>
+                      <DataTable.Title>Category</DataTable.Title>
+                      <DataTable.Title>Status</DataTable.Title>
+                      <DataTable.Title>Resolved</DataTable.Title>
+                      <DataTable.Title>Created At</DataTable.Title>
+                    </DataTable.Header>
+                    {currentItems.map((ticket, index) => (
+                      <DataTable.Row key={ticket.id}>
+                        <DataTable.Cell>{index + 1}</DataTable.Cell>
+                        <DataTable.Cell>
+                          <Button
+                            onPress={() =>
+                              navigation.navigate("User Reply Ticket", {
+                                ticketId: ticket.ticket_id,
+                              })
+                            }
+                          >
+                            #{ticket.ticket_id}
+                          </Button>
+                        </DataTable.Cell>
+                        <DataTable.Cell>{ticket.subject}</DataTable.Cell>
+                        <DataTable.Cell>{ticket.category}</DataTable.Cell>
+                        <DataTable.Cell>
+                          {ticket.is_closed ? (
+                            <Text style={{ color: "red" }}>Closed</Text>
+                          ) : (
+                            <Text style={{ color: "green" }}>Active</Text>
                           )}
-                        </Link>
-                      </Button>
-                    </td>
-                    {/* <td>{ticket.email}</td> */}
-                    <td>{ticket.subject}</td>
-                    <td>{ticket.category}</td>
-                    {/* <td>{ticket.ticket}</td> */}
-                    <td>
-                      {ticket.is_closed ? (
-                        <span style={{ color: "red" }}>Closed</span>
-                      ) : (
-                        <span style={{ color: "green" }}>Active</span>
-                      )}
-                    </td>
-                    <td>
-                      {ticket.is_resolved ? (
-                        <i
-                          className="fas fa-check-circle"
-                          style={{ fontSize: "16px", color: "green" }}
-                        ></i>
-                      ) : (
-                        <i
-                          className="fas fa-times-circle"
-                          style={{ fontSize: "16px", color: "red" }}
-                        ></i>
-                      )}
-                    </td>
+                        </DataTable.Cell>
+                        <DataTable.Cell>
+                          {ticket.is_resolved ? (
+                            <Text style={{ color: "green" }}>Resolved</Text>
+                          ) : (
+                            <Text style={{ color: "red" }}>Not Resolved</Text>
+                          )}
+                        </DataTable.Cell>
+                        <DataTable.Cell>
+                          {/* {new Date(ticket.created_at).toLocaleString("en-US", {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "numeric",
+                            second: "numeric",
+                          })} */}
+                        {new Date(ticket.created_at).toLocaleString()}
 
-                    <td>
-                      {new Date(ticket.created_at).toLocaleString("en-US", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "numeric",
-                        minute: "numeric",
-                        second: "numeric",
-                      })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
+                        </DataTable.Cell>
+                      </DataTable.Row>
+                    ))}
+                  </DataTable>
+                </ScrollView>
+              )}
+              <View style={styles.pagination}>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={Math.ceil(tickets.length / itemsPerPage)}
+                  paginate={paginate}
+                />
+              </View>
+            </>
           )}
-          <div className="py-2">
-            <Pagination
-              itemsPerPage={itemsPerPage}
-              totalItems={tickets.length}
-              currentPage={currentPage}
-              paginate={paginate}
-            />
-          </div>
-        </>
-      )}
-      <div className="d-flex justify-content-center mt-5 py-3">
-        <Button
-          variant="success"
-          onClick={handleCreateTicket}
-          className="rounded"
-        >
-          Create A New Support Ticket
-        </Button>
-      </div>
-    </Container>
+         
+
+          <View style={styles.submitButton}>
+            <TouchableOpacity onPress={handleCreateTicket}>
+              <Text style={styles.roundedPrimaryBtn}>
+                Create Ticket{" "}
+                <FontAwesomeIcon icon={faPaperPlane} color="#fff" />
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  scrollView: {
+    flexGrow: 1,
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  icon: {
+    fontSize: 20,
+  },
+  noTicketsText: {
+    textAlign: "center",
+    paddingTop: 10,
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+  submitButton: {
+    marginTop: 20,
+    padding: 15,
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+});
 
 export default SupportTicket;

@@ -60,8 +60,8 @@ function PaidAdCard({ product }) {
   const handleReleteAdClose = () => setReactivateAdModal(false);
 
   const handleEditAd = () => {
-    const id = product.id;
-    navigation.navigate("Edit Paid Ad", { id });
+    const adId = product.id;
+    navigation.navigate("Edit Paid Ad", { adId: adId });
   };
 
   function formatCount(viewCount) {

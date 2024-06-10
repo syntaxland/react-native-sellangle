@@ -86,6 +86,7 @@ import {
   clearBuyerPaidAdMsgCounterReducer,
   GetActiveBuyerFreeAdMessagesReducer,
   GetActiveBuyerPaidAdMessagesReducer,
+  getSellerAdStatisticsReducer,
 } from "./reducers/marketplaceSellerReducers";
 
 import {
@@ -390,6 +391,8 @@ const rootReducer = combineReducers({
 
   GetActiveBuyerFreeAdMessageState: GetActiveBuyerFreeAdMessagesReducer,
   GetActiveBuyerPaidAdMessageState: GetActiveBuyerPaidAdMessagesReducer,
+
+  getSellerAdStatState: getSellerAdStatisticsReducer,
 
   applyPromoCodeState: applyPomoCodeReducer,
 });

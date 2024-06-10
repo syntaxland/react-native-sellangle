@@ -251,6 +251,14 @@ const styles = StyleSheet.create({
     borderRadius: 50, 
     marginLeft: 5,
   },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    textAlign: "center",
+  },
 });
 
 export default GetActiveBuyerPaidAdMsg;

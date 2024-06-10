@@ -6,7 +6,7 @@ import { getUserFreeAdsViews } from "../../redux/actions/marketplaceSellerAction
 import AllFreeAdCard from "./AllFreeAdCard";
 import Message from "../../Message";
 import Loader from "../../Loader";
-import { Pagination } from "../../Pagination";
+import { Pagination } from "../../Pagination"; 
 
 const ViewedFreeAds = () => {
   const dispatch = useDispatch();

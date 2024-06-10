@@ -3,6 +3,7 @@ import {
   CREATE_TICKET_REQUEST,
   CREATE_TICKET_SUCCESS,
   CREATE_TICKET_FAIL,
+  RESET_TICKET,
   CREATE_SUPPORT_MESSAGE_REQUEST,
   CREATE_SUPPORT_MESSAGE_SUCCESS,
   CREATE_SUPPORT_MESSAGE_FAIL,
@@ -87,6 +88,8 @@ export const createSupportTicketReducer = (state = initialState, action) => {
       return { loading: false, success: true };
     case CREATE_TICKET_FAIL:
       return { loading: false, error: action.payload };
+    case RESET_TICKET:
+      return {};
     default:
       return state;
   }

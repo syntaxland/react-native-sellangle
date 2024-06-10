@@ -1,31 +1,42 @@
-// SupportMessage.js
-import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, SafeAreaView, StyleSheet } from "react-native";
+// AdminSupportTicket.js
+import React, { useEffect, useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+  StyleSheet,
+  RefreshControl,
+} from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faTicket } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, DataTable } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import { listSupportTicket, listSupportMessage } from "../../redux/actions/supportActions";
+import {
+  listAllSupportTickets,
+  clearUserSupportMsgCounter,
+} from "../../redux/actions/supportActions";
 import Message from "../../Message";
 import Loader from "../../Loader";
-import Pagination from "../../Pagination";
+import { Pagination } from "../../Pagination";
 
-const SupportMessage = () => {
+const AdminSupportTicket = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const allTicketList = useSelector((state) => state.allTicketList);
+  const { loading, tickets, error } = allTicketList;
+  console.log("tickets:", tickets);
 
-  const listSupportTicketState = useSelector(
-    (state) => state.listSupportTicketState
-  );
-  const { loading, success, tickets, error } = listSupportTicketState;
+  const [refreshing, setRefreshing] = useState(false);
 
-  const listSupportMessageState = useSelector(
-    (state) => state.listSupportMessageState
-  );
-  const {
-    loading: listSupportMessageloading,
-    ticketMessages,
-    error: listSupportMessageError,
-  } = listSupportMessageState;
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      dispatch(listAllSupportTickets());
+      setRefreshing(false);
+    }, 2000);
+  }, [dispatch]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -34,35 +45,46 @@ const SupportMessage = () => {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = ticketMessages
-    ? ticketMessages.slice(indexOfFirstItem, indexOfLastItem)
+  const currentItems = tickets
+    ? tickets.slice(indexOfFirstItem, indexOfLastItem)
     : [];
 
   useEffect(() => {
-    dispatch(listSupportTicket());
-    dispatch(listSupportMessage());
+    dispatch(listAllSupportTickets());
   }, [dispatch]);
 
-  const handleCreateTicket = () => {
-    navigation.navigate("Create Support Message");
+  const clearMessageCounter = (ticketId) => {
+    const ticketData = {
+      ticket_id: ticketId,
+    };
+    dispatch(clearUserSupportMsgCounter(ticketData));
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollView}>
+      <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={styles.container}>
           <Text style={styles.title}>
-            <Text style={styles.icon}>🎫</Text> Support Ticket
+            <Text style={styles.icon}>
+              {" "}
+              <FontAwesomeIcon icon={faTicket} />
+            </Text>{" "}
+            Support Tickets
           </Text>
-          {loading || listSupportMessageloading ? (
+          {loading ? (
             <Loader />
-          ) : error || listSupportMessageError ? (
-            <Message variant="danger">{error || listSupportMessageError}</Message>
+          ) : error ? (
+            <Message variant="danger">{error}</Message>
           ) : (
             <>
               {currentItems.length === 0 ? (
                 <Text style={styles.noTicketsText}>
-                  Support Ticket appear here.
+                  Support tickets appear here.
                 </Text>
               ) : (
                 <ScrollView horizontal={true}>
@@ -71,6 +93,8 @@ const SupportMessage = () => {
                       <DataTable.Title>SN</DataTable.Title>
                       <DataTable.Title>Ticket ID</DataTable.Title>
                       <DataTable.Title>User</DataTable.Title>
+                      <DataTable.Title>Account ID</DataTable.Title>
+                      <DataTable.Title>Username</DataTable.Title>
                       <DataTable.Title>Subject</DataTable.Title>
                       <DataTable.Title>Category</DataTable.Title>
                       <DataTable.Title>Message</DataTable.Title>
@@ -81,8 +105,21 @@ const SupportMessage = () => {
                     {currentItems.map((ticket, index) => (
                       <DataTable.Row key={ticket.id}>
                         <DataTable.Cell>{index + 1}</DataTable.Cell>
-                        <DataTable.Cell>{ticket.ticket_id}</DataTable.Cell>
+                        <DataTable.Cell>
+                          <Button
+                            onPress={() => {
+                              clearMessageCounter(ticket.ticket_id);
+                              navigation.navigate("Admin Reply Ticket", {
+                                ticketId: ticket.ticket_id,
+                              });
+                            }}
+                          >
+                            #{ticket.ticket_id}
+                          </Button>
+                        </DataTable.Cell>
                         <DataTable.Cell>{ticket.email}</DataTable.Cell>
+                        <DataTable.Cell>{ticket.account_id}</DataTable.Cell>
+                        <DataTable.Cell>{ticket.user_username}</DataTable.Cell>
                         <DataTable.Cell>{ticket.subject}</DataTable.Cell>
                         <DataTable.Cell>{ticket.category}</DataTable.Cell>
                         <DataTable.Cell>{ticket.message}</DataTable.Cell>
@@ -119,17 +156,12 @@ const SupportMessage = () => {
               <View style={styles.pagination}>
                 <Pagination
                   currentPage={currentPage}
-                  totalPages={Math.ceil(ticketMessages.length / itemsPerPage)}
+                  totalPages={Math.ceil(tickets.length / itemsPerPage)}
                   paginate={paginate}
                 />
               </View>
             </>
           )}
-          <View style={styles.createTicketButton}>
-            <Button mode="contained" onPress={handleCreateTicket}>
-              Create A New Support Ticket
-            </Button>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -145,7 +177,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 10,
+    padding: 20,
   },
   title: {
     fontSize: 24,
@@ -165,10 +197,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 20,
   },
-  createTicketButton: {
-    alignItems: "center",
-    marginTop: 20,
-  },
 });
 
-export default SupportMessage;
+export default AdminSupportTicket;

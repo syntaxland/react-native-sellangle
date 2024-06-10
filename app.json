@@ -11,9 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
@@ -22,8 +20,16 @@
         "expo-image-picker",
         {
           "photosPermission": "custom photos permission",
-          "cameraPermission": "Allow Sellangle to open the camera",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to open the camera",
           "microphonePermission": false
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "isAccessMediaLocationEnabled": true
         }
       ],
       [

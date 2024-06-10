@@ -24,14 +24,13 @@ import {
   ID_TYPE_CHOICES,
   COUNTRY_CHOICES,
   BUSINESS_TYPE_CHOICES,
-  STAFF_SIZE_CHOICES,
+  STAFF_SIZE_CHOICES, 
   BUSINESS_INDUSTRY_CHOICES,
   BUSINESS_CATEGORY_CHOICES,
 } from "../../constants";
 
 function SellerProfile() {
   const dispatch = useDispatch();
-  // const [selectedCountry] = useState("US");
 
   const [idTypeChoices, setIdTypeChoices] = useState([]);
   const [countryChoices, setCountryChoices] = useState([]);
@@ -57,7 +56,6 @@ function SellerProfile() {
     error: getSellerAccountError,
     sellerAccount,
   } = getSellerAccountState;
-  // console.log("sellerAccount:", sellerAccount);
 
   const updateSellerAccountState = useSelector(
     (state) => state.updateSellerAccountState
@@ -70,7 +68,6 @@ function SellerProfile() {
 
   const getSellerPhotoState = useSelector((state) => state.getSellerPhotoState);
   const { sellerPhoto } = getSellerPhotoState;
-  // console.log("sellerPhoto:", sellerPhoto);
 
   const updateSellerPhotoState = useSelector(
     (state) => state.updateSellerPhotoState

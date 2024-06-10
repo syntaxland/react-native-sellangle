@@ -38,7 +38,7 @@ const EditPaidAd = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const route = useRoute();
-  const { id } = route.params;
+  const { adId } = route.params;
   const richText = useRef();
 
   const [durationChoices, setDurationChoices] = useState([]);
@@ -71,8 +71,8 @@ const EditPaidAd = () => {
   }, [userInfo, navigation]);
 
   useEffect(() => {
-    dispatch(getPaidAdDetail(id));
-  }, [dispatch, id]);
+    dispatch(getPaidAdDetail(adId));
+  }, [dispatch, adId]);
 
   const editPaidAdState = useSelector((state) => state.editPaidAdState);
   const { success, error, loading } = editPaidAdState;
@@ -221,7 +221,7 @@ const EditPaidAd = () => {
       "is_price_negotiable",
       editAdData.is_price_negotiable
     );
-    editAdFormData.append("ad_id", id);
+    editAdFormData.append("ad_id", adId);
 
     if (editAdFormData.image1 instanceof File) {
       editAdFormData.append("image1", editAdData.image1);

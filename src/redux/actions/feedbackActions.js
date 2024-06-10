@@ -4,8 +4,9 @@ import {
     CREATE_FEEDBACK_REQUEST,
     CREATE_FEEDBACK_SUCCESS,
     CREATE_FEEDBACK_FAIL,
+    RESET_FEEDBACK,
     LIST_FEEDBACK_REQUEST,
-    LIST_FEEDBACK_SUCCESS,
+    LIST_FEEDBACK_SUCCESS, 
     LIST_FEEDBACK_FAIL,
   
 } from "../constants/feedbackConstants";  
@@ -51,6 +52,10 @@ export const createFeedback = (feedbackData) => async (dispatch, getState) => {
           : error.message,
     });
   }
+};
+
+export const resetFeedback = () => (dispatch) => {
+  dispatch({ type: RESET_FEEDBACK });
 };
 
 export const listFeedbacks = () => async (dispatch, getState) => {

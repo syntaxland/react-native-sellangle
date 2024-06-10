@@ -2,15 +2,15 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"; 
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 import {
   getUserProfile,
-  updateUserProfile, 
+  updateUserProfile,
   updateUserAvatar,
 } from "../../actions/userProfileActions";
 import { sendEmailOtp } from "../../actions/emailOtpActions";
-import { Form, Button, Row, Col, Container, Accordion } from "react-bootstrap";
+import { Form, Button, Row, Col, Container, Accordion } from "react-bootstrap"; 
 import Message from "../Message";
 import Loader from "../Loader";
 
@@ -37,14 +37,6 @@ function UserProfile() {
   const [successMessage, setSuccessMessage] = useState("");
   const history = useHistory();
 
-  // const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // const toggleSidebar = () => {
-  //   setSidebarOpen(!sidebarOpen);
-  // };
-
-  // const { loading: updateAvatarLoading, success: updateAvatarSuccess, error: updateAvatarError } = useSelector((state) => state.updateUserAvatar);
-
   const handleAvatarChange = (e) => {
     const avatar = e.target.files[0];
     if (avatar) {
@@ -66,19 +58,6 @@ function UserProfile() {
       dispatch(getUserProfile());
     }
   }, [dispatch, userInfo]);
-
-  // useEffect(() => {
-  //   if (userProfile && userProfile.profile) {
-  //     const profile = userProfile.profile;
-  //     setUserData({
-  //       ...userData,
-  //       first_name: profile.first_name,
-  //       last_name: profile.last_name,
-  //       phone_number: profile.phone_number,
-  //       avatar: profile.avatar,
-  //     });
-  //   }
-  // }, [userProfile, userData]);
 
   useEffect(() => {
     if (userProfile && userProfile.profile) {
@@ -120,11 +99,6 @@ function UserProfile() {
     dispatch(updateUserProfile(userData));
   };
 
-  // const handleDeleteAccount = () => {
-  //   // setUserData({ ...userData, password: "" }); // Clear the password field
-  //   history.push("/delete-account");
-  // };
-
   const handleResendEmailOtp = () => {
     dispatch(sendEmailOtp(userInfo.email, userInfo.first_name));
     history.push("/verify-email-otp");
@@ -136,25 +110,19 @@ function UserProfile() {
     }
   };
 
-  // const handleChangePassword = () => {
-  //   history.push("/change-password");
-  // };
-
   return (
     <Container Fluid>
       <Row>
-        
-
         {userInfo.is_verified ? (
-            <h2 className="text-center">
+          <h2 className="text-center">
             Profile <i className="fas fa-user-check"></i>
           </h2>
-          ) : (
-            <h2 className="text-center">
-          Profile <i className="fas fa-user"></i>
-        </h2>
-          )}
-          
+        ) : (
+          <h2 className="text-center">
+            Profile <i className="fas fa-user"></i>
+          </h2>
+        )}
+
         {loading && <Loader />}
         {profileLoading && <Loader />}
 
@@ -170,41 +138,15 @@ function UserProfile() {
           {userInfo.is_verified ? (
             <i
               className="fas fa-check-circle"
-              // className="fas fa-badge-check"
               style={{ fontSize: "18px", color: "white" }}
             ></i>
           ) : (
             <i
               className="fas fa-times-circle"
-              // className="fas fa-badge-check"
               style={{ fontSize: "18px", color: "red" }}
             ></i>
           )}
         </p>
-
-        {/* <Col
-          xs={3}
-          id="sidebar"
-          className={`bg-dark ${sidebarOpen ? "open" : "closed"}`}
-        >
-
-          <div className="sidebar-content">
-            <Accordion defaultActiveKey="0">
-
-            <Accordion.Item eventKey="0">
-              <Accordion.Header>Bio</Accordion.Header>
-              <Accordion.Body>
-                Bio
-              </Accordion.Body>
-            </Accordion.Item>
-            </Accordion>
-          </div>
-
-          <Button className="toggle-button" onClick={toggleSidebar}>
-           X <i className={`bi bi-x-lg ${sidebarOpen ? "open" : "closed"}`}></i>
-          </Button>
-
-        </Col> */}
 
         <Col>
           <Accordion defaultActiveKey={["0"]} alwaysOpen>
@@ -238,7 +180,7 @@ function UserProfile() {
                       onChange={handleInputChange}
                     />
                   </Form.Group>
-                  
+
                   <Form.Group>
                     <Form.Label>Last Name</Form.Label>
                     <Form.Control
@@ -268,16 +210,6 @@ function UserProfile() {
                     />
                   </Form.Group>
 
-                  {/* <Form.Group>
-                    <Form.Label>Avatar</Form.Label>
-                    <Form.Control
-                      type="file"
-                      name="avatar"
-                      accept="image/*"
-                      onChange={handleAvatarChange}
-                    />
-                  </Form.Group> */}
-
                   <div className="d-flex justify-content-right pt-3">
                     <Button
                       className="rounded"
@@ -287,51 +219,9 @@ function UserProfile() {
                       Update Profile
                     </Button>{" "}
                   </div>
-
-                  {/* <Form.Group>
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control
-                      type="password"
-                      name="password"
-                      value={userData.password}
-                      readOnly
-                      onChange={handleInputChange}
-                    />
-                  </Form.Group>
-                  <Button
-                    rounded
-                    variant="success"
-                    onClick={handleChangePassword}
-                  >
-                    Change Password
-                  </Button> */}
                 </Form>
               </Accordion.Body>
             </Accordion.Item>
-
-            {/* <Accordion.Item eventKey="1">
-              <Accordion.Header>Change Password</Accordion.Header>
-              <Accordion.Body>
-                <Form.Group>
-                  <Form.Label>Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    name="password"
-                    placeholder="****************"
-                    value={userInfo.password}
-                    readOnly
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-                <Button
-                  className="rounded"
-                  variant="success"
-                  onClick={handleChangePassword}
-                >
-                  Change Password
-                </Button>
-              </Accordion.Body>
-            </Accordion.Item> */}
 
             <Accordion.Item eventKey="2">
               <Accordion.Header>Update Avatar</Accordion.Header>
@@ -347,28 +237,6 @@ function UserProfile() {
                 </Form.Group>
               </Accordion.Body>
             </Accordion.Item>
-
-            {/* <Accordion.Item eventKey="3">
-              <Accordion.Header>Delete Account</Accordion.Header>
-              <Accordion.Body>
-                <p>
-                  <FontAwesomeIcon
-                    icon={faExclamationTriangle}
-                    className="warning-icon"
-                  />{" "}
-                  Warning! This action is irreversible and all your data will be
-                  deleted from our database.
-                </p>
-                <Button
-                  variant="danger"
-                  onClick={handleDeleteAccount}
-                  className="rounded"
-                >
-                  Delete Account
-                </Button>
-              </Accordion.Body>
-            </Accordion.Item> */}
-
           </Accordion>
         </Col>
       </Row>

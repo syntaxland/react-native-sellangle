@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserPaidAdsViews } from "../../redux/actions/marketplaceSellerActions";
+import { getUserPaidAdsViews } from "../../redux/actions/marketplaceSellerActions"; 
 import AllPaidAdCard from "./AllPaidAdCard";
 import Message from "../../Message";
 import Loader from "../../Loader";

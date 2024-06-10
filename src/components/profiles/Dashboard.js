@@ -10,6 +10,9 @@ import {
   Modal,
   TouchableOpacity,
 } from "react-native";
+
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faWallet, faDashboard } from "@fortawesome/free-solid-svg-icons";
 import { useNavigation } from "@react-navigation/native";
 import { getCreditPointBalance } from "../../redux/actions/creditPointActions";
 import SellCreditPoint from "../CreditPoint/SellCreditPoint";
@@ -63,21 +66,49 @@ const Dashboard = () => {
       ) : (
         <View style={styles.dashboard}>
           <Text style={styles.title}>
-            <Text style={styles.icon}>📊</Text> Dashboard (User)
+            <Text style={styles.icon}>
+              <FontAwesomeIcon
+                icon={faDashboard}
+                style={styles.icon}
+                // color="#fff"
+              />{" "}
+              Dashboard (User)
+            </Text>
           </Text>
           <View style={styles.walletSection}>
             <Text style={styles.subtitle}>
-              Credit Point Wallet <Text style={styles.icon}>💼</Text>
+              Credit Point Wallet{" "}
+              <Text style={styles.icon}>
+                <FontAwesomeIcon
+                  icon={faWallet}
+                  style={styles.icon}
+                  // color="#fff"
+                />{" "}
+              </Text>
             </Text>
             <Text style={styles.balance}>
               Balance: {formatNumber(creditPoints)} CPS
             </Text>
             <View style={styles.buttonGroup}>
-              <Button title="Buy CPS" onPress={handleBuyCreditPointOpen} />
+              {/* <Button title="Buy CPS" onPress={handleBuyCreditPointOpen} />
               <Button
                 title="Sell/Share CPS"
                 onPress={handleSellCreditPointOpen}
-              />
+              /> */}
+
+              <TouchableOpacity
+                onPress={handleBuyCreditPointOpen}
+                disabled={loading}
+              >
+                <Text style={styles.roundedPrimaryBtn}>Buy CPS</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleSellCreditPointOpen}
+                disabled={loading}
+              >
+                <Text style={styles.roundedPrimaryBtn}>Sell CPS</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -88,11 +119,11 @@ const Dashboard = () => {
         onRequestClose={handleBuyCreditPointClose}
       >
         {/* <View style={styles.paymentContainer}> */}
-          <View style={styles.modalContent}>
+        <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Buy Credit Point</Text>
           <SelectCurrency />
           <Button title="Close" onPress={handleBuyCreditPointClose} />
-          </View>
+        </View>
         {/* </View> */}
       </Modal>
 
@@ -161,6 +192,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     // marginBottom: 20,
     padding: 20,
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    // justifyContent: "center",
+    // alignItems: "center",
+    // textAlign: "center",
   },
 });
 

@@ -24,6 +24,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   faDashboard,
   faUser,
+  faUserLock,
   faUserShield,
   faHandPeace,
   faUserPlus,
@@ -52,7 +53,10 @@ import {
   listBuyerFreeAdMessages,
   listBuyerPaidAdMessages,
 } from "../redux/actions/marketplaceSellerActions";
-import { listSupportTicket } from "../redux/actions/supportActions";
+import {
+  listSupportTicket,
+  listAllSupportTickets,
+} from "../redux/actions/supportActions";
 
 const Drawer = createDrawerNavigator();
 
@@ -116,9 +120,14 @@ export const CustomDrawerContent = (props) => {
 
   const [greeting, setGreeting] = useState("");
   const [showCreditPointLinks, setShowCreditPointLinks] = useState(false);
+  const [showAdminLinks, setShowAdminLinks] = useState(false);
 
   const toggleCreditPointLinks = () => {
     setShowCreditPointLinks(!showCreditPointLinks);
+  };
+
+  const toggleAdminLinks = () => {
+    setShowAdminLinks(!showAdminLinks);
   };
 
   useEffect(() => {
@@ -130,6 +139,7 @@ export const CustomDrawerContent = (props) => {
       dispatch(listBuyerFreeAdMessages());
       dispatch(listBuyerPaidAdMessages());
       dispatch(listSupportTicket());
+      dispatch(listAllSupportTickets());
     }
   }, [dispatch, userInfo]);
 
@@ -185,12 +195,27 @@ export const CustomDrawerContent = (props) => {
   const listSupportTicketState = useSelector(
     (state) => state.listSupportTicketState
   );
-  const { tickets } = listSupportTicketState;
+  const { tickets: userTickets } = listSupportTicketState;
 
-  const supportMsgCounted = tickets?.reduce(
+  const supportMsgCounted = userTickets?.reduce(
     (total, userMessages) => total + userMessages.user_msg_count,
     0
   );
+
+  const allTicketList = useSelector((state) => state.allTicketList);
+  const { tickets: adminTickets } = allTicketList;
+
+  const adminSupportMsgCounted = adminTickets?.reduce(
+    (total, userMessages) => total + userMessages.admin_user_msg_count,
+    0
+  );
+
+  const totalMsgCount =
+    msgCounted +
+    msgPaidAdCounted +
+    msgFreeAdCounted +
+    msgActiveFreeAdCounted +
+    msgActivePaidAdCounted;
 
   useEffect(() => {
     const currentHour = new Date().getHours();
@@ -235,7 +260,7 @@ export const CustomDrawerContent = (props) => {
         </View>
       </View>
 
-      {userInfo ? (
+      {userInfo && (
         <View style={styles.drawerContainer}>
           <Text style={styles.title}>User Metrics</Text>
           <View style={styles.drawerItemContainer}>
@@ -278,8 +303,8 @@ export const CustomDrawerContent = (props) => {
               style={styles.icon}
             />
             <DrawerItem
-              label="Referral"
-              onPress={() => navigation.navigate("Referral")}
+              label="Referrals"
+              onPress={() => navigation.navigate("Referrals")}
               style={styles.drawerItem}
               labelStyle={styles.drawerItemLabel}
             />
@@ -306,7 +331,6 @@ export const CustomDrawerContent = (props) => {
               <FontAwesomeIcon
                 color={styles.iconColor}
                 icon={faCaretDown}
-                // size={styles.iconSize}
                 style={styles.toggleIcon}
               />
             </TouchableOpacity>
@@ -421,20 +445,9 @@ export const CustomDrawerContent = (props) => {
                 style={styles.drawerItem}
                 labelStyle={styles.drawerItemLabel}
               />
-              <Text style={styles.msgCounter}>
-                {msgCounted +
-                  msgPaidAdCounted +
-                  msgFreeAdCounted +
-                  msgActiveFreeAdCounted +
-                  msgActivePaidAdCounted >
-                  0 && (
-                  <>
-                    {msgCounted +
-                      msgPaidAdCounted +
-                      msgFreeAdCounted +
-                      msgActiveFreeAdCounted +
-                      msgActivePaidAdCounted}
-                  </>
+              <Text>
+                {totalMsgCount > 0 && (
+                  <Text style={styles.msgCounter}>{totalMsgCount}</Text>
                 )}
               </Text>
             </View>
@@ -515,19 +528,12 @@ export const CustomDrawerContent = (props) => {
                 style={styles.drawerItem}
                 labelStyle={styles.drawerItemLabel}
               />
-              <Text style={styles.msgCounter}>
-                {supportMsgCounted > 0 && <>{supportMsgCounted}</>}
+              <Text>
+                {supportMsgCounted > 0 && (
+                  <Text style={styles.msgCounter}>{supportMsgCounted}</Text>
+                )}
               </Text>
             </View>
-
-            {/* <DrawerItem
-              label="Support"
-              onPress={() => navigation.navigate("Support")}
-              style={styles.drawerItem}
-              labelStyle={styles.drawerItemLabel}
-            />
-
-            <Text>{supportMsgCounted > 0 && <>{supportMsgCounted}</>}</Text> */}
           </View>
 
           <View style={styles.drawerItemContainer}>
@@ -545,14 +551,28 @@ export const CustomDrawerContent = (props) => {
             />
           </View>
         </View>
-      ) : (
-        <></>
       )}
 
-      {userInfo ? (
-        <>
+      {userInfo && (
+        <View style={styles.drawerContainer}>
           {!profile?.is_marketplace_seller ? (
-            <View style={styles.drawerContainer}>
+            <View style={styles.drawerItemContainer}>
+              <FontAwesomeIcon
+                color={styles.iconColor}
+                icon={faDashboard}
+                size={styles.iconSize}
+                style={styles.icon}
+              />
+              <DrawerItem
+                label="Create Seller Account"
+                onPress={() => navigation.navigate("Create Seller Account")}
+                style={styles.drawerItem}
+                labelStyle={styles.drawerItemLabel}
+              />
+            </View>
+          ) : (
+            <>
+              <Text style={styles.title}>Seller Aspect</Text>
               <View style={styles.drawerItemContainer}>
                 <FontAwesomeIcon
                   color={styles.iconColor}
@@ -561,127 +581,181 @@ export const CustomDrawerContent = (props) => {
                   style={styles.icon}
                 />
                 <DrawerItem
-                  label="Create Seller Account"
-                  onPress={() => navigation.navigate("Create Seller Account")}
+                  label="Dashboard (Seller)"
+                  onPress={() => navigation.navigate("Dashboard (Seller)")}
                   style={styles.drawerItem}
                   labelStyle={styles.drawerItemLabel}
                 />
               </View>
-            </View>
-          ) : (
-            <>
-              <View style={styles.drawerContainer}>
-                <Text style={styles.title}>Seller Aspect</Text>
-                <View style={styles.drawerItemContainer}>
-                  <FontAwesomeIcon
-                    color={styles.iconColor}
-                    icon={faDashboard}
-                    size={styles.iconSize}
-                    style={styles.icon}
-                  />
-                  <DrawerItem
-                    label="Dashboard (Seller)"
-                    onPress={() => navigation.navigate("Dashboard (Seller)")}
-                    style={styles.drawerItem}
-                    labelStyle={styles.drawerItemLabel}
-                  />
-                </View>
 
-                <View style={styles.drawerItemContainer}>
-                  <FontAwesomeIcon
-                    color={styles.iconColor}
-                    icon={faUserShield}
-                    size={styles.iconSize}
-                    style={styles.icon}
-                  />
-                  <DrawerItem
-                    label="Seller Account"
-                    onPress={() => navigation.navigate("Seller Account")}
-                    style={styles.drawerItem}
-                    labelStyle={styles.drawerItemLabel}
-                  />
-                </View>
+              <View style={styles.drawerItemContainer}>
+                <FontAwesomeIcon
+                  color={styles.iconColor}
+                  icon={faUserShield}
+                  size={styles.iconSize}
+                  style={styles.icon}
+                />
+                <DrawerItem
+                  label="Seller Account"
+                  onPress={() => navigation.navigate("Seller Account")}
+                  style={styles.drawerItem}
+                  labelStyle={styles.drawerItemLabel}
+                />
+              </View>
 
-                <View style={styles.drawerItemContainer}>
-                  <FontAwesomeIcon
-                    color={styles.iconColor}
-                    icon={faAd}
-                    size={styles.iconSize}
-                    style={styles.icon}
-                  />
-                  <DrawerItem
-                    label="Current Ads"
-                    onPress={() => navigation.navigate("Current Ads")}
-                    style={styles.drawerItem}
-                    labelStyle={styles.drawerItemLabel}
-                  />
-                </View>
+              <View style={styles.drawerItemContainer}>
+                <FontAwesomeIcon
+                  color={styles.iconColor}
+                  icon={faAd}
+                  size={styles.iconSize}
+                  style={styles.icon}
+                />
+                <DrawerItem
+                  label="Current Ads"
+                  onPress={() => navigation.navigate("Current Ads")}
+                  style={styles.drawerItem}
+                  labelStyle={styles.drawerItemLabel}
+                />
+              </View>
 
-                <View style={styles.drawerItemContainer}>
-                  <FontAwesomeIcon
-                    color={styles.iconColor}
-                    icon={faAd}
-                    size={styles.iconSize}
-                    style={styles.icon}
-                  />
-                  <DrawerItem
-                    label="Post Free Ad"
-                    onPress={() => navigation.navigate("Post Free Ad")}
-                    style={styles.drawerItem}
-                    labelStyle={styles.drawerItemLabel}
-                  />
-                </View>
+              <View style={styles.drawerItemContainer}>
+                <FontAwesomeIcon
+                  color={styles.iconColor}
+                  icon={faAd}
+                  size={styles.iconSize}
+                  style={styles.icon}
+                />
+                <DrawerItem
+                  label="Post Free Ad"
+                  onPress={() => navigation.navigate("Post Free Ad")}
+                  style={styles.drawerItem}
+                  labelStyle={styles.drawerItemLabel}
+                />
+              </View>
 
-                <View style={styles.drawerItemContainer}>
-                  <FontAwesomeIcon
-                    color={styles.iconColor}
-                    icon={faAd}
-                    size={styles.iconSize}
-                    style={styles.icon}
-                  />
-                  <DrawerItem
-                    label="Post Paid Ad"
-                    onPress={() => navigation.navigate("Post Paid Ad")}
-                    style={styles.drawerItem}
-                    labelStyle={styles.drawerItemLabel}
-                  />
-                </View>
+              <View style={styles.drawerItemContainer}>
+                <FontAwesomeIcon
+                  color={styles.iconColor}
+                  icon={faAd}
+                  size={styles.iconSize}
+                  style={styles.icon}
+                />
+                <DrawerItem
+                  label="Post Paid Ad"
+                  onPress={() => navigation.navigate("Post Paid Ad")}
+                  style={styles.drawerItem}
+                  labelStyle={styles.drawerItemLabel}
+                />
+              </View>
 
-                <View style={styles.drawerItemContainer}>
-                  <FontAwesomeIcon
-                    color={styles.iconColor}
-                    icon={faMoneyBill}
-                    size={styles.iconSize}
-                    style={styles.icon}
-                  />
-                  <DrawerItem
-                    label="Billing"
-                    onPress={() => navigation.navigate("Billing")}
-                    style={styles.drawerItem}
-                    labelStyle={styles.drawerItemLabel}
-                  />
-                </View>
+              <View style={styles.drawerItemContainer}>
+                <FontAwesomeIcon
+                  color={styles.iconColor}
+                  icon={faMoneyBill}
+                  size={styles.iconSize}
+                  style={styles.icon}
+                />
+                <DrawerItem
+                  label="Billing"
+                  onPress={() => navigation.navigate("Billing")}
+                  style={styles.drawerItem}
+                  labelStyle={styles.drawerItemLabel}
+                />
+              </View>
 
-                <View style={styles.drawerItemContainer}>
-                  <FontAwesomeIcon
-                    color={styles.iconColor}
-                    icon={faLink}
-                    size={styles.iconSize}
-                    style={styles.icon}
-                  />
-                  <DrawerItem
-                    label="Shop Front Link"
-                    onPress={() => navigation.navigate("Shop Front Link")}
-                    style={styles.drawerItem}
-                    labelStyle={styles.drawerItemLabel}
-                  />
-                </View>
+              <View style={styles.drawerItemContainer}>
+                <FontAwesomeIcon
+                  color={styles.iconColor}
+                  icon={faLink}
+                  size={styles.iconSize}
+                  style={styles.icon}
+                />
+                <DrawerItem
+                  label="Shop Front Link"
+                  onPress={() => navigation.navigate("Shop Front Link")}
+                  style={styles.drawerItem}
+                  labelStyle={styles.drawerItemLabel}
+                />
               </View>
             </>
           )}
-        </>
-      ) : (
-        <></>
+        </View>
+      )}
+
+      {userInfo && (profile?.is_superuser || profile?.is_staff) && (
+        <View style={styles.drawerContainer}>
+          <Text style={styles.title}>Admin Area</Text>
+
+          <View style={styles.drawerItemContainer}>
+            <FontAwesomeIcon
+              color={styles.iconColor}
+              icon={faUserLock}
+              size={styles.iconSize}
+              style={styles.icon}
+            />
+
+            <TouchableOpacity
+              onPress={toggleAdminLinks}
+              style={styles.toggleContainer}
+            >
+              <DrawerItem
+                label="Admin"
+                onPress={toggleAdminLinks}
+                style={styles.drawerItem}
+                labelStyle={styles.drawerItemLabel}
+              />
+              <FontAwesomeIcon
+                color={styles.iconColor}
+                icon={faCaretDown}
+                style={styles.toggleIcon}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {showAdminLinks && (
+            <>
+              <View style={styles.drawerItemContainer}>
+                <FontAwesomeIcon
+                  color={styles.iconColor}
+                  icon={faTicket}
+                  size={styles.iconSize}
+                  style={styles.icon}
+                />
+
+                <View style={styles.inboxContainer}>
+                  <DrawerItem
+                    label="Support Tickets"
+                    onPress={() => navigation.navigate("Admin Support")}
+                    style={styles.drawerItem}
+                    labelStyle={styles.drawerItemLabel}
+                  />
+                  <Text>
+                    {adminSupportMsgCounted > 0 && (
+                      <Text style={styles.msgCounter}>
+                        {adminSupportMsgCounted}
+                      </Text>
+                    )}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.drawerItemContainer}>
+                <FontAwesomeIcon
+                  color={styles.iconColor}
+                  icon={faComments}
+                  size={styles.iconSize}
+                  style={styles.icon}
+                />
+                <DrawerItem
+                  label="Feedbacks"
+                  onPress={() => navigation.navigate("Admin Feedback")}
+                  style={styles.drawerItem}
+                  labelStyle={styles.drawerItemLabel}
+                />
+              </View>
+            </>
+          )}
+        </View>
       )}
 
       <DrawerItem

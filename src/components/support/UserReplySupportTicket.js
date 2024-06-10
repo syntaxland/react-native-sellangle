@@ -1,33 +1,54 @@
 // UserReplySupportTicket.js
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TextInput,
+  StyleSheet,
+  RefreshControl,
+  TouchableOpacity,
+} from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faUser, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { Form, Button, Row, Col, Container, ListGroup } from "react-bootstrap";
 import {
   userReplySupportTicket,
   getTicketDetail,
   listSupportTicketReply,
-} from "../../actions/supportActions";
-import Loader from "../Loader";
-import Message from "../Message";
-import LoaderButton from "../LoaderButton";
+} from "../../redux/actions/supportActions";
+import Loader from "../../Loader";
+import Message from "../../Message";
 
-function UserReplySupportTicket() {
+const UserReplySupportTicket = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
+  const route = useRoute();
+
+  const { ticketId } = route.params;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
-  }, [userInfo]);
-  
-  const { id } = useParams();
+  }, [userInfo, navigation]);
+
   const [replyMessage, setReplyMessage] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      dispatch(getTicketDetail(ticketId));
+      dispatch(listSupportTicketReply(ticketId));
+      setReplyMessage("");
+      setRefreshing(false);
+    }, 2000);
+  }, [dispatch, ticketId]);
 
   const replySupportTicketState = useSelector(
     (state) => state.replySupportTicketState
@@ -36,242 +57,280 @@ function UserReplySupportTicket() {
 
   const ticketDetailList = useSelector((state) => state.ticketDetailList);
   const { tickets } = ticketDetailList;
-  console.log("tickets:", tickets);
 
   const listSupportTicketReplyState = useSelector(
     (state) => state.listSupportTicketReplyState
   );
   const { ticketReplies } = listSupportTicketReplyState;
-  console.log("ticketReplies:", ticketReplies);
 
   useEffect(() => {
-    const ticketId = id;
     dispatch(getTicketDetail(ticketId));
     dispatch(listSupportTicketReply(ticketId));
-  }, [dispatch, id]);
+  }, [dispatch, ticketId]);
 
-  const handleSubmitReply = (e) => {
-    e.preventDefault();
-
+  const handleSubmitReply = () => {
     const replyticketData = {
-      ticket_id: id,
+      ticket_id: ticketId,
       message: replyMessage,
     };
 
     dispatch(userReplySupportTicket(replyticketData));
   };
 
-  // useEffect(() => {
-  //   if (!userInfo) {
-  //     // Redirect to login or handle unauthorized access
-  //   }
-  // }, [dispatch, userInfo]);
+  const isFirstMessageOfDay = (currentIndex, messages) => {
+    if (currentIndex === 0)
+      return formatDateLabel(new Date(messages[0].timestamp));
+
+    const currentDate = new Date(messages[currentIndex].timestamp);
+    const prevDate = new Date(messages[currentIndex - 1].timestamp);
+
+    if (currentDate.toLocaleDateString() !== prevDate.toLocaleDateString()) {
+      return formatDateLabel(currentDate);
+    }
+    return "";
+  };
+
+  const formatDateLabel = (date) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (isSameDay(date, today)) {
+      return "Today";
+    } else if (isSameDay(date, yesterday)) {
+      return "Yesterday";
+    } else {
+      return date.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    }
+  };
+
+  const isSameDay = (date1, date2) => {
+    return (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    );
+  };
 
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
-        // history.push("/dashboard");
-        window.location.reload();
-      }, 1000);
+        onRefresh();
+      }, 100);
       return () => clearTimeout(timer);
     }
-  }, [success, history]);
-
-  const ticketsFormatted = tickets ? tickets : [];
-  const ticketRepliesFormatted = ticketReplies ? ticketReplies : [];
-
-  const formatTimestamp = (created_at) => {
-    const messageDate = new Date(created_at);
-    return messageDate.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  // Function to determine if a message is the first of the day
-  const isFirstMessageOfDay = (currentIndex, messages) => {
-    if (currentIndex === 0) return true;
-
-    const currentDate = new Date(messages[currentIndex].created_at);
-    const prevDate = new Date(messages[currentIndex - 1].created_at);
-
-    // Check if the messages were sent on different dates
-    if (currentDate.toLocaleDateString() !== prevDate.toLocaleDateString()) {
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-
-      // Check if the current message was sent today
-      if (currentDate.toLocaleDateString() === today.toLocaleDateString()) {
-        return "Today";
-      }
-      // Check if the current message was sent yesterday
-      else if (
-        currentDate.toLocaleDateString() === yesterday.toLocaleDateString()
-      ) {
-        return "Yesterday";
-      } else {
-        // If it's beyond yesterday, return the full date
-        return currentDate.toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-      }
-    }
-
-    return false;
-  };
+  }, [success, onRefresh]);
 
   return (
-    <Container>
-      <div>
-        <Row className="d-flex justify-content-center">
-          <Col className="border rounded p-4 bg-secondary py-2" xs={10} md={8}>
-
-            {loading && <Loader />}
-            {error && <Message variant="danger">{error}</Message>}
-
-            <ListGroup className="py-2 text-center">
-              <ListGroup.Item>
-                <h2 className="rounded py-2 text-center">Support Ad Details</h2>
-                <Row>
-                  <Col>
-                    <ListGroup.Item>
-                      <h2>Ticket ID: {id}</h2>
-                    </ListGroup.Item>
-                  </Col>
-                  <Col>
-                    <ListGroup.Item>
-                      {ticketsFormatted.map((message) => (
-                        <ListGroup.Item
-                          key={message.id}
-                          className="border rounded p-4 py-2"
-                        >
-                          <ListGroup.Item>
-                            Subject: {message.subject}
-                          </ListGroup.Item>
-                          <ListGroup.Item>
-                            <i className="fas fa-user"></i>{" "}
-                            {message.user_username?.charAt(0).toUpperCase() +
-                              message.user_username?.slice(1)}
-                          </ListGroup.Item>
-                          <ListGroup.Item>
-                            Message: {message.message}
-                          </ListGroup.Item>
-                          <ListGroup.Item>
-                            {new Date(message?.created_at).toLocaleString(
-                              "en-US",
-                              {
-                                weekday: "long",
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                                hour: "numeric",
-                                minute: "numeric",
-                                hour12: true,
-                              }
-                            )}
-                          </ListGroup.Item>
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup.Item>
-                  </Col>
-                </Row>
-              </ListGroup.Item>
-            </ListGroup>
-
-            <ListGroup className="py-2 text-center">
-              <ListGroup.Item>
-                <h2>Responses</h2>
-              </ListGroup.Item>
-            </ListGroup>
-
-            {ticketRepliesFormatted?.map((message, index) => (
-              <div key={message.id}>
-                {isFirstMessageOfDay(index, ticketRepliesFormatted) && (
-                  <p className="text-center mb-0 mt-3">
-                    {new Date(message.created_at).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </p>
-                )}
-                <div
-                  className={`${ 
-                    message.admin_user
-                      ? "d-flex justify-content-left"
-                      : "d-flex justify-content-end"
-                  }`}
-                  style={{ maxWidth: "75%" }}
-                >
-                  <div>
-                    <div
-                      className={`border rounded p-3 my-2 ${
-                        message.admin_user
-                          ? "bg-light"
-                          : "bg-success justify-content-end"
-                      }`}
-                    >
-                      <p>
-                        <i className="fas fa-user"></i>{" "}
-                        {message.user_username
-                          ? message.user_username?.charAt(0).toUpperCase() +
-                            message.user_username?.slice(1)
-                          : message.admin_username?.charAt(0).toUpperCase() +
-                            message.admin_username?.slice(1)}
-                      </p>
-                      <p>{message.message}</p>
-                      <p className="d-flex justify-content-end">
-                        {" "}
-                        {formatTimestamp(message.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <View style={styles.container}>
+        <View style={styles.ticketDetails}>
+          <Text style={styles.header}>Support Ticket Details</Text>
+          <View style={styles.ticketInfo}>
+            <Text style={styles.detailItem}>Ticket ID: {ticketId}</Text>
+            {tickets?.map((ticket) => (
+              <View key={ticket.id}>
+                <Text style={styles.detailItem}>Subject: {ticket.subject}</Text>
+                <Text style={styles.detailItem}>
+                  <FontAwesomeIcon icon={faUser} />{" "}
+                  {ticket.user_username.charAt(0).toUpperCase() +
+                    ticket.user_username.slice(1)}
+                </Text>
+                <Text style={styles.detailItem}>Message: {ticket.message}</Text>
+                <Text style={styles.detailItem}>
+                  {new Date(ticket.created_at).toLocaleString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "numeric",
+                    hour12: true,
+                  })}
+                </Text>
+              </View>
             ))}
+          </View>
+        </View>
 
-            <Form onSubmit={handleSubmitReply}>
-              <Form.Group controlId="message">
-                <Form.Label>Message</Form.Label>
-                <Form.Control
-                  required
-                  as="textarea"
-                  rows={4}
-                  value={replyMessage}
-                  maxLength={1000}
-                  onChange={(e) => setReplyMessage(e.target.value)}
-                ></Form.Control>
-              </Form.Group>
+        {ticketReplies?.map((message, index) => (
+          <View key={message.id}>
+            {isFirstMessageOfDay(index, ticketReplies) && (
+              <Text style={styles.dateLabel}>
+                {isFirstMessageOfDay(index, ticketReplies)}
+              </Text>
+            )}
+            <View
+              style={[
+                styles.messageItem,
+                message.admin_user ? styles.adminMessage : styles.userMessage,
+              ]}
+            >
+              <View
+                style={[
+                  styles.messageBubble,
+                  message.admin_user ? styles.adminBubble : styles.userBubble,
+                ]}
+              >
+                <Text style={styles.username}>
+                  <FontAwesomeIcon icon={faUser} />{" "}
+                  {message.user_username
+                    ? message.user_username.charAt(0).toUpperCase() +
+                      message.user_username.slice(1)
+                    : message.admin_username.charAt(0).toUpperCase() +
+                      message.admin_username.slice(1)}
+                </Text>
+                <Text>{message.message}</Text>
+                <Text style={styles.timestamp}>
+                  {new Date(message.created_at).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </View>
+            </View>
+          </View>
+        ))}
 
-              <div className="py-2">
-                <Button
-                  className="w-100 rounded"
-                  type="submit"
-                  variant="success"
-                  disabled={loading}
-                >
-                  <div className="d-flex justify-content-center">
-                    <span className="py-1">
-                      Submit <i className="fa fa-paper-plane"></i>
-                    </span>
-                    {loading && <LoaderButton />}
-                  </div>
-                </Button>
-              </div>
-              {success && (
-                <Message variant="success">Message sent successfully.</Message>
-              )}
-            </Form>
-          </Col>
-        </Row>
-      </div>
-    </Container>
+        {loading && <Loader />}
+        {error && (
+          <Message variant="danger" fixed>
+            {error}
+          </Message>
+        )}
+        {success && (
+          <Message variant="success" fixed>
+            Message sent successfully.
+          </Message>
+        )}
+
+        <View style={styles.replyForm}>
+          <TextInput
+            style={[styles.input, styles.textarea]}
+            placeholder="Type your message"
+            value={replyMessage}
+            onChangeText={setReplyMessage}
+            multiline
+            numberOfLines={4}
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <TouchableOpacity onPress={handleSubmitReply} disabled={loading}>
+            <Text style={styles.roundedPrimaryBtn}>
+              Send <FontAwesomeIcon icon={faPaperPlane} color="#fff" />
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+  },
+  ticketDetails: {
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 5,
+  },
+  detailItem: {
+    marginBottom: 10,
+  },
+  ticketInfo: {
+    marginBottom: 10,
+  },
+  messageItem: {
+    marginBottom: 10,
+    maxWidth: "75%",
+  },
+  adminMessage: {
+    alignSelf: "flex-start",
+  },
+  userMessage: {
+    alignSelf: "flex-end",
+  },
+  messageBubble: {
+    borderRadius: 10,
+    padding: 10,
+  },
+  adminBubble: {
+    backgroundColor: "#f8f9fa",
+  },
+  userBubble: {
+    backgroundColor: "#28a745",
+  },
+  username: {
+    fontWeight: "bold",
+  },
+  timestamp: {
+    textAlign: "right",
+    fontSize: 10,
+  },
+  dateLabel: {
+    textAlign: "center",
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: 12,
+    color: "#888",
+    marginVertical: 5,
+  },
+  replyForm: {
+    marginTop: 20,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  textarea: {
+    height: 100,
+  },
+  formGroup: {
+    marginBottom: 10,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 5,
+    textAlign: "center",
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    textAlign: "center",
+    overflow: "hidden",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+});
 
 export default UserReplySupportTicket;

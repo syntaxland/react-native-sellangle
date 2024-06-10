@@ -1,29 +1,37 @@
 // AdChargesReceipt.js
 import React, { useState, useEffect } from "react";
-import { Button, Modal, Col, Row, Container } from "react-bootstrap";
 import {
-  // useDispatch,
-  useSelector,
-} from "react-redux";
-import { useHistory } from "react-router-dom";
+  View,
+  Text,
+  Modal,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+import { useSelector } from "react-redux";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faDownload, faFileDownload } from "@fortawesome/free-solid-svg-icons";
+import { useNavigation } from "@react-navigation/native";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
+// import RNFetchBlob from "rn-fetch-blob";
+import { Buffer } from "buffer";
 import axios from "axios";
-import Loader from "../Loader";
-import Message from "../Message";
+import Loader from "../../Loader";
 
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_URL } from "../../config/apiConfig";
 
-function AdChargesReceipt({ adChargesReceiptMonth, billingPeriodLoading }) {
-  // const dispatch = useDispatch();
-  const history = useHistory();
+const AdChargesReceipt = ({ adChargesReceiptMonth, billingPeriodLoading }) => {
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     }
-  }, [userInfo, history]);
+  }, [userInfo]);
 
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -35,9 +43,50 @@ function AdChargesReceipt({ adChargesReceiptMonth, billingPeriodLoading }) {
     setSuccess(false);
     setError(null);
   };
-  console.log("adChargesReceiptMonth:", adChargesReceiptMonth);
 
   const handleShowReceiptModal = () => setShowReceiptModal(true);
+
+  // const downloadAdChargesReceipt = async () => {
+  //   try {
+  //     setLoading(true);
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get-ad-charges-receipt/`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${userInfo?.access}`,
+  //         },
+  //         params: {
+  //           ad_charges_receipt_month: adChargesReceiptMonth,
+  //         },
+  //         responseType: "arraybuffer",
+  //       }
+  //     );
+
+  //     if (response.status === 200) {
+  //       const { dirs } = RNFetchBlob.fs;
+  //       const path = `${dirs.DownloadDir}/${adChargesReceiptMonth}_ad_charges_receipt.pdf`;
+
+  //       await RNFetchBlob.fs.writeFile(path, response.data, "base64");
+  //       await RNFetchBlob.android.addCompleteDownload({
+  //         title: "Ad Charges Receipt",
+  //         description: `Ad charges receipt for ${adChargesReceiptMonth}`,
+  //         mime: "application/pdf",
+  //         path,
+  //         showNotification: true,
+  //       });
+
+  //       console.log("File downloaded to ", path);
+  //       setSuccess(true);
+  //     } else {
+  //       setError("Error downloading ad charges receipt.");
+  //     }
+  //   } catch (error) {
+  //     setError(`Error downloading ad charges receipt: ${error.message}`);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const downloadAdChargesReceipt = async () => {
     try {
@@ -52,20 +101,24 @@ function AdChargesReceipt({ adChargesReceiptMonth, billingPeriodLoading }) {
           params: {
             ad_charges_receipt_month: adChargesReceiptMonth,
           },
-          responseType: "blob",
+          responseType: "arraybuffer",
         }
       );
 
       if (response.status === 200) {
-        const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-        //   console.log("Blob size:", response.data.size);
-        const link = document.createElement("a");
-        console.log("link:", link);
-        link.href = URL.createObjectURL(pdfBlob);
-        link.download = `${adChargesReceiptMonth}_ad_charges_receipt.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const fileUri =
+          FileSystem.documentDirectory +
+          `${adChargesReceiptMonth}_ad_charges_receipt.pdf`;
+
+        await FileSystem.writeAsStringAsync(
+          fileUri,
+          Buffer.from(response.data, "binary").toString("base64"),
+          {
+            encoding: FileSystem.EncodingType.Base64,
+          }
+        );
+
+        console.log("File downloaded to ", fileUri);
         setSuccess(true);
       } else {
         setError("Error downloading ad charges receipt.");
@@ -77,404 +130,201 @@ function AdChargesReceipt({ adChargesReceiptMonth, billingPeriodLoading }) {
     }
   };
 
+  // const downloadAdChargesReceipt = async () => {
+  //   try {
+  //     setLoading(true);
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get-ad-charges-receipt/`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${userInfo?.access}`,
+  //         },
+  //         params: {
+  //           ad_charges_receipt_month: adChargesReceiptMonth,
+  //         },
+  //         responseType: "arraybuffer",
+  //       }
+  //     );
+
+  //     if (response.status === 200) {
+  //       const base64 = Buffer.from(response.data, "binary").toString("base64");
+  //       const fileUri =
+  //         FileSystem.documentDirectory +
+  //         `${adChargesReceiptMonth}_ad_charges_receipt.pdf`;
+
+  //       await FileSystem.writeAsStringAsync(fileUri, base64, {
+  //         encoding: FileSystem.EncodingType.Base64,
+  //       });
+
+  //       const { status } = await MediaLibrary.requestPermissionsAsync();
+  //       if (status === "granted") {
+  //         const asset = await MediaLibrary.createAssetAsync(fileUri);
+  //         let album = await MediaLibrary.getAlbumAsync("Download");
+  //         if (!album) {
+  //           album = await MediaLibrary.createAlbumAsync("Download", asset, false);
+  //         } else {
+  //           await MediaLibrary.addAssetsToAlbumAsync([asset], album.id, false);
+  //         }
+  //         console.log("File saved to Downloads");
+  //       } else {
+  //         setError("Permission to access media library is required.");
+  //       }
+
+  //       console.log("File downloaded to ", fileUri);
+  //       setSuccess(true);
+  //     } else {
+  //       setError("Error downloading ad charges receipt.");
+  //     }
+  //   } catch (error) {
+  //     setError(`Error downloading ad charges receipt: ${error.message}`);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   return (
-    <Container className="d-flex justify-content-center align-items-center text-center">
-      <Row>
-        <Col>
-          <Button
-            variant="primary"
-            onClick={handleShowReceiptModal}
-            disabled={
-              loading ||
-              billingPeriodLoading ||
-              success ||
-              adChargesReceiptMonth === ""
-            }
-          >
-            <i className="fas fa-download"></i>{" "}
+    <ScrollView>
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleShowReceiptModal}
+          disabled={
+            loading ||
+            billingPeriodLoading ||
+            // success ||
+            adChargesReceiptMonth === ""
+          }
+        >
+          <Text style={styles.buttonText}>
+            <FontAwesomeIcon
+              icon={faDownload}
+              style={styles.icon}
+              color="#fff"
+            />{" "}
             {loading ? "Downloading..." : "Download"}
-          </Button>
+          </Text>
+        </TouchableOpacity>
 
-          <Modal show={showReceiptModal} onHide={handleCloseReceiptModal}>
-            <Modal.Header closeButton>
-              <Modal.Title className="text-center w-100 py-2">
-                Ad Charges Receipt
-              </Modal.Title>
-            </Modal.Header>
-            <Modal.Body className="py-2 d-flex justify-content-center align-items-center text-center">
-              <div>
-                {loading ? (
-                  <>
-                    <Loader />
-                    <p>Downloading...</p>
-                  </>
-                ) : success ? (
-                  <Message variant="success">
-                    Ad charges receipt for {adChargesReceiptMonth} downloaded
-                    successfully.
-                  </Message>
-                ) : error ? (
-                  <Message variant="danger">{error}</Message>
-                ) : (
-                  <>
-                    <p>
-                      <p>
-                        Download your ad billing receipt for:{" "}
-                        {adChargesReceiptMonth}? 
-                      </p>
-                      <Button onClick={downloadAdChargesReceipt}>
-                        {" "}
-                        <i className="fas fa-file-download"></i> Download
-                      </Button>
-                    </p>
-                  </>
-                )}
-              </div>
-            </Modal.Body>
-
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloseReceiptModal}>
-                Close
-              </Button>
-            </Modal.Footer>
-          </Modal>
-        </Col>
-      </Row>
-    </Container>
+        <Modal
+          visible={showReceiptModal}
+          animationType="slide"
+          transparent={true}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalBody}>
+              <Text style={styles.modalTitle}>Ad Charges Receipt</Text>
+              {loading ? (
+                <>
+                  <Loader />
+                  <Text>Downloading...</Text>
+                </>
+              ) : success ? (
+                <Text style={styles.successMessage}>
+                  Ad charges receipt for {adChargesReceiptMonth} downloaded
+                  successfully.
+                </Text>
+              ) : error ? (
+                <Text style={styles.errorMessage}>{error}</Text>
+              ) : (
+                <>
+                  <Text>
+                    Download your ad billing receipt for:{" "}
+                    {adChargesReceiptMonth}?
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.downloadButton}
+                    onPress={downloadAdChargesReceipt}
+                  >
+                    <Text style={styles.downloadButtonText}>
+                      <FontAwesomeIcon
+                        icon={faFileDownload}
+                        style={styles.icon}
+                        color="#fff"
+                      />{" "}
+                      Download Now
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              )}
+              <TouchableOpacity
+                onPress={handleCloseReceiptModal}
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  button: {
+    backgroundColor: "#007bff",
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  icon: {
+    marginRight: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalBody: {
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+  },
+
+  successMessage: {
+    color: "green",
+    marginBottom: 10,
+  },
+  errorMessage: {
+    color: "red",
+    marginBottom: 10,
+  },
+  downloadButton: {
+    backgroundColor: "#007bff",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  downloadButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  closeButton: {
+    marginTop: 20,
+  },
+  closeButtonText: {
+    color: "blue",
+    fontSize: 16,
+  },
+});
 
 export default AdChargesReceipt;
-
-// import React, { useState, useEffect } from "react";
-// import { Button, Modal, Col, Row, Container } from "react-bootstrap";
-// import { useDispatch, useSelector } from "react-redux";
-// import { useHistory } from "react-router-dom";
-// import { getAdChargesReceipt } from "../../actions/marketplaceSellerActions";
-// import Loader from "../Loader";
-// import Message from "../Message";
-// import { jsPDF } from "jspdf";
-// // import { saveAs } from "file-saver";
-// // import b64toBlob from 'b64-to-blob';
-// // import {
-// //   // PDFViewer,
-// //   Document,
-// //   Page,
-// //   Text,
-// //   View,
-// //   StyleSheet,
-// // } from "@react-pdf/renderer";
-
-// // const styles = StyleSheet.create({
-// //   page: {
-// //     flexDirection: "row",
-// //     backgroundColor: "#E4E4E4",
-// //   },
-// //   section: {
-// //     margin: 10,
-// //     padding: 10,
-// //     flexGrow: 1,
-// //   },
-// // });
-
-// // const AdChargesReceiptPDF = ({ adChargesReceiptMonth, paidAdReceipt }) => (
-// //   <Document>
-// //     <Page size="A4" style={styles.page}>
-// //       <View style={styles.section}>
-// //         <Text>{`Ad Charges Receipt for ${adChargesReceiptMonth}`}</Text>
-// //         <Text>{paidAdReceipt}</Text>
-// //       </View>
-// //     </Page>
-// //   </Document>
-// // );
-
-// const API_URL = process.env.REACT_APP_API_URL;
-
-// function AdChargesReceipt({ adChargesReceiptMonth }) {
-//   const dispatch = useDispatch();
-//   const history = useHistory();
-
-//   const userLogin = useSelector((state) => state.userLogin);
-//   const { userInfo } = userLogin;
-
-//   const getAdChargesReceiptState = useSelector(
-//     (state) => state.getAdChargesReceiptState
-//   );
-//   const { loading, success, error, paidAdReceipt } = getAdChargesReceiptState;
-//   console.log("paidAdReceipt:", paidAdReceipt);
-
-//     // const url = `${API_URL}/api/get-ad-charges-receipt/?ad_charges_receipt_month=${ad_charges_receipt_month}`;
-
-//   useEffect(() => {
-//     if (!userInfo) {
-//       history.push("/login");
-//     }
-//   }, [userInfo, history]);
-
-//   const [showReceiptModal, setShowReceiptModal] = useState(false);
-
-//   const handleCloseReceiptModal = () => setShowReceiptModal(false);
-//   const handleShowReceiptModal = () => setShowReceiptModal(true);
-
-//   const downloadAdChargesReceipt = async () => {
-//     try {
-//       const adData = {
-//         ad_charges_receipt_month: adChargesReceiptMonth,
-//       };
-
-//       // Dispatch the action to get the ad charges receipt
-//       await dispatch(getAdChargesReceipt(adData));
-
-//       if (paidAdReceipt) {
-//         console.log("paidAdReceipt2:", paidAdReceipt);
-//         // Decode base64
-//         const decodedPaidAdReceipt = atob(paidAdReceipt);
-//         console.log("decodedPaidAdReceipt:", decodedPaidAdReceipt);
-
-//         // Generate PDF using jsPDF
-//         // const doc = new jsPDF();
-
-//         const doc = new jsPDF({
-//           orientation: "portrait", // or "landscape"
-//           unit: "mm", // or "pt", "in", etc.
-//           format: "a4", // or an array of numbers [width, height]
-//         });
-
-//         doc.text(`Ad Charges Receipt for ${adChargesReceiptMonth}`, 10, 10);
-//         doc.text(decodedPaidAdReceipt, 10, 20);
-
-//         console.log("decodedPaidAdReceipt 2:", decodedPaidAdReceipt);
-
-//         // Save the PDF
-//         doc.save(`${adChargesReceiptMonth}_ad_charges_receipt.pdf`);
-//       } else {
-//         console.error("Error downloading ad charges receipt.");
-//       }
-//     } catch (error) {
-//       console.error("Error dispatching getAdChargesReceipt:", error);
-//     }
-//   };
-
-//   // const downloadAdChargesReceipt = async () => {
-//   //   try {
-//   //     const adData = {
-//   //       ad_charges_receipt_month: adChargesReceiptMonth,
-//   //     };
-
-//   //     // Dispatch the action to get the ad charges receipt
-//   //     await dispatch(getAdChargesReceipt(adData));
-
-//   //     // Access the paidAdReceipt from the Redux state
-//   //     // const { paidAdReceipt } = getAdChargesReceiptState;
-
-//   //     if (paidAdReceipt) {
-//   //       // Generate PDF using paidAdReceipt data
-//   //       const pdfBlob = await AdChargesReceiptPDF({
-//   //         adChargesReceiptMonth,
-//   //         paidAdReceipt, // Pass the paidAdReceipt data to the PDF component
-//   //       }).toBlob();
-
-//   //       // Create a download link and trigger the download
-//   //       const link = document.createElement("a");
-//   //       link.href = URL.createObjectURL(pdfBlob);
-//   //       link.setAttribute(
-//   //         "download",
-//   //         `${adChargesReceiptMonth}_ad_charges_receipt.pdf`
-//   //       );
-//   //       document.body.appendChild(link);
-//   //       link.click();
-//   //       document.body.removeChild(link);
-//   //     } else {
-//   //       console.error("Error downloading ad charges receipt.");
-//   //     }
-//   //   } catch (error) {
-//   //     console.error("Error dispatching getAdChargesReceipt:", error);
-//   //   }
-//   // };
-
-//   // const downloadAdChargesReceipt = async () => {
-//   //   try {
-//   //     const adData = {
-//   //       ad_charges_receipt_month: adChargesReceiptMonth,
-//   //     };
-
-//   //     await dispatch(getAdChargesReceipt(adData));
-
-//   //     if (paidAdReceipt) {
-//   //       const pdfBlob = new Blob([paidAdReceipt], { type: "application/pdf" });
-//   //       saveAs(pdfBlob, `${adChargesReceiptMonth}_ad_charges_receipt.pdf`);
-//   //     } else {
-//   //       console.error("Error downloading ad charges receipt.");
-//   //     }
-//   //   } catch (error) {
-//   //     console.error("Error dispatching getAdChargesReceipt:", error);
-//   //   }
-//   // };
-
-//   // const downloadAdChargesReceipt = async () => {
-//   //   try {
-//   //     const adData = {
-//   //       ad_charges_receipt_month: adChargesReceiptMonth,
-//   //     };
-
-//   //     await dispatch(getAdChargesReceipt(adData));
-
-//   //     if (paidAdReceipt) {
-//   //       const pdfBlob = await AdChargesReceiptPDF({ adChargesReceiptMonth }).toBlob();
-//   //       saveAs(pdfBlob, `${adChargesReceiptMonth}_ad_charges_receipt.pdf`);
-//   //     } else {
-//   //       console.error("Error downloading ad charges receipt.");
-//   //     }
-//   //   } catch (error) {
-//   //     console.error("Error dispatching getAdChargesReceipt:", error);
-//   //   }
-//   // };
-
-//   // const downloadAdChargesReceipt = async () => {
-//   //   try {
-//   //     // Dispatch the getAdChargesReceipt action when the user clicks "Download"
-//   //     const adData = {
-//   //       ad_charges_receipt_month: adChargesReceiptMonth,
-//   //     };
-//   //     console.log("adData", adData);
-
-//   //     await dispatch(getAdChargesReceipt(adData));
-
-//   //     if (paidAdReceipt) {
-//   //       // Convert the base64 PDF data to a Blob using b64toBlob function
-//   //       const pdfBlob = b64toBlob(paidAdReceipt, 'application/pdf');
-//   //       console.log("pdfBlob:", pdfBlob);
-
-//   //       // Create a download link and trigger the download
-//   //       const link = document.createElement("a");
-//   //       link.href = window.URL.createObjectURL(pdfBlob);
-//   //       link.setAttribute(
-//   //         "download",
-//   //         `${adChargesReceiptMonth}_ad_charges_receipt.pdf`
-//   //       );
-//   //       document.body.appendChild(link);
-//   //       link.click();
-//   //       document.body.removeChild(link);
-//   //     } else {
-//   //       console.error("Error downloading ad charges receipt.");
-//   //     }
-//   //   } catch (error) {
-//   //     console.error("Error dispatching getAdChargesReceipt:", error);
-//   //   }
-//   // };
-
-//   // const downloadAdChargesReceipt = async () => {
-//   //   try {
-//   //     // Dispatch the getAdChargesReceipt action when the user clicks "Download"
-//   //     const adData = {
-//   //       ad_charges_receipt_month: adChargesReceiptMonth,
-//   //     };
-//   //     console.log("adData", adData);
-
-//   //     await dispatch(getAdChargesReceipt(adData));
-
-//   //     if (paidAdReceipt) {
-
-//   //       // Convert the base64 PDF data to a Blob using atob function
-//   //       const byteCharacters = atob(paidAdReceipt);
-//   //       const byteNumbers = new Array(byteCharacters.length);
-//   //       for (let i = 0; i < byteCharacters.length; i++) {
-//   //         byteNumbers[i] = byteCharacters.charCodeAt(i);
-//   //       }
-//   //       const byteArray = new Uint8Array(byteNumbers);
-//   //       console.log("Uint8Array:", byteArray);
-
-//   //       const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
-//   //       console.log("pdfBlob:", pdfBlob);
-
-//   //       // Create a download link and trigger the download
-//   //       const link = document.createElement("a");
-//   //       link.href = window.URL.createObjectURL(pdfBlob);
-//   //       link.setAttribute(
-//   //         "download",
-//   //         `${adChargesReceiptMonth}_ad_charges_receipt.pdf`
-//   //       );
-//   //       document.body.appendChild(link);
-//   //       link.click();
-//   //       document.body.removeChild(link);
-//   //     } else {
-//   //       console.error("Error downloading ad charges receipt.");
-//   //     }
-//   //   } catch (error) {
-//   //     console.error("Error dispatching getAdChargesReceipt:", error);
-//   //   }
-//   // };
-
-//   useEffect(() => {
-//     if (success) {
-//       const timer = setTimeout(() => {
-//         // window.location.reload();
-//       }, 15000);
-//       return () => clearTimeout(timer);
-//     }
-//   }, [success, history]);
-
-//   return (
-//     <Container className="d-flex justify-content-center align-items-center text-center">
-//       <Row>
-//         <Col>
-//           <Button
-//             variant="primary"
-//             onClick={handleShowReceiptModal}
-//             disabled={loading || success || adChargesReceiptMonth === ""}
-//           >
-//             <i className="fas fa-download"></i> Download
-//           </Button>
-
-//           <Modal show={showReceiptModal} onHide={handleCloseReceiptModal}>
-//             <Modal.Header closeButton>
-//               <Modal.Title className="text-center w-100 py-2">
-//                 Ad Charges Receipt
-//               </Modal.Title>
-//             </Modal.Header>
-//             <Modal.Body className="py-2 d-flex justify-content-center align-items-center text-center">
-//               <div>
-//                 {loading ? (
-//                   <>
-//                     <Loader />
-//                     <p>Downloading...</p>
-//                   </>
-//                 ) : success ? (
-//                   <Message variant="success">
-//                     Ad charges receipt for {adChargesReceiptMonth} downloaded
-//                     successfully.
-//                   </Message>
-//                 ) : error ? (
-//                   <Message variant="danger">{error}</Message>
-//                 ) : (
-//                   <>
-//                     <p>
-//                       <p>
-//                         Download your ad charges receipt for:{" "}
-//                         {adChargesReceiptMonth}?
-//                       </p>
-//                       <Button
-//                         onClick={downloadAdChargesReceipt}
-//                         // disabled={loading}
-//                       >
-//                         {" "}
-//                         <i className="fas fa-file-download"></i> Download
-//                       </Button>
-//                     </p>
-//                   </>
-//                 )}
-//               </div>
-//             </Modal.Body>
-//             <Modal.Footer>
-//               <Button variant="secondary" onClick={handleCloseReceiptModal}>
-//                 Close
-//               </Button>
-//             </Modal.Footer>
-//           </Modal>
-//         </Col>
-//       </Row>
-//     </Container>
-//   );
-// }
-
-// export default AdChargesReceipt;

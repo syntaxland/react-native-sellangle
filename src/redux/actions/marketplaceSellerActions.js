@@ -201,10 +201,46 @@ GET_ACTIVE_BUYER_FREE_AD_MESSAGES_FAIL,
 GET_ACTIVE_BUYER_PAID_AD_MESSAGES_REQUEST,
 GET_ACTIVE_BUYER_PAID_AD_MESSAGES_SUCCESS,
 GET_ACTIVE_BUYER_PAID_AD_MESSAGES_FAIL,
+
+GET_SELLER_AD_STATISTICS_REQUEST,
+  GET_SELLER_AD_STATISTICS_SUCCESS,
+  GET_SELLER_AD_STATISTICS_FAIL,
 } from "../constants/marketplaceSellerConstants";
 
 import { API_URL } from "../../config/apiConfig";
 // const API_URL = process.env.REACT_APP_API_URL;
+
+export const getSellerAdStatistics = () => async (dispatch, getState) => {
+  try {
+    dispatch({ type: GET_SELLER_AD_STATISTICS_REQUEST });
+
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.access}`,
+      },
+    };
+
+    const { data } = await axios.get(`${API_URL}/api/get-seller-ad-statistics/`, config);
+
+    dispatch({
+      type: GET_SELLER_AD_STATISTICS_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_SELLER_AD_STATISTICS_FAIL,
+      payload:
+        error.response && error.response.data.detail
+          ? error.response.data.detail
+          : error.message,
+    });
+  }
+};
 
 export const GetActiveBuyerFreeAdMessages = () => async (dispatch, getState) => {
   try {

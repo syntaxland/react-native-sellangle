@@ -9,7 +9,7 @@ import Loader from "../../Loader";
 import { Pagination } from "../../Pagination";
 
 const SavedFreeAds = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch(); 
 
   useEffect(() => {
     dispatch(getUserSavedFreeAds());

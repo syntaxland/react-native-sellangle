@@ -3,7 +3,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
-  Button,
   StyleSheet,
   Alert,
   Clipboard,
@@ -16,9 +15,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faCopy, faShareAlt, faCheck } from "@fortawesome/free-solid-svg-icons";
 import { getSellerShopfrontLink } from "../../redux/actions/marketplaceSellerActions";
-import Loader from "../../Loader";
+import Loader from "../../Loader"; 
 import Message from "../../Message";
-// import Clipboard from '@react-native-clipboard/clipboard';
+// import * as Clipboard from "expo-clipboard";
 
 const ShopFrontLink = () => {
   const navigation = useNavigation();
@@ -36,7 +35,7 @@ const ShopFrontLink = () => {
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // dispatch(getPaidAdDetail(id));
+    dispatch(getSellerShopfrontLink());
     setTimeout(() => setRefreshing(false), 2000);
   }, [dispatch]);
 
@@ -75,6 +74,12 @@ const ShopFrontLink = () => {
     }
   };
 
+  // const handleCopyPhoneNumber = async () => {
+  //   await Clipboard.setStringAsync(ads?.seller_phone);
+  //   setIsPhoneCopied(true);
+  //   setTimeout(() => setIsPhoneCopied(false), 2000);
+  // };
+
   return (
     <ScrollView
       refreshControl={
@@ -103,7 +108,7 @@ const ShopFrontLink = () => {
                     <Text style={styles.label}>
                       Copied{" "}
                       <FontAwesomeIcon
-                        icon={faCheck}
+                        icon={faCheck} 
                         size={16}
                         // style={styles.icon}
                       />

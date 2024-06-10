@@ -1,43 +1,58 @@
 // CreateSupportTicket.js
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Button, Row, Col } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
+import {
+  View,
+  Text,
+  TextInput,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import RNPickerSelect from "react-native-picker-select";
 import {
   createSupportTicket,
-} from "../../actions/supportActions";  
-import Loader from "../Loader"; 
-import Message from "../Message";
- 
-function CreateSupportTicket() {  
-  const dispatch = useDispatch();  
-    const history = useHistory();
-  
-  const [subject, setSubject] = useState(""); 
-  const [category, setCategory] = useState("support");
+  resetSupportTicket,
+} from "../../redux/actions/supportActions";
+import Loader from "../../Loader";
+import Message from "../../Message";
+import { SUPPORT_CHOICES } from "../../constants";
+
+const CreateSupportTicket = () => {
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+
+  const [subject, setSubject] = useState("");
+  const [category, setCategory] = useState("Support");
   const [message, setMessage] = useState("");
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [supportChoices, setSupportChoices] = useState([]);
 
   const userLogin = useSelector((state) => state.userLogin);
-  const { userInfo } = userLogin; 
+  const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login"; 
+      navigation.navigate("Login");
     }
-  }, [userInfo]);
+  }, [userInfo, navigation]);
+
+  useEffect(() => {
+    setSupportChoices(SUPPORT_CHOICES);
+  }, [navigation, userInfo]);
 
   const createSupportTicketState = useSelector(
     (state) => state.createSupportTicketState
   );
   const { loading, success, error } = createSupportTicketState;
 
-  const submitHandler = (e) => {
-    e.preventDefault();
-
+  const submitHandler = () => {
     const ticketData = {
-      subject: subject,
-      category: category,
-      message: message,
+      subject,
+      category,
+      message,
     };
 
     dispatch(createSupportTicket(ticketData));
@@ -45,88 +60,150 @@ function CreateSupportTicket() {
 
   useEffect(() => {
     if (success) {
+      setShowSuccessMessage(true);
       const timer = setTimeout(() => {
-        history.push("/support/tickets/");
-        window.location.reload();
-      }, 1000);
+        setSubject("");
+        setCategory("");
+        setMessage("");
+        setShowSuccessMessage(false);
+        dispatch(resetSupportTicket());
+        navigation.navigate("Support");
+      }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [success, history]);
+  }, [success, navigation]);
 
   return (
-    <div>
-      <Row className="d-flex justify-content-center">
-        <Col xs={12} md={6}>
-          <h2 className="text-center py-2">Create A New Support Ticket</h2>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        <View style={styles.container}>
+          <Text style={styles.headerText}>Create A New Support Ticket</Text>
           {loading && <Loader />}
           {error && <Message variant="danger">{error}</Message>}
-          {success && (
+          {showSuccessMessage && (
             <Message variant="success">Ticket created successfully.</Message>
           )}
-          <Form onSubmit={submitHandler}>
-            <Form.Group controlId="category">
-              <Form.Label>Category</Form.Label>
-              <Form.Control
-                as="select"
-                required
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                <option value="Support">Support</option>
-                <option value="Account Fund">Account Fund</option>
-                <option value="Billing">Billing</option>
-                <option value="Abuse">Abuse</option>
-                <option value="OTP">OTP</option>
-                <option value="Payments">Payments</option>
-                <option value="Services">Services</option>
-                <option value="Credit Points">Credit Points</option>
-                <option value="Referrals">Referrals</option>
-                <option value="Others">Others</option>
-              </Form.Control>
-            </Form.Group>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Category</Text>
+            <RNPickerSelect
+              onValueChange={(value) => setCategory(value)}
+              items={supportChoices.map(([value, label]) => ({ label, value }))}
+              style={pickerSelectStyles}
+              value={category}
+            />
+          </View>
 
-            <Form.Group controlId="subject">
-              <Form.Label>Subject</Form.Label>
-              <Form.Control
-                required
-                type="text"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="Enter subject"
-                maxLength={80}
-              ></Form.Control>
-            </Form.Group>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Subject</Text>
+            <TextInput
+              style={styles.input}
+              value={subject}
+              onChangeText={(text) => setSubject(text)}
+              placeholder="Enter subject"
+              maxLength={80}
+            />
+          </View>
 
-            <Form.Group controlId="message">
-              <Form.Label>Message</Form.Label>
-              <Form.Control
-                required
-                as="textarea"
-                rows={4}
-                value={message}
-                placeholder="Enter message"
-                maxLength={1000}
-                onChange={(e) => setMessage(e.target.value)}
-              ></Form.Control>
-            </Form.Group>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Message</Text>
+            <TextInput
+              style={[styles.input, styles.textarea]}
+              value={message}
+              onChangeText={(text) => setMessage(text)}
+              placeholder="Enter message"
+              maxLength={1000}
+              multiline
+              numberOfLines={4}
+            />
+          </View>
 
-            <div className="py-2">
-              <Button
-                className="w-100 rounded"
-                type="submit"
-                variant="success"
-                disabled={
-                  message === "" || subject === "" || loading || success
-                }
-              >
-                Submit
-              </Button>
-            </div>
-          </Form>
-        </Col>
-      </Row>
-    </div>
+          <TouchableOpacity
+            onPress={submitHandler}
+            style={styles.submitButton}
+            disabled={message === "" || subject === "" || loading || success}
+          >
+            <Text style={styles.submitButtonText}>Submit</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+  },
+  scrollViewContainer: {
+    padding: 16,
+  },
+  container: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 16,
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  formGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  input: {
+    borderColor: "#ced4da",
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: "#e9ecef",
+  },
+  textarea: {
+    height: 100,
+  },
+  submitButton: {
+    backgroundColor: "#28a745",
+    padding: 15,
+    borderRadius: 5,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "#ced4da",
+    borderRadius: 4,
+    color: "black",
+    paddingRight: 30,
+    backgroundColor: "#e9ecef",
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: "#ced4da",
+    borderRadius: 4,
+    color: "black",
+    paddingRight: 30,
+    backgroundColor: "#e9ecef",
+  },
+});
 
 export default CreateSupportTicket;

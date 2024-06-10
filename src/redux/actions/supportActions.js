@@ -4,6 +4,7 @@ import {
   CREATE_TICKET_REQUEST,
   CREATE_TICKET_SUCCESS,
   CREATE_TICKET_FAIL,
+  RESET_TICKET,
   // CREATE_SUPPORT_MESSAGE_REQUEST,
   // CREATE_SUPPORT_MESSAGE_SUCCESS,
   // CREATE_SUPPORT_MESSAGE_FAIL,
@@ -121,7 +122,7 @@ export const createSupportTicket = (ticketData) => async (
   getState
 ) => {
   try {
-    dispatch({ type: CREATE_TICKET_REQUEST });
+    dispatch({ type: CREATE_TICKET_REQUEST }); 
 
     const {
       userLogin: { userInfo },
@@ -150,6 +151,10 @@ export const createSupportTicket = (ticketData) => async (
           : error.message,
     });
   }
+};
+
+export const resetSupportTicket = () => (dispatch) => {
+  dispatch({ type: RESET_TICKET });
 };
 
 export const listSupportTicket = () => async (dispatch, getState) => {

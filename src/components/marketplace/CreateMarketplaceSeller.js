@@ -16,7 +16,6 @@ import { createMarketplaceSeller } from "../../redux/actions/marketplaceSellerAc
 import * as ImagePicker from "expo-image-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
-// import DatePicker from "react-native-date-picker";
 import PhoneInput from "react-native-phone-input";
 import RNPickerSelect from "react-native-picker-select";
 import Message from "../../Message";
@@ -206,7 +205,6 @@ const CreateMarketplaceSeller = () => {
   sellerData.append("id_number", idNumber);
   sellerData.append("id_card_image", idCardImage);
   sellerData.append("dob", dob);
-  // sellerData.append("dob", dob.toISOString().split("T")[0]);
   sellerData.append("home_address", address);
 
   console.log("sellerData:", sellerData);

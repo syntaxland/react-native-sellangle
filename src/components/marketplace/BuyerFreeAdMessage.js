@@ -5,7 +5,6 @@ import {
   Text,
   ScrollView,
   TextInput,
-  Button,
   StyleSheet,
   Image,
   RefreshControl,

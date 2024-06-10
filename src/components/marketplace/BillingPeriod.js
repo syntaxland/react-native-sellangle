@@ -1,32 +1,38 @@
 // BillingPeriod.js
 import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Col, Row, Container } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
-import { getAdCpsCharges } from "../../actions/creditPointActions";
-import Message from "../Message";
-import LoaderButton from "../LoaderButton";
+import { useNavigation } from "@react-navigation/native";
+import RNPickerSelect from "react-native-picker-select";
+import { getAdCpsCharges } from "../../redux/actions/creditPointActions";
+import Loader from "../../Loader";
+import Message from "../../Message";
 import AdChargesReceipt from "./AdChargesReceipt";
-import Select from "react-select";
 
-function BillingPeriod() {
+const BillingPeriod = () => {
   const dispatch = useDispatch();
-  const history = useHistory;
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      history.push("/login");
+      navigation.navigate("Login");
     }
-  }, [userInfo, history]);
+  }, [userInfo]);
 
   const getAdCpsChargesState = useSelector(
     (state) => state.getAdCpsChargesState
   );
   const { loading, adCpsCharges, error } = getAdCpsChargesState;
-  console.log("adCpsCharges:", adCpsCharges);
 
   const [billingPeriodOptions, setBillingPeriodOptions] = useState([]);
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(null);
@@ -37,7 +43,6 @@ function BillingPeriod() {
         const formattedDate = new Date(charge.created_at).toLocaleString(
           "en-US",
           {
-            // month: "numeric",
             month: "long",
             year: "numeric",
           }
@@ -60,40 +65,89 @@ function BillingPeriod() {
     }
   }, [adCpsCharges]);
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const wait = (timeout) => {
+    return new Promise((resolve) => {
+      setTimeout(resolve, timeout);
+    });
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    dispatch(getAdCpsCharges());
+    wait(2000).then(() => setRefreshing(false));
+  };
+
   useEffect(() => {
     dispatch(getAdCpsCharges());
   }, [dispatch]);
 
   return (
-    <Container>
-      <Row className="py-2 d-flex justify-content-center">
-        <Col md={8}>
-          <h2 className="text-center py-2">Billing Period </h2>
-          {loading && <LoaderButton />}
-
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>Billing Period</Text>
+          {loading && <Loader />}
           {error && <Message variant="danger">{error}</Message>}
-
-          <Row className="py-2 d-flex justify-content-between">
-            <Col md={8} className="py-1">
-              <Select
-                options={billingPeriodOptions}
-                value={selectedBillingPeriod}
-                onChange={(selectedOption) =>
-                  setSelectedBillingPeriod(selectedOption)
-                }
-              />
-            </Col>
-            <Col md={4} className="py-1">
-              <AdChargesReceipt
-                adChargesReceiptMonth={selectedBillingPeriod?.label}
-                billingPeriodLoading={loading}
-              />
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    </Container>
+          <View style={styles.pickerContainer}>
+            <RNPickerSelect
+              onValueChange={(value) =>
+                setSelectedBillingPeriod(
+                  billingPeriodOptions.find((option) => option.value === value)
+                )
+              }
+              items={billingPeriodOptions}
+              value={selectedBillingPeriod?.value}
+            />
+          </View>
+          <View style={styles.receiptContainer}>
+            <AdChargesReceipt
+              adChargesReceiptMonth={selectedBillingPeriod?.label}
+              billingPeriodLoading={loading}
+            />
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  scrollView: {
+    padding: 20,
+  },
+  container: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 10,
+    textAlign: "center",
+  },
+  pickerContainer: {
+    marginVertical: 20,
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    textAlign: "center",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  receiptContainer: {
+    marginTop: 20,
+  },
+});
 
 export default BillingPeriod;
