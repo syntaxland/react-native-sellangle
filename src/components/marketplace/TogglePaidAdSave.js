@@ -2,17 +2,12 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { togglePaidAdSave } from "../../redux/actions/marketplaceSellerActions";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faHeart as fasHeart } from "@fortawesome/free-solid-svg-icons";
 import { faHeart as farHeart } from "@fortawesome/free-regular-svg-icons";
+import Loader from "../../Loader";
 
 const TogglePaidAdSave = ({ ad }) => {
   const dispatch = useDispatch();
@@ -63,7 +58,7 @@ const TogglePaidAdSave = ({ ad }) => {
         disabled={toggleAdSaveLoading}
       >
         {toggleAdSaveLoading ? (
-          <ActivityIndicator size="small" color="#0000ff" />
+          <Loader />
         ) : (
           <>
             <FontAwesomeIcon

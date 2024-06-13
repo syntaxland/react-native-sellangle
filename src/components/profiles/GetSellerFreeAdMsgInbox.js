@@ -68,7 +68,7 @@ const GetSellerFreeAdMsgInbox = () => {
       currency: message?.free_ad_currency,
       sellerAvatarUrl: message?.sellerAvatarUrl,
       seller_username: message?.free_ad_seller_username,
-      expiration_date: message?.free_ad_expiration_date,
+      expiration_date: message?.free_ad_expiration_date, 
       ad_rating: message?.free_ad_rating,
     };
 

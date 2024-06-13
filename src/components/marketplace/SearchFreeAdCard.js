@@ -104,7 +104,12 @@ function SearchFreeAdCard({ freeSearchAd }) {
         ad_rating: sellerRating,
       };
 
-      navigation.navigate("BuyerMessage", queryParams);
+      // navigation.navigate("BuyerMessage", queryParams);
+
+      navigation.navigate("Seller Free Ad Message", {
+        id: freeSearchAd.id,
+        ...queryParams,
+      });
     }
   };
 

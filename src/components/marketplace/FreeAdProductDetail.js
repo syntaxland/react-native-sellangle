@@ -332,7 +332,7 @@ const FreeAdProductDetail = () => {
                 onPress={handleSellerShopFront}
               >
                 <Text style={styles.shopfrontButtonText}>
-                  <FontAwesomeIcon icon={faShoppingCart} /> Go to Seller
+                  <FontAwesomeIcon icon={faShoppingCart} color="#fff"/> Go to Seller
                   Shopfront
                 </Text>
               </TouchableOpacity>

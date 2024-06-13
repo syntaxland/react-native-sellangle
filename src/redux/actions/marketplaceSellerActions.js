@@ -179,36 +179,74 @@ import {
   PAY_ADS_CHARGES_SUCCESS,
   PAY_ADS_CHARGES_FAIL,
   GET_PAID_ADS_CHARGES_RECEIPT_REQUEST,
-GET_PAID_ADS_CHARGES_RECEIPT_SUCCESS,
-GET_PAID_ADS_CHARGES_RECEIPT_FAIL,
+  GET_PAID_ADS_CHARGES_RECEIPT_SUCCESS,
+  GET_PAID_ADS_CHARGES_RECEIPT_FAIL,
+  CLEAR_SELLER_FREE_AD_MESSAGE_COUNTER_REQUEST,
+  CLEAR_SELLER_FREE_AD_MESSAGE_COUNTER_SUCCESS,
+  CLEAR_SELLER_FREE_AD_MESSAGE_COUNTER_FAIL,
+  CLEAR_BUYER_FREE_AD_MESSAGE_COUNTER_REQUEST,
+  CLEAR_BUYER_FREE_AD_MESSAGE_COUNTER_SUCCESS,
+  CLEAR_BUYER_FREE_AD_MESSAGE_COUNTER_FAIL,
+  CLEAR_SELLER_PAID_AD_MESSAGE_COUNTER_REQUEST,
+  CLEAR_SELLER_PAID_AD_MESSAGE_COUNTER_SUCCESS,
+  CLEAR_SELLER_PAID_AD_MESSAGE_COUNTER_FAIL,
+  CLEAR_BUYER_PAID_AD_MESSAGE_COUNTER_REQUEST,
+  CLEAR_BUYER_PAID_AD_MESSAGE_COUNTER_SUCCESS,
+  CLEAR_BUYER_PAID_AD_MESSAGE_COUNTER_FAIL,
+  GET_ACTIVE_BUYER_FREE_AD_MESSAGES_REQUEST,
+  GET_ACTIVE_BUYER_FREE_AD_MESSAGES_SUCCESS,
+  GET_ACTIVE_BUYER_FREE_AD_MESSAGES_FAIL,
+  GET_ACTIVE_BUYER_PAID_AD_MESSAGES_REQUEST,
+  GET_ACTIVE_BUYER_PAID_AD_MESSAGES_SUCCESS,
+  GET_ACTIVE_BUYER_PAID_AD_MESSAGES_FAIL,
 
-CLEAR_SELLER_FREE_AD_MESSAGE_COUNTER_REQUEST,
-CLEAR_SELLER_FREE_AD_MESSAGE_COUNTER_SUCCESS,
-CLEAR_SELLER_FREE_AD_MESSAGE_COUNTER_FAIL,
-CLEAR_BUYER_FREE_AD_MESSAGE_COUNTER_REQUEST,
-CLEAR_BUYER_FREE_AD_MESSAGE_COUNTER_SUCCESS,
-CLEAR_BUYER_FREE_AD_MESSAGE_COUNTER_FAIL,
-CLEAR_SELLER_PAID_AD_MESSAGE_COUNTER_REQUEST,
-CLEAR_SELLER_PAID_AD_MESSAGE_COUNTER_SUCCESS,
-CLEAR_SELLER_PAID_AD_MESSAGE_COUNTER_FAIL,
-CLEAR_BUYER_PAID_AD_MESSAGE_COUNTER_REQUEST,
-CLEAR_BUYER_PAID_AD_MESSAGE_COUNTER_SUCCESS,
-CLEAR_BUYER_PAID_AD_MESSAGE_COUNTER_FAIL,
-
-GET_ACTIVE_BUYER_FREE_AD_MESSAGES_REQUEST,
-GET_ACTIVE_BUYER_FREE_AD_MESSAGES_SUCCESS,
-GET_ACTIVE_BUYER_FREE_AD_MESSAGES_FAIL,
-GET_ACTIVE_BUYER_PAID_AD_MESSAGES_REQUEST,
-GET_ACTIVE_BUYER_PAID_AD_MESSAGES_SUCCESS,
-GET_ACTIVE_BUYER_PAID_AD_MESSAGES_FAIL,
-
-GET_SELLER_AD_STATISTICS_REQUEST,
+  GET_SELLER_AD_STATISTICS_REQUEST,
   GET_SELLER_AD_STATISTICS_SUCCESS,
   GET_SELLER_AD_STATISTICS_FAIL,
+  TOGGLE_FOLLOW_SELLER_REQUEST,
+  TOGGLE_FOLLOW_SELLER_SUCCESS,
+  TOGGLE_FOLLOW_SELLER_FAIL,
 } from "../constants/marketplaceSellerConstants";
 
 import { API_URL } from "../../config/apiConfig";
-// const API_URL = process.env.REACT_APP_API_URL;
+
+export const toggleFollowSeller =
+  (toggleData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: TOGGLE_FOLLOW_SELLER_REQUEST });
+
+      const {
+        userLogin: { userInfo },
+      } = getState();
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
+
+      const { data } = await axios.post(
+        `${API_URL}/api/toggle-follow-seller/`,
+        toggleData,
+        config
+      );
+
+      dispatch({
+        type: TOGGLE_FOLLOW_SELLER_SUCCESS,
+        payload: data,
+      });
+      return data;
+    } catch (error) {
+      dispatch({
+        type: TOGGLE_FOLLOW_SELLER_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
 export const getSellerAdStatistics = () => async (dispatch, getState) => {
   try {
@@ -225,7 +263,10 @@ export const getSellerAdStatistics = () => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.get(`${API_URL}/api/get-seller-ad-statistics/`, config);
+    const { data } = await axios.get(
+      `${API_URL}/api/get-seller-ad-statistics/`,
+      config
+    );
 
     dispatch({
       type: GET_SELLER_AD_STATISTICS_SUCCESS,
@@ -242,230 +283,233 @@ export const getSellerAdStatistics = () => async (dispatch, getState) => {
   }
 };
 
-export const GetActiveBuyerFreeAdMessages = () => async (dispatch, getState) => {
-  try {
-    dispatch({ type: GET_ACTIVE_BUYER_FREE_AD_MESSAGES_REQUEST });
+export const GetActiveBuyerFreeAdMessages =
+  () => async (dispatch, getState) => {
+    try {
+      dispatch({ type: GET_ACTIVE_BUYER_FREE_AD_MESSAGES_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.get(
-      `${API_URL}/api/get-active-buyer-free-ad-messages/`,
+      const { data } = await axios.get(
+        `${API_URL}/api/get-active-buyer-free-ad-messages/`,
 
-      config
-    );
+        config
+      );
 
-    dispatch({
-      type: GET_ACTIVE_BUYER_FREE_AD_MESSAGES_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: GET_ACTIVE_BUYER_FREE_AD_MESSAGES_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: GET_ACTIVE_BUYER_FREE_AD_MESSAGES_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: GET_ACTIVE_BUYER_FREE_AD_MESSAGES_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const GetActiveBuyerPaidAdMessages = () => async (dispatch, getState) => {
-  try {
-    dispatch({ type: GET_ACTIVE_BUYER_PAID_AD_MESSAGES_REQUEST });
+export const GetActiveBuyerPaidAdMessages =
+  () => async (dispatch, getState) => {
+    try {
+      dispatch({ type: GET_ACTIVE_BUYER_PAID_AD_MESSAGES_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.get(
-      `${API_URL}/api/get-active-buyer-paid-ad-messages/`,
+      const { data } = await axios.get(
+        `${API_URL}/api/get-active-buyer-paid-ad-messages/`,
 
-      config
-    );
+        config
+      );
 
-    dispatch({
-      type: GET_ACTIVE_BUYER_PAID_AD_MESSAGES_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: GET_ACTIVE_BUYER_PAID_AD_MESSAGES_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: GET_ACTIVE_BUYER_PAID_AD_MESSAGES_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: GET_ACTIVE_BUYER_PAID_AD_MESSAGES_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const clearSellerFreeAdMessageCounter = (counterData) => async (dispatch, getState) => {
-  try {
-    dispatch({ type: CLEAR_SELLER_FREE_AD_MESSAGE_COUNTER_REQUEST });
+export const clearSellerFreeAdMessageCounter =
+  (counterData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: CLEAR_SELLER_FREE_AD_MESSAGE_COUNTER_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.post(
-      `${API_URL}/api/clear-seller-free-ad-message-counter/`,
-      counterData,
-      config
-    );
+      const { data } = await axios.post(
+        `${API_URL}/api/clear-seller-free-ad-message-counter/`,
+        counterData,
+        config
+      );
 
-    dispatch({
-      type: CLEAR_SELLER_FREE_AD_MESSAGE_COUNTER_SUCCESS,
-      payload: data,
-    });
-    return data;
-  } catch (error) {
-    dispatch({
-      type: CLEAR_SELLER_FREE_AD_MESSAGE_COUNTER_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: CLEAR_SELLER_FREE_AD_MESSAGE_COUNTER_SUCCESS,
+        payload: data,
+      });
+      return data;
+    } catch (error) {
+      dispatch({
+        type: CLEAR_SELLER_FREE_AD_MESSAGE_COUNTER_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const clearBuyerFreeAdMessageCounter = (counterData) => async (dispatch, getState) => {
-  try {
-    dispatch({ type: CLEAR_BUYER_FREE_AD_MESSAGE_COUNTER_REQUEST });
+export const clearBuyerFreeAdMessageCounter =
+  (counterData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: CLEAR_BUYER_FREE_AD_MESSAGE_COUNTER_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.post(
-      `${API_URL}/api/clear-buyer-free-ad-message-counter/`,
-      counterData,
-      config
-    );
+      const { data } = await axios.post(
+        `${API_URL}/api/clear-buyer-free-ad-message-counter/`,
+        counterData,
+        config
+      );
 
-    dispatch({
-      type: CLEAR_BUYER_FREE_AD_MESSAGE_COUNTER_SUCCESS,
-      payload: data,
-    });
-    return data;
-  } catch (error) {
-    dispatch({
-      type: CLEAR_BUYER_FREE_AD_MESSAGE_COUNTER_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: CLEAR_BUYER_FREE_AD_MESSAGE_COUNTER_SUCCESS,
+        payload: data,
+      });
+      return data;
+    } catch (error) {
+      dispatch({
+        type: CLEAR_BUYER_FREE_AD_MESSAGE_COUNTER_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const clearSellerPaidAdMessageCounter = (counterData) => async (dispatch, getState) => {
-  try {
-    dispatch({ type: CLEAR_SELLER_PAID_AD_MESSAGE_COUNTER_REQUEST });
+export const clearSellerPaidAdMessageCounter =
+  (counterData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: CLEAR_SELLER_PAID_AD_MESSAGE_COUNTER_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.post(
-      `${API_URL}/api/clear-seller-paid-ad-message-counter/`,
-      counterData,
-      config
-    );
+      const { data } = await axios.post(
+        `${API_URL}/api/clear-seller-paid-ad-message-counter/`,
+        counterData,
+        config
+      );
 
-    dispatch({
-      type: CLEAR_SELLER_PAID_AD_MESSAGE_COUNTER_SUCCESS,
-      payload: data,
-    });
-    return data;
-  } catch (error) {
-    dispatch({
-      type: CLEAR_SELLER_PAID_AD_MESSAGE_COUNTER_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: CLEAR_SELLER_PAID_AD_MESSAGE_COUNTER_SUCCESS,
+        payload: data,
+      });
+      return data;
+    } catch (error) {
+      dispatch({
+        type: CLEAR_SELLER_PAID_AD_MESSAGE_COUNTER_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const clearBuyerPaidAdMessageCounter = (counterData) => async (dispatch, getState) => {
-  try {
-    dispatch({ type: CLEAR_BUYER_PAID_AD_MESSAGE_COUNTER_REQUEST });
+export const clearBuyerPaidAdMessageCounter =
+  (counterData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: CLEAR_BUYER_PAID_AD_MESSAGE_COUNTER_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.post(
-      `${API_URL}/api/clear-buyer-paid-ad-message-counter/`,
-      counterData,
-      config
-    );
+      const { data } = await axios.post(
+        `${API_URL}/api/clear-buyer-paid-ad-message-counter/`,
+        counterData,
+        config
+      );
 
-    dispatch({
-      type: CLEAR_BUYER_PAID_AD_MESSAGE_COUNTER_SUCCESS,
-      payload: data,
-    });
-    return data;
-  } catch (error) {
-    dispatch({
-      type: CLEAR_BUYER_PAID_AD_MESSAGE_COUNTER_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: CLEAR_BUYER_PAID_AD_MESSAGE_COUNTER_SUCCESS,
+        payload: data,
+      });
+      return data;
+    } catch (error) {
+      dispatch({
+        type: CLEAR_BUYER_PAID_AD_MESSAGE_COUNTER_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const getAdChargesReceipt = (adData) => async (
-  dispatch,
-  getState
-) => {
+export const getAdChargesReceipt = (adData) => async (dispatch, getState) => {
   try {
     dispatch({ type: GET_PAID_ADS_CHARGES_RECEIPT_REQUEST });
 
@@ -481,7 +525,7 @@ export const getAdChargesReceipt = (adData) => async (
     };
 
     const { ad_charges_receipt_month } = adData;
-    const url = `${API_URL}/api/get-ad-charges-receipt/?ad_charges_receipt_month=${ad_charges_receipt_month}`;
+    const url = `${API_URL}/api/get-ad-charges-receipt/?ad_charges_receipt_month=${ad_charges_receipt_month}/`;
     const { data } = await axios.get(url, config);
 
     dispatch({
@@ -610,175 +654,167 @@ export const applyPromoCode = (promoData) => async (dispatch, getState) => {
   }
 };
 
-export const getFreeAdSellerReviews = (reviewData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: GET_REVIEW_SELLER_FREE_ADS_REQUEST });
+export const getFreeAdSellerReviews =
+  (reviewData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: GET_REVIEW_SELLER_FREE_ADS_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { ad_id } = reviewData;
-    const url = `${API_URL}/api/get-seller-free-ad-reviews/?ad_id=${ad_id}`;
-    const { data } = await axios.get(url, config);
+      const { ad_id } = reviewData;
+      const url = `${API_URL}/api/get-seller-free-ad-reviews/?ad_id=${ad_id}/`;
+      const { data } = await axios.get(url, config);
 
-    // const { data } = await axios.get(
-    //   `${API_URL}/api/get-seller-free-ad-reviews/${reviewData}`,
-    //   reviewData,
-    //   config
-    // );
+      // const { data } = await axios.get(
+      //   `${API_URL}/api/get-seller-free-ad-reviews/${reviewData}`,
+      //   reviewData,
+      //   config
+      // );
 
-    dispatch({
-      type: GET_REVIEW_SELLER_FREE_ADS_SUCCESS,
-      payload: data,
-    });
-    return data;
-  } catch (error) {
-    dispatch({
-      type: GET_REVIEW_SELLER_FREE_ADS_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: GET_REVIEW_SELLER_FREE_ADS_SUCCESS,
+        payload: data,
+      });
+      return data;
+    } catch (error) {
+      dispatch({
+        type: GET_REVIEW_SELLER_FREE_ADS_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const getPaidAdSellerReviews = (reviewData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: GET_REVIEW_SELLER_PAID_ADS_REQUEST });
+export const getPaidAdSellerReviews =
+  (reviewData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: GET_REVIEW_SELLER_PAID_ADS_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { ad_id } = reviewData;
-    const url = `${API_URL}/api/get-seller-paid-ad-reviews/?ad_id=${ad_id}`;
-    const { data } = await axios.get(url, config);
+      const { ad_id } = reviewData;
+      const url = `${API_URL}/api/get-seller-paid-ad-reviews/?ad_id=${ad_id}/`;
+      const { data } = await axios.get(url, config);
 
-    // const { data } = await axios.get(
-    //   `${API_URL}/api/get-seller-paid-ad-reviews/`,
-    //   reviewData,
-    //   config
-    // );
+      // const { data } = await axios.get(
+      //   `${API_URL}/api/get-seller-paid-ad-reviews/`,
+      //   reviewData,
+      //   config
+      // );
 
-    dispatch({
-      type: GET_REVIEW_SELLER_PAID_ADS_SUCCESS,
-      payload: data,
-    });
-    return data;
-  } catch (error) {
-    dispatch({
-      type: GET_REVIEW_SELLER_PAID_ADS_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: GET_REVIEW_SELLER_PAID_ADS_SUCCESS,
+        payload: data,
+      });
+      return data;
+    } catch (error) {
+      dispatch({
+        type: GET_REVIEW_SELLER_PAID_ADS_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const reviewFreeAdSeller = (reviewData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: REVIEW_SELLER_FREE_ADS_REQUEST });
+export const reviewFreeAdSeller =
+  (reviewData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: REVIEW_SELLER_FREE_ADS_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.post(
-      `${API_URL}/api/review-free-ad-seller/`,
-      reviewData,
+      const { data } = await axios.post(
+        `${API_URL}/api/review-free-ad-seller/`,
+        reviewData,
 
-      config
-    );
+        config
+      );
 
-    dispatch({
-      type: REVIEW_SELLER_FREE_ADS_SUCCESS,
-      payload: data,
-    });
-    return data;
-  } catch (error) {
-    dispatch({
-      type: REVIEW_SELLER_FREE_ADS_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: REVIEW_SELLER_FREE_ADS_SUCCESS,
+        payload: data,
+      });
+      return data;
+    } catch (error) {
+      dispatch({
+        type: REVIEW_SELLER_FREE_ADS_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const reviewPaidAdSeller = (reviewData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: REVIEW_SELLER_PAID_ADS_REQUEST });
+export const reviewPaidAdSeller =
+  (reviewData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: REVIEW_SELLER_PAID_ADS_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.post(
-      `${API_URL}/api/review-paid-ad-seller/`,
-      reviewData,
+      const { data } = await axios.post(
+        `${API_URL}/api/review-paid-ad-seller/`,
+        reviewData,
 
-      config
-    );
+        config
+      );
 
-    dispatch({
-      type: REVIEW_SELLER_PAID_ADS_SUCCESS,
-      payload: data,
-    });
-    return data;
-  } catch (error) {
-    dispatch({
-      type: REVIEW_SELLER_PAID_ADS_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: REVIEW_SELLER_PAID_ADS_SUCCESS,
+        payload: data,
+      });
+      return data;
+    } catch (error) {
+      dispatch({
+        type: REVIEW_SELLER_PAID_ADS_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
 export const toggleFreeAdSave = (toggleData) => async (dispatch, getState) => {
   try {
@@ -1018,7 +1054,7 @@ export const getUserSavedFreeAds = () => async (dispatch, getState) => {
     };
 
     const { data } = await axios.get(
-      `${API_URL}/api/get-user-saved-free-ads/`, 
+      `${API_URL}/api/get-user-saved-free-ads/`,
 
       config
     );
@@ -1074,85 +1110,81 @@ export const getUserSavedPaidAds = () => async (dispatch, getState) => {
   }
 };
 
-export const sellerReplyFreeAdMessage = (messageData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: SELLER_REPLY_FREE_AD_MESSAGE_REQUEST });
+export const sellerReplyFreeAdMessage =
+  (messageData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: SELLER_REPLY_FREE_AD_MESSAGE_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.post(
-      `${API_URL}/api/seller-reply-free-ad-message/`,
-      messageData,
+      const { data } = await axios.post(
+        `${API_URL}/api/seller-reply-free-ad-message/`,
+        messageData,
 
-      config
-    );
+        config
+      );
 
-    dispatch({
-      type: SELLER_REPLY_FREE_AD_MESSAGE_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: SELLER_REPLY_FREE_AD_MESSAGE_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: SELLER_REPLY_FREE_AD_MESSAGE_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: SELLER_REPLY_FREE_AD_MESSAGE_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const sellerReplyPaidAdMessage = (messageData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: SELLER_REPLY_PAID_AD_MESSAGE_REQUEST });
+export const sellerReplyPaidAdMessage =
+  (messageData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: SELLER_REPLY_PAID_AD_MESSAGE_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.post(
-      `${API_URL}/api/seller-reply-paid-ad-message/`,
-      messageData,
+      const { data } = await axios.post(
+        `${API_URL}/api/seller-reply-paid-ad-message/`,
+        messageData,
 
-      config
-    );
+        config
+      );
 
-    dispatch({
-      type: SELLER_REPLY_PAID_AD_MESSAGE_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: SELLER_REPLY_PAID_AD_MESSAGE_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: SELLER_REPLY_PAID_AD_MESSAGE_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: SELLER_REPLY_PAID_AD_MESSAGE_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
 export const listSellerFreeAdMessages = (pk) => async (dispatch, getState) => {
   try {
@@ -1420,13 +1452,9 @@ export const searchAds = (searchData) => async (dispatch, getState) => {
       },
     };
 
-    const {
-      search_term,
-      selected_country,
-      selected_state,
-      selected_city,
-    } = searchData;
-    const url = `${API_URL}/api/search-ads/?search_term=${search_term}&country=${selected_country}&state=${selected_state}&city=${selected_city}`;
+    const { search_term, selected_country, selected_state, selected_city } =
+      searchData;
+    const url = `${API_URL}/api/search-ads/?search_term=${search_term}&country=${selected_country}&state=${selected_state}&city=${selected_city}/`;
     const { data } = await axios.get(url, config);
 
     // const { data } = await axios.get(
@@ -1449,160 +1477,152 @@ export const searchAds = (searchData) => async (dispatch, getState) => {
   }
 };
 
-export const getSellerUsernameSearch = (lowerCaseUsername) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: GET_SELLER_USERNAME_SEARCH_REQUEST });
+export const getSellerUsernameSearch =
+  (lowerCaseUsername) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: GET_SELLER_USERNAME_SEARCH_REQUEST });
 
-    // const {
-    //   userLogin: { userInfo },
-    // } = getState();
+      // const {
+      //   userLogin: { userInfo },
+      // } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        // Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          // Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.get(
-      `${API_URL}/api/search-seller-username/${lowerCaseUsername}/`,
-      config
-    );
+      const { data } = await axios.get(
+        `${API_URL}/api/search-seller-username/${lowerCaseUsername}/`,
+        config
+      );
 
-    dispatch({
-      type: GET_SELLER_USERNAME_SEARCH_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: GET_SELLER_USERNAME_SEARCH_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: GET_SELLER_USERNAME_SEARCH_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: GET_SELLER_USERNAME_SEARCH_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const getSellerDetail = (seller_username) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: GET_SELLER_DETAIL_REQUEST });
+export const getSellerDetail =
+  (seller_username) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: GET_SELLER_DETAIL_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        // "Content-Type": "multipart/form-data",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          // "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.get(
-      `${API_URL}/api/get-seller-detail/${seller_username}/`,
-      config
-    );
+      const { data } = await axios.get(
+        `${API_URL}/api/get-seller-detail/${seller_username}/`,
+        config
+      );
 
-    dispatch({
-      type: GET_SELLER_DETAIL_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: GET_SELLER_DETAIL_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: GET_SELLER_DETAIL_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: GET_SELLER_DETAIL_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const getSellerActivePaidAds = (seller_username) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: GET_SELLER_ACTIVE_PAID_ADS_REQUEST });
+export const getSellerActivePaidAds =
+  (seller_username) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: GET_SELLER_ACTIVE_PAID_ADS_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        // "Content-Type": "multipart/form-data",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          // "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.get(
-      `${API_URL}/api/get-seller-active-paid-ads/${seller_username}/`,
-      config
-    );
+      const { data } = await axios.get(
+        `${API_URL}/api/get-seller-active-paid-ads/${seller_username}/`,
+        config
+      );
 
-    dispatch({
-      type: GET_SELLER_ACTIVE_PAID_ADS_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: GET_SELLER_ACTIVE_PAID_ADS_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: GET_SELLER_ACTIVE_PAID_ADS_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: GET_SELLER_ACTIVE_PAID_ADS_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const getSellerActiveFreeAds = (seller_username) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: GET_SELLER_ACTIVE_FREE_ADS_REQUEST });
+export const getSellerActiveFreeAds =
+  (seller_username) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: GET_SELLER_ACTIVE_FREE_ADS_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        // "Content-Type": "multipart/form-data",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          // "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.get(
-      `${API_URL}/api/get-seller-active-free-ads/${seller_username}/`,
-      config
-    );
+      const { data } = await axios.get(
+        `${API_URL}/api/get-seller-active-free-ads/${seller_username}/`,
+        config
+      );
 
-    dispatch({
-      type: GET_SELLER_ACTIVE_FREE_ADS_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: GET_SELLER_ACTIVE_FREE_ADS_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: GET_SELLER_ACTIVE_FREE_ADS_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: GET_SELLER_ACTIVE_FREE_ADS_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
 export const deactivateFreeAd = (adData) => async (dispatch, getState) => {
   try {
@@ -1824,169 +1844,161 @@ export const reactivatePaidAd = (adData) => async (dispatch, getState) => {
   }
 };
 
-export const buyerCreatePaidAdMessage = (messageData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: CREATE_PAID_AD_MESSAGE_REQUEST });
+export const buyerCreatePaidAdMessage =
+  (messageData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: CREATE_PAID_AD_MESSAGE_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.post(
-      `${API_URL}/api/buyer-create-paid-ad-message/`,
-      messageData,
+      const { data } = await axios.post(
+        `${API_URL}/api/buyer-create-paid-ad-message/`,
+        messageData,
 
-      config
-    );
+        config
+      );
 
-    dispatch({
-      type: CREATE_PAID_AD_MESSAGE_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: CREATE_PAID_AD_MESSAGE_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: CREATE_PAID_AD_MESSAGE_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: CREATE_PAID_AD_MESSAGE_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const listPaidAdMessages = (messageData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: LIST_PAID_AD_MESSAGE_REQUEST });
+export const listPaidAdMessages =
+  (messageData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: LIST_PAID_AD_MESSAGE_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    // const { data } = await axios.get(
-    //   `${API_URL}/api/list-paid-ad-messages/${pk}`,
-    //   config
-    // ); 
+      // const { data } = await axios.get(
+      //   `${API_URL}/api/list-paid-ad-messages/${pk}`,
+      //   config
+      // );
 
-    const { ad_id, paid_ad_message_id } = messageData;
-    const url = `${API_URL}/api/list-paid-ad-messages/?ad_id=${ad_id}&paid_ad_message_id=${paid_ad_message_id}`;
-    const { data } = await axios.get(url, config);
+      const { ad_id, paid_ad_message_id } = messageData;
+      const url = `${API_URL}/api/list-paid-ad-messages/?ad_id=${ad_id}&paid_ad_message_id=${paid_ad_message_id}/`;
+      const { data } = await axios.get(url, config);
 
-    dispatch({
-      type: LIST_PAID_AD_MESSAGE_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: LIST_PAID_AD_MESSAGE_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: LIST_PAID_AD_MESSAGE_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: LIST_PAID_AD_MESSAGE_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const buyerCreateFreeAdMessage = (messageData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: CREATE_FREE_AD_MESSAGE_REQUEST });
+export const buyerCreateFreeAdMessage =
+  (messageData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: CREATE_FREE_AD_MESSAGE_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.post(
-      `${API_URL}/api/buyer-create-free-ad-message/`,
-      messageData,
+      const { data } = await axios.post(
+        `${API_URL}/api/buyer-create-free-ad-message/`,
+        messageData,
 
-      config
-    );
+        config
+      );
 
-    dispatch({
-      type: CREATE_FREE_AD_MESSAGE_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: CREATE_FREE_AD_MESSAGE_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: CREATE_FREE_AD_MESSAGE_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: CREATE_FREE_AD_MESSAGE_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const listFreeAdMessages = (messageData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: LIST_FREE_AD_MESSAGE_REQUEST });
+export const listFreeAdMessages =
+  (messageData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: LIST_FREE_AD_MESSAGE_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    // const { data } = await axios.get(
-    //   `${API_URL}/api/list-free-ad-messages/${pk}`,
-    //   config
-    // );
+      // const { data } = await axios.get(
+      //   `${API_URL}/api/list-free-ad-messages/${pk}`,
+      //   config
+      // );
 
-    const { ad_id, free_ad_message_id } = messageData;
-    const url = `${API_URL}/api/list-free-ad-messages/?ad_id=${ad_id}&free_ad_message_id=${free_ad_message_id}`;
-    const { data } = await axios.get(url, config);
+      const { ad_id, free_ad_message_id } = messageData;
+      const url = `${API_URL}/api/list-free-ad-messages/?ad_id=${ad_id}&free_ad_message_id=${free_ad_message_id}/`;
+      const { data } = await axios.get(url, config);
 
-    dispatch({
-      type: LIST_FREE_AD_MESSAGE_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: LIST_FREE_AD_MESSAGE_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: LIST_FREE_AD_MESSAGE_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: LIST_FREE_AD_MESSAGE_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
 export const getSellerFreeAd = () => async (dispatch, getState) => {
   try {
@@ -2097,44 +2109,42 @@ export const deleteFreeAd = (adData) => async (dispatch, getState) => {
   }
 };
 
-export const updateFreeAd = (businessFormData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: UPDATE_FREE_AD_REQUEST });
+export const updateFreeAd =
+  (businessFormData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: UPDATE_FREE_AD_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.put(
-      `${API_URL}/api/update-free-ad/`,
-      businessFormData,
-      config
-    );
+      const { data } = await axios.put(
+        `${API_URL}/api/update-free-ad/`,
+        businessFormData,
+        config
+      );
 
-    dispatch({
-      type: UPDATE_FREE_AD_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: UPDATE_FREE_AD_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: UPDATE_FREE_AD_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: UPDATE_FREE_AD_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
 export const getAllFreeAd = (adData) => async (dispatch, getState) => {
   try {
@@ -2153,7 +2163,7 @@ export const getAllFreeAd = (adData) => async (dispatch, getState) => {
     };
 
     const { selected_country, selected_state, selected_city } = adData;
-    const url = `${API_URL}/api/get-all-free-ad/?country=${selected_country}&state=${selected_state}&city=${selected_city}`;
+    const url = `${API_URL}/api/get-all-free-ad/?country=${selected_country}&state=${selected_state}&city=${selected_city}/`;
     const { data } = await axios.get(url, config);
 
     // const { data } = await axios.get(
@@ -2251,44 +2261,42 @@ export const getPaidAdDetail = (pk) => async (dispatch, getState) => {
   }
 };
 
-export const updatePaidAd = (businessFormData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: UPDATE_PAID_AD_REQUEST });
+export const updatePaidAd =
+  (businessFormData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: UPDATE_PAID_AD_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.put(
-      `${API_URL}/api/update-paid-ad/`,
-      businessFormData,
-      config
-    );
+      const { data } = await axios.put(
+        `${API_URL}/api/update-paid-ad/`,
+        businessFormData,
+        config
+      );
 
-    dispatch({
-      type: UPDATE_PAID_AD_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: UPDATE_PAID_AD_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: UPDATE_PAID_AD_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: UPDATE_PAID_AD_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
 export const deletePaidAd = (adData) => async (dispatch, getState) => {
   try {
@@ -2343,7 +2351,7 @@ export const getAllPaidAd = (adData) => async (dispatch, getState) => {
     };
 
     const { selected_country, selected_state, selected_city } = adData;
-    const url = `${API_URL}/api/get-all-paid-ad/?country=${selected_country}&state=${selected_state}&city=${selected_city}`;
+    const url = `${API_URL}/api/get-all-paid-ad/?country=${selected_country}&state=${selected_state}&city=${selected_city}/`;
     const { data } = await axios.get(url, config);
 
     // const { data } = await axios.get(
@@ -2439,44 +2447,42 @@ export const postFreeAd = (sellerData) => async (dispatch, getState) => {
   }
 };
 
-export const createMarketplaceSeller = (sellerData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: CREATE_MARKETPLACE_SELLER_REQUEST });
+export const createMarketplaceSeller =
+  (sellerData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: CREATE_MARKETPLACE_SELLER_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.post(
-      `${API_URL}/api/create-marketplace-seller/`,
-      sellerData,
-      config
-    );
+      const { data } = await axios.post(
+        `${API_URL}/api/create-marketplace-seller/`,
+        sellerData,
+        config
+      );
 
-    dispatch({
-      type: CREATE_MARKETPLACE_SELLER_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: CREATE_MARKETPLACE_SELLER_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: CREATE_MARKETPLACE_SELLER_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: CREATE_MARKETPLACE_SELLER_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
 export const getSellerAccount = () => async (dispatch, getState) => {
   try {
@@ -2514,44 +2520,42 @@ export const getSellerAccount = () => async (dispatch, getState) => {
   }
 };
 
-export const updateSellerAccount = (businessFormData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: UPDATE_SELLER_ACCOUNT_REQUEST });
+export const updateSellerAccount =
+  (businessFormData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: UPDATE_SELLER_ACCOUNT_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.put(
-      `${API_URL}/api/update-marketplace-seller-account/`,
-      businessFormData,
-      config
-    );
+      const { data } = await axios.put(
+        `${API_URL}/api/update-marketplace-seller-account/`,
+        businessFormData,
+        config
+      );
 
-    dispatch({
-      type: UPDATE_SELLER_ACCOUNT_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: UPDATE_SELLER_ACCOUNT_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: UPDATE_SELLER_ACCOUNT_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: UPDATE_SELLER_ACCOUNT_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
 export const sellerPhoto = (sellerData) => async (dispatch, getState) => {
   try {
@@ -2625,44 +2629,42 @@ export const getSellerPhoto = () => async (dispatch, getState) => {
   }
 };
 
-export const updateSellerPhoto = (photoFormData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: UPDATE_SELLER_PHOTO_REQUEST });
+export const updateSellerPhoto =
+  (photoFormData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: UPDATE_SELLER_PHOTO_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.put(
-      `${API_URL}/api/update-marketplace-seller-photo/`,
-      photoFormData,
-      config
-    );
+      const { data } = await axios.put(
+        `${API_URL}/api/update-marketplace-seller-photo/`,
+        photoFormData,
+        config
+      );
 
-    dispatch({
-      type: UPDATE_SELLER_PHOTO_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: UPDATE_SELLER_PHOTO_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: UPDATE_SELLER_PHOTO_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: UPDATE_SELLER_PHOTO_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
 export const getSellerPaysofterApiKey = () => async (dispatch, getState) => {
   try {
@@ -2700,41 +2702,39 @@ export const getSellerPaysofterApiKey = () => async (dispatch, getState) => {
   }
 };
 
-export const updateSellerPaysofterApiKey = (apiKeyFormData) => async (
-  dispatch,
-  getState
-) => {
-  try {
-    dispatch({ type: UPDATE_SELLER_API_KEY_REQUEST });
+export const updateSellerPaysofterApiKey =
+  (apiKeyFormData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: UPDATE_SELLER_API_KEY_REQUEST });
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
+      const {
+        userLogin: { userInfo },
+      } = getState();
 
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.put(
-      `${API_URL}/api/save-seller-api-key/`,
-      apiKeyFormData,
-      config
-    );
+      const { data } = await axios.put(
+        `${API_URL}/api/save-seller-api-key/`,
+        apiKeyFormData,
+        config
+      );
 
-    dispatch({
-      type: UPDATE_SELLER_API_KEY_SUCCESS,
-      payload: data,
-    });
-  } catch (error) {
-    dispatch({
-      type: UPDATE_SELLER_API_KEY_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: UPDATE_SELLER_API_KEY_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: UPDATE_SELLER_API_KEY_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };

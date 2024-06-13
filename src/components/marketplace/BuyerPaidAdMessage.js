@@ -9,7 +9,7 @@ import {
   Image,
   RefreshControl,
   TouchableOpacity,
-} from "react-native";
+} from "react-native"; 
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {

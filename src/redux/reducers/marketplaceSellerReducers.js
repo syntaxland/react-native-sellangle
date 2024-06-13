@@ -201,6 +201,9 @@ import {
   GET_SELLER_AD_STATISTICS_REQUEST,
   GET_SELLER_AD_STATISTICS_SUCCESS,
   GET_SELLER_AD_STATISTICS_FAIL,
+  TOGGLE_FOLLOW_SELLER_REQUEST,
+  TOGGLE_FOLLOW_SELLER_SUCCESS,
+  TOGGLE_FOLLOW_SELLER_FAIL,
 } from "../constants/marketplaceSellerConstants";
 
 const initialState = {
@@ -243,6 +246,23 @@ const initialState = {
 
   totalSellerAdsViews: [],
   totalSellerAdSaved: [],
+  totalFollwersCount: [],
+};
+
+export const toggleFollowSellerReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case TOGGLE_FOLLOW_SELLER_REQUEST:
+      return { loading: true };
+    case TOGGLE_FOLLOW_SELLER_SUCCESS:
+      return {
+        loading: false,
+        success: true,
+      };
+    case TOGGLE_FOLLOW_SELLER_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
 };
 
 export const getSellerAdStatisticsReducer = (state = initialState, action) => {
@@ -255,6 +275,7 @@ export const getSellerAdStatisticsReducer = (state = initialState, action) => {
         success: true,
         totalSellerAdsViews: action.payload.totalSellerAdsViews,
         totalSellerAdSaved: action.payload.totalSellerAdSaved,
+        totalFollwersCount: action.payload.totalFollwersCount,
       };
     case GET_SELLER_AD_STATISTICS_FAIL:
       return { loading: false, error: action.payload };

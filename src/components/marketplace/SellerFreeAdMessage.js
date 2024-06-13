@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faUser, faPaperPlane, faClock } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faPaperPlane, faClock } from "@fortawesome/free-solid-svg-icons"; 
 import { useDispatch, useSelector } from "react-redux";
 import {
   sellerReplyFreeAdMessage,

@@ -23,12 +23,12 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getSellerAccount,
-  // getPaidAdDetail,
   getSellerDetail,
 } from "../../redux/actions/marketplaceSellerActions";
 import Loader from "../../Loader";
 import Message from "../../Message";
 import RatingSeller from "../../RatingSeller";
+import ToggleFollowSeller from "./ToggleFollowSeller";
 
 function GetSellerDetail() {
   const dispatch = useDispatch();
@@ -114,12 +114,6 @@ function GetSellerDetail() {
           <View style={styles.card}>
             <Text style={styles.header}>Seller Details</Text>
             <View style={styles.sellerInfo}>
-              {/* {sellerAvatarUrl && (
-                <Image
-                  source={{ uri: sellerAvatarUrl }}
-                  style={styles.avatar}
-                />
-              )} */}
               {sellerAvatarUrl && typeof sellerAvatarUrl === "string" && (
                 <Image
                   source={{ uri: sellerAvatarUrl }}
@@ -128,6 +122,9 @@ function GetSellerDetail() {
               )}
               <View style={styles.sellerDetails}>
                 <Text>{sellerDetail?.seller_username}</Text>
+                <Text>
+                  <ToggleFollowSeller sellerDetail={sellerDetail} />
+                </Text>
                 <Text>{calculateLastSeen(sellerDetail?.user_last_login)}</Text>
               </View>
             </View>
@@ -140,30 +137,18 @@ function GetSellerDetail() {
             </View>
             <RatingSeller value={sellerDetail?.rating} color={"green"} />
 
-            {/* <TouchableOpacity
-              style={styles.button}
-              onPress={handleShowPhoneNumber}
-            >
-              <Text style={styles.buttonText}>
-                {showPhoneNumber ? "Hide" : "Show"} Seller Phone Number
-              </Text>
-            </TouchableOpacity> */}
-
             <View style={styles.spaceBtwGroup}>
-                <TouchableOpacity
-                  style={styles.squaredPrimaryButton}
-                  onPress={handleShowPhoneNumber}
-                >
-                  <Text style={styles.btnText}>
-                    <FontAwesomeIcon icon={faPhone} color="#fff" />{" "}
-                    {showPhoneNumber ? "Hide Contact" : "Show Contact"}
-                  </Text>
-                </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.squaredPrimaryButton}
+                onPress={handleShowPhoneNumber}
+              >
+                <Text style={styles.btnText}>
+                  <FontAwesomeIcon icon={faPhone} color="#fff" />{" "}
+                  {showPhoneNumber ? "Hide Contact" : "Show Contact"}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-                
-              </View>
-
-            {/* {showPhoneNumber && <Text>{sellerDetail?.seller_phone}</Text>} */}
             {showPhoneNumber && (
               <View style={styles.spaceBtwGrou}>
                 <Text style={styles.phoneNumber}>

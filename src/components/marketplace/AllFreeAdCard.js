@@ -95,7 +95,14 @@ function AllFreeAdCard({ product }) {
         ad_rating: sellerRating,
       };
 
-      navigation.navigate("MessageSeller", { queryParams });
+      // navigation.navigate("MessageSeller", { queryParams });
+
+      navigation.navigate("Seller Free Ad Message", {
+        id: product.id,
+        ...queryParams,
+      });
+
+
     }
   };
 

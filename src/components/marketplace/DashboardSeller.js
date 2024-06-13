@@ -42,7 +42,7 @@ function DashboardSeller() {
   const getSellerAdStatState = useSelector(
     (state) => state.getSellerAdStatState
   );
-  const { loading, error, totalSellerAdsViews, totalSellerAdSaved } =
+  const { loading, error, totalSellerAdsViews, totalSellerAdSaved, totalFollwersCount } =
     getSellerAdStatState;
 
   const getSellerDetailState = useSelector(
@@ -159,7 +159,7 @@ function DashboardSeller() {
                 </Text>
                 <Text>
                   <FontAwesomeIcon icon={faPeopleGroup} style={styles.icon} />{" "}
-                  Total Followers:
+                  Total Followers: {totalFollwersCount}
                 </Text>
               </View>
               <View style={styles.chartContainer}>

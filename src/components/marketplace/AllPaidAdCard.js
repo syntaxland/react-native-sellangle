@@ -96,7 +96,13 @@ function AllPaidAdCard({ product }) {
         ad_rating: sellerRating,
       };
 
-      navigation.navigate("MessageSeller", { queryParams });
+      // navigation.navigate("MessageSeller", { queryParams });
+
+      navigation.navigate("Seller Paid Ad Message", {
+        id: product.id,
+        ...queryParams,
+      });
+
     }
   };
 

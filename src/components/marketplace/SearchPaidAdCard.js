@@ -104,7 +104,13 @@ function SearchPaidAdCard({ paidSearchAd }) {
         ad_rating: sellerRating,
       };
 
-      navigation.navigate("BuyerMessage", queryParams);
+      // navigation.navigate("BuyerMessage", queryParams);
+
+      navigation.navigate("Seller Paid Ad Message", {
+        id: paidSearchAd.id,
+        ...queryParams,
+      });
+
     }
   };
 

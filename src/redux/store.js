@@ -64,6 +64,7 @@ import {
   listBuyerPaidAdMessagesReducer,
   toggleFreeAdSaveReducer,
   togglePaidAdSaveReducer,
+  toggleFollowSellerReducer,
   trackFreeAdViewReducer,
   trackPaidAdViewReducer,
   getUserViewedFreeAdsReducer,
@@ -361,6 +362,7 @@ const rootReducer = combineReducers({
 
   toggleFreeAdSaveState: toggleFreeAdSaveReducer,
   togglePaidAdSaveState: togglePaidAdSaveReducer,
+  toggleFollowSellerState: toggleFollowSellerReducer,
   trackFreeAdViewState: trackFreeAdViewReducer,
   trackPaidAdViewState: trackPaidAdViewReducer,
 
