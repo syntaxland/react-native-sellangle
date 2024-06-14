@@ -199,16 +199,53 @@ import {
   GET_ACTIVE_BUYER_PAID_AD_MESSAGES_REQUEST,
   GET_ACTIVE_BUYER_PAID_AD_MESSAGES_SUCCESS,
   GET_ACTIVE_BUYER_PAID_AD_MESSAGES_FAIL,
-
   GET_SELLER_AD_STATISTICS_REQUEST,
   GET_SELLER_AD_STATISTICS_SUCCESS,
   GET_SELLER_AD_STATISTICS_FAIL,
   TOGGLE_FOLLOW_SELLER_REQUEST,
   TOGGLE_FOLLOW_SELLER_SUCCESS,
   TOGGLE_FOLLOW_SELLER_FAIL,
+  GET_FOLLOWED_SELLER_REQUEST,
+  GET_FOLLOWED_SELLER_SUCCESS,
+  GET_FOLLOWED_SELLER_FAIL,
 } from "../constants/marketplaceSellerConstants";
 
 import { API_URL } from "../../config/apiConfig";
+
+export const getFollowedSellers = () => async (dispatch, getState) => {
+  try {
+    dispatch({ type: GET_FOLLOWED_SELLER_REQUEST });
+
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userInfo.access}`,
+      },
+    };
+
+    const { data } = await axios.get(
+      `${API_URL}/api/get-followed-sellers/`,
+      config
+    );
+
+    dispatch({
+      type: GET_FOLLOWED_SELLER_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_FOLLOWED_SELLER_FAIL,
+      payload:
+        error.response && error.response.data.detail
+          ? error.response.data.detail
+          : error.message,
+    });
+  }
+};
 
 export const toggleFollowSeller =
   (toggleData) => async (dispatch, getState) => {

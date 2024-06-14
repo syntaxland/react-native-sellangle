@@ -1,4 +1,4 @@
-// SellerSearchCard.js
+// SellerCard.js
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -9,10 +9,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigation } from "@react-navigation/native";
 
-function SellerSearchCard({ searchResults, sellerAvatarUrl }) {
+function SellerCard({ followedSeller }) {
   const navigation = useNavigation();
-
-  console.log("seller_username:", searchResults?.seller_username);
 
   function calculateDuration(joinedTimestamp) {
     const now = new Date();
@@ -46,27 +44,30 @@ function SellerSearchCard({ searchResults, sellerAvatarUrl }) {
 
   const handleSellerShopFront = () => {
     navigation.navigate("Seller Shop Front", {
-      seller_username: searchResults?.seller_username,
+      seller_username: followedSeller?.seller_username,
     });
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Seller Found</Text>
+      <Text style={styles.title}>Seller</Text>
       <View style={styles.sellerInfo}>
-        {sellerAvatarUrl && (
-          <Image source={{ uri: sellerAvatarUrl }} style={styles.avatar} />
+        {followedSeller?.seller_avatar_url && (
+          <Image
+            source={{ uri: followedSeller.seller_avatar_url }}
+            style={styles.avatar}
+          />
         )}
         <Text style={styles.sellerUsername}>
-          {searchResults?.seller_username}
+          {followedSeller?.seller_username}
         </Text>
       </View>
       <View style={styles.verifiedInfo}>
         <Text style={styles.businessName}>
-          Business Name: {searchResults?.business_name}
+          Business Name: {followedSeller?.business_name}
         </Text>
         <View style={styles.verifiedBadge}>
-          {searchResults?.is_seller_verified ? (
+          {followedSeller?.is_seller_verified ? (
             <Text style={styles.verifiedText}>
               <FontAwesomeIcon icon={faCheckCircle} color="green" /> Verified ID
             </Text>
@@ -80,17 +81,16 @@ function SellerSearchCard({ searchResults, sellerAvatarUrl }) {
       </View>
       <View style={styles.joinedInfo}>
         <Text>
-          Joined since {calculateDuration(searchResults?.seller_joined_since)}
+          Joined since {calculateDuration(followedSeller?.seller_joined_since)}
         </Text>
       </View>
-
       <View style={styles.shopfront}>
         <TouchableOpacity
           style={styles.shopfrontButton}
           onPress={handleSellerShopFront}
         >
           <Text style={styles.shopfrontButtonText}>
-            <FontAwesomeIcon icon={faShoppingCart} /> Go to Seller Shopfront
+            <FontAwesomeIcon icon={faShoppingCart} color="#fff" /> Go to Seller Shopfront
           </Text>
         </TouchableOpacity>
       </View>
@@ -170,4 +170,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SellerSearchCard;
+export default SellerCard;

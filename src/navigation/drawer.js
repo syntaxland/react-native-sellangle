@@ -43,6 +43,7 @@ import {
   faSignInAlt,
   faSignOut,
   faCaretDown,
+  faUserCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { logout } from "../redux/actions/userActions";
 import { getUserProfile } from "../redux/actions/userProfileActions";
@@ -288,10 +289,9 @@ export const CustomDrawerContent = (props) => {
             />
             <DrawerItem
               label="Profile"
-              onPress={() => navigation.navigate("UserProfile")}
+              onPress={() => navigation.navigate("Profile")}
               style={styles.drawerItem}
               labelStyle={styles.drawerItemLabel}
-              // labelStyle={getLabelStyle("UserProfile")}
             />
           </View>
 
@@ -501,6 +501,21 @@ export const CustomDrawerContent = (props) => {
           <View style={styles.drawerItemContainer}>
             <FontAwesomeIcon
               color={styles.iconColor}
+              icon={faThumbsUp}
+              size={styles.iconSize}
+              style={styles.icon}
+            />
+            <DrawerItem
+              label="Followed Sellers"
+              onPress={() => navigation.navigate("Followed Sellers")}
+              style={styles.drawerItem}
+              labelStyle={styles.drawerItemLabel}
+            />
+          </View>
+
+          <View style={styles.drawerItemContainer}>
+            <FontAwesomeIcon
+              color={styles.iconColor}
               icon={faComments}
               size={styles.iconSize}
               style={styles.icon}
@@ -545,7 +560,7 @@ export const CustomDrawerContent = (props) => {
             />
             <DrawerItem
               label="Settings"
-              onPress={() => navigation.navigate("Buyer Free Ad Message")}
+              onPress={() => navigation.navigate("Settings")}
               style={styles.drawerItem}
               labelStyle={styles.drawerItemLabel}
             />
@@ -749,6 +764,21 @@ export const CustomDrawerContent = (props) => {
                 <DrawerItem
                   label="Feedbacks"
                   onPress={() => navigation.navigate("Admin Feedback")}
+                  style={styles.drawerItem}
+                  labelStyle={styles.drawerItemLabel}
+                />
+              </View>
+
+              <View style={styles.drawerItemContainer}>
+                <FontAwesomeIcon
+                  color={styles.iconColor}
+                  icon={faUserCheck}
+                  size={styles.iconSize}
+                  style={styles.icon}
+                />
+                <DrawerItem
+                  label="Testing"
+                  onPress={() => navigation.navigate("Testing")}
                   style={styles.drawerItem}
                   labelStyle={styles.drawerItemLabel}
                 />

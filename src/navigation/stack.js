@@ -28,7 +28,7 @@ import BuyerPaidAdMessage from "../components/marketplace/BuyerPaidAdMessage";
 import SellerFreeAdMessage from "../components/marketplace/SellerFreeAdMessage";
 import SellerPaidAdMessage from "../components/marketplace/SellerPaidAdMessage";
 import Billing from "../components/marketplace/Billing";
-// import DashboardSeller from "../components/marketplace/DashboardSeller";
+import SellerProfile from "../components/marketplace/SellerProfile";
 // import Billing from "../components/marketplace/Billing";
 // CreditPoint
 import GetBuyCreditPoint from "../components/CreditPoint/GetBuyCreditPoint";
@@ -49,9 +49,9 @@ import SavedAds from "../components/profiles/SavedAds";
 import RecommendedAds from "../components/recommender/RecommendedAds";
 import Inbox from "../components/profiles/Inbox";
 import Referrals from "../components/profiles/Referrals";
-// import Referrals from "../components/profiles/Referrals";
-// import Referrals from "../components/profiles/Referrals";
-// import Referrals from "../components/profiles/Referrals";
+import FollowedSellers from "../components/profiles/FollowedSellers";
+import Settings from "../components/profiles/Settings";
+import UserProfile from "../components/profiles/UserProfile";
 // support
 import SupportTicket from "../components/support/SupportTicket";
 import CreateSupportTicket from "../components/support/CreateSupportTicket";
@@ -63,7 +63,7 @@ import AdminFeedback from "../components/admin/AdminFeedback";
 import Feedback from "../components/profiles/Feedback";
 
 import AdminSupportTicket from "../components/admin/AdminSupportTicket";
-// import AdminSupportTicket from "../components/admin/AdminSupportTicket";
+import Testing from "../components/admin/Testing";
 // import AdminSupportTicket from "../components/admin/AdminSupportTicket";
 // import AdminSupportTicket from "../components/admin/AdminSupportTicket";
 
@@ -85,7 +85,9 @@ export const HomeStack = () => {
       <Stack.Screen name="Inbox" component={Inbox} />
       <Stack.Screen name="Referrals" component={Referrals} />
       <Stack.Screen name="Dashboard (Seller)" component={DashboardSeller} />
-      {/* <Stack.Screen name="Referrals" component={Referrals} /> */}
+      <Stack.Screen name="Followed Sellers" component={FollowedSellers} />
+      <Stack.Screen name="Settings" component={Settings} />
+      <Stack.Screen name="Profile" component={UserProfile} />
       {/* marketplace */}
       <Stack.Screen name="Bought NGN CPS List" component={GetBuyCreditPoint} />
       <Stack.Screen name="CPS Bonuses" component={GetUserCpsBonuses} />
@@ -132,7 +134,7 @@ export const HomeStack = () => {
         component={SellerPaidAdMessage}
       />
       <Stack.Screen name="Billing" component={Billing} />
-      {/* <Stack.Screen name="Billing" component={Billing} /> */}
+      <Stack.Screen name="Seller Account" component={SellerProfile} />
       {/* <Stack.Screen name="Billing" component={Billing} /> */}
 
       <Stack.Screen name="Support" component={SupportTicket} />
@@ -147,6 +149,8 @@ export const HomeStack = () => {
       <Stack.Screen name="PaysofterButton" component={PaysofterButton} />
       {/* <Stack.Screen name="PaysofterButton" component={PaysofterButton} /> */}
       {/* <Stack.Screen name="PaysofterButton" component={PaysofterButton} /> */}
+
+      <Stack.Screen name="Testing" component={Testing} />
     </Stack.Navigator>
   );
 };

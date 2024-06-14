@@ -1,18 +1,32 @@
 // UserProfile.js
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faExclamationTriangle,
+  faUserCheck,
+  faUser,
+  faCheckCircle,
+  faTimesCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import {
   getUserProfile,
   updateUserProfile,
   updateUserAvatar,
-} from "../../actions/userProfileActions";
-import { sendEmailOtp } from "../../actions/emailOtpActions";
-import { Form, Button, Row, Col, Container, Accordion } from "react-bootstrap"; 
-import Message from "../Message";
-import Loader from "../Loader";
+} from "../../redux/actions/userProfileActions";
+import { sendEmailOtp } from "../../redux/actions/emailOtpActions";
+import { List } from "react-native-paper";
+
+import Message from "../../Message";
+import Loader from "../../Loader";
 
 function UserProfile() {
   const dispatch = useDispatch();
@@ -35,7 +49,6 @@ function UserProfile() {
   }, [userInfo]);
 
   const [successMessage, setSuccessMessage] = useState("");
-  const history = useHistory();
 
   const handleAvatarChange = (e) => {
     const avatar = e.target.files[0];
@@ -50,7 +63,6 @@ function UserProfile() {
     first_name: "",
     last_name: "",
     phone_number: "",
-    // avatar: "",
   });
 
   useEffect(() => {
@@ -90,8 +102,7 @@ function UserProfile() {
     }
   }, [success]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
+  const handleInputChange = (name, value) => {
     setUserData({ ...userData, [name]: value });
   };
 
@@ -111,17 +122,12 @@ function UserProfile() {
   };
 
   return (
-    <Container Fluid>
-      <Row>
-        {userInfo.is_verified ? (
-          <h2 className="text-center">
-            Profile <i className="fas fa-user-check"></i>
-          </h2>
-        ) : (
-          <h2 className="text-center">
-            Profile <i className="fas fa-user"></i>
-          </h2>
-        )}
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.header}>
+          Profile{" "}
+          <FontAwesomeIcon icon={userInfo.is_verified ? faUserCheck : faUser} />
+        </Text>
 
         {loading && <Loader />}
         {profileLoading && <Loader />}
@@ -133,115 +139,113 @@ function UserProfile() {
         {error && <Message variant="danger">{error}</Message>}
         {profileError && <Message variant="danger">{error}</Message>}
 
-        <p>
+        <Text>
           Verified{" "}
-          {userInfo.is_verified ? (
-            <i
-              className="fas fa-check-circle"
-              style={{ fontSize: "18px", color: "white" }}
-            ></i>
-          ) : (
-            <i
-              className="fas fa-times-circle"
-              style={{ fontSize: "18px", color: "red" }}
-            ></i>
-          )}
-        </p>
+          <FontAwesomeIcon
+            icon={userInfo.is_verified ? faCheckCircle : faTimesCircle}
+            style={{ color: userInfo.is_verified ? "white" : "red" }}
+          />
+        </Text>
 
-        <Col>
-          <Accordion defaultActiveKey={["0"]} alwaysOpen>
-            <Accordion.Item eventKey="0">
-              <Accordion.Header>Bio</Accordion.Header>
-              <Accordion.Body>
-                <Form encType="multipart/form-data">
-                  {!userInfo.is_verified && (
-                    <Button variant="primary" onClick={handleVerifyEmail}>
-                      Verify Email
-                    </Button>
-                  )}
+        <View style={styles.item}>
+          <List.Accordion
+            title="Bio"
+            left={(props) => <List.Icon {...props} icon="account" />}
+          >
+            {!userInfo.is_verified && (
+              <Button title="Verify Email" onPress={handleVerifyEmail} />
+            )}
 
-                  <Form.Group>
-                    <Form.Label>Username</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="username"
-                      value={profile.username}
-                      readOnly
-                      onChange={handleInputChange}
-                    />
-                  </Form.Group>
+            <TextInput
+              style={styles.input}
+              placeholder="Username"
+              value={profile.username}
+              editable={false}
+              onChangeText={(value) => handleInputChange("username", value)}
+            />
 
-                  <Form.Group>
-                    <Form.Label>First Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="first_name"
-                      value={userData.first_name}
-                      onChange={handleInputChange}
-                    />
-                  </Form.Group>
+            <TextInput
+              style={styles.input}
+              placeholder="First Name"
+              value={userData.first_name}
+              onChangeText={(value) => handleInputChange("first_name", value)}
+            />
 
-                  <Form.Group>
-                    <Form.Label>Last Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="last_name"
-                      value={userData.last_name}
-                      onChange={handleInputChange}
-                    />
-                  </Form.Group>
-                  <Form.Group>
-                    <Form.Label>Email Adress</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="email"
-                      value={profile.email}
-                      readOnly
-                      onChange={handleInputChange}
-                    />
-                  </Form.Group>
-                  <Form.Group>
-                    <Form.Label>Phone Number</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="phone_number"
-                      value={userData.phone_number}
-                      onChange={handleInputChange}
-                    />
-                  </Form.Group>
+            <TextInput
+              style={styles.input}
+              placeholder="Last Name"
+              value={userData.last_name}
+              onChangeText={(value) => handleInputChange("last_name", value)}
+            />
 
-                  <div className="d-flex justify-content-right pt-3">
-                    <Button
-                      className="rounded"
-                      variant="success"
-                      onClick={handleUpdateProfile}
-                    >
-                      Update Profile
-                    </Button>{" "}
-                  </div>
-                </Form>
-              </Accordion.Body>
-            </Accordion.Item>
+            <TextInput
+              style={styles.input}
+              placeholder="Email Address"
+              value={profile.email}
+              editable={false}
+              onChangeText={(value) => handleInputChange("email", value)}
+            />
 
-            <Accordion.Item eventKey="2">
-              <Accordion.Header>Update Avatar</Accordion.Header>
-              <Accordion.Body>
-                <Form.Group>
-                  <Form.Label>Avatar</Form.Label>
-                  <Form.Control
-                    type="file"
-                    name="avatar"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                  />
-                </Form.Group>
-              </Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
-        </Col>
-      </Row>
-    </Container>
+            <TextInput
+              style={styles.input}
+              placeholder="Phone Number"
+              value={userData.phone_number}
+              onChangeText={(value) => handleInputChange("phone_number", value)}
+            />
+
+            <Button
+              title="Update Profile"
+              onPress={handleUpdateProfile}
+              color="green"
+            />
+          </List.Accordion>
+        </View>
+
+        <View style={styles.item}>
+          <List.Accordion
+            title="Update Avatar"
+            left={(props) => <List.Icon {...props} icon="camera" />}
+          >
+            <TextInput
+              style={styles.input}
+              placeholder="Avatar"
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+            />
+          </List.Accordion>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    paddingBottom: 20,
+  },
+  item: {
+    marginBottom: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  warning: {
+    color: "orange",
+    marginBottom: 10,
+  },
+});
 
 export default UserProfile;

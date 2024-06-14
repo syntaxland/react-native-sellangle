@@ -204,6 +204,9 @@ import {
   TOGGLE_FOLLOW_SELLER_REQUEST,
   TOGGLE_FOLLOW_SELLER_SUCCESS,
   TOGGLE_FOLLOW_SELLER_FAIL,
+  GET_FOLLOWED_SELLER_REQUEST,
+  GET_FOLLOWED_SELLER_SUCCESS,
+  GET_FOLLOWED_SELLER_FAIL,
 } from "../constants/marketplaceSellerConstants";
 
 const initialState = {
@@ -247,6 +250,25 @@ const initialState = {
   totalSellerAdsViews: [],
   totalSellerAdSaved: [],
   totalFollwersCount: [],
+
+  followedSellers: [],
+};
+
+export const getFollowedSellersReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case GET_FOLLOWED_SELLER_REQUEST:
+      return { loading: true };
+    case GET_FOLLOWED_SELLER_SUCCESS:
+      return {
+        loading: false,
+        success: true,
+        followedSellers: action.payload.data,
+      };
+    case GET_FOLLOWED_SELLER_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
 };
 
 export const toggleFollowSellerReducer = (state = initialState, action) => {
