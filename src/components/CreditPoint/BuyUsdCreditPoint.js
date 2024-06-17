@@ -1,11 +1,19 @@
 // BuyUsdCreditPoint.js
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { View, Text, Button, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import RNPickerSelect from "react-native-picker-select";
 import { getPaymentApiKeys } from "../../redux/actions/paymentActions";
 import PaymentScreen from "./payment/PaymentScreen";
-import { useNavigation } from "@react-navigation/native";
+import Loader from "../../Loader";
+import Message from "../../Message";
 
 const BuyUsdCreditPoint = ({ currency }) => {
   const dispatch = useDispatch();
@@ -14,7 +22,10 @@ const BuyUsdCreditPoint = ({ currency }) => {
   const getPaymentApiKeysState = useSelector(
     (state) => state.getPaymentApiKeysState
   );
-  const { paystackPublicKey, paysofterPublicKey } = getPaymentApiKeysState;
+  const { loading, error, paystackPublicKey, paysofterPublicKey } =
+    getPaymentApiKeysState;
+
+  console.log("apiKeys:", paystackPublicKey, paysofterPublicKey);
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -63,19 +74,30 @@ const BuyUsdCreditPoint = ({ currency }) => {
       ) : (
         <View style={styles.formContainer}>
           <Text style={styles.label}>Select CPS Amount</Text>
-          <RNPickerSelect
-            onValueChange={(value) => setAmount(value)}
-            items={USD_CPS_CHOICES}
-            placeholder={{ label: "Select CPS Amount", value: null }}
-            style={pickerSelectStyles}
-            value={amount}
-          />
-          <Button
-            title="Buy Credit Point (USD)"
+
+          <View style={styles.selectBorder}>
+            <RNPickerSelect
+              onValueChange={(value) => setAmount(value)}
+              items={USD_CPS_CHOICES}
+              placeholder={{ label: "Select CPS Amount", value: null }}
+              // style={pickerSelectStyles}
+              value={amount}
+            />
+          </View>
+
+          {loading && <Loader />}
+          {error && <Message variant="danger">{error}</Message>}
+
+          <TouchableOpacity
+            // style={[
+            //   styles.button,
+            //   { backgroundColor: amount ? "#007bff" : "#cccccc" },
+            // ]}
             onPress={handleShowPaymentScreen}
             disabled={amount === ""}
-            color="#007bff"
-          />
+          >
+            <Text style={styles.roundedPrimaryBtn}>Buy Credit Point (USD)</Text>
+          </TouchableOpacity>
         </View>
       )}
     </ScrollView>
@@ -84,7 +106,7 @@ const BuyUsdCreditPoint = ({ currency }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    // flexGrow: 1,
     padding: 2,
     justifyContent: "center",
   },
@@ -101,10 +123,30 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
+  selectBorder: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    marginBottom: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
   label: {
     marginBottom: 10,
     fontSize: 16,
     fontWeight: "bold",
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
   },
 });
 

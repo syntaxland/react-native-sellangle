@@ -23,7 +23,7 @@ const SellerActiveFreeAdScreen = ({ seller_username }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfLastItem = currentPage * itemsPerPage; 
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = ads?.slice(indexOfFirstItem, indexOfLastItem);
 

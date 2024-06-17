@@ -22,7 +22,6 @@ import Message from "../../../Message";
 
 const VerifyUsdAccountFundOtp = ({
   amount,
-  paymentData,
   reference,
   userEmail,
   currency,
@@ -70,6 +69,7 @@ const VerifyUsdAccountFundOtp = ({
     payment_id: reference,
     email: userEmail,
     amount: amount,
+    currency: currency,
     public_api_key: paysofterPublicKey,
     created_at: createdAt,
   };
@@ -85,6 +85,7 @@ const VerifyUsdAccountFundOtp = ({
     account_id: sendOtpData?.account_id,
     security_code: sendOtpData?.security_code,
     amount: amount,
+    currency: currency,
   };
 
   const handleVerifyEmailOtp = () => {
@@ -130,13 +131,22 @@ const VerifyUsdAccountFundOtp = ({
       dispatch(buyCreditPoint(creditPointData));
       AsyncStorage.removeItem("debitUsdAccountData");
       setShowSuccessMessage(true);
-      setTimeout(() => {
-        navigation.navigate("Dashboard");
-      }, 5000);
+      // setTimeout(() => {
+      //   navigation.navigate("Home");
+      // }, 5000);
     }
   }, [success, dispatch, navigation, paysofterPaymentData, creditPointData]);
 
-  console.log("VerifyUsdAccountFundOtp")
+  useEffect(() => {
+    if (buyCreditPointSuccess) {
+      const timer = setTimeout(() => {
+        navigation.navigate("Home");
+      }, 5000); 
+      return () => clearTimeout(timer);
+    }
+  }, [buyCreditPointSuccess, navigation]);
+
+  console.log("VerifyUsdAccountFundOtp paysofterPaymentData", paysofterPaymentData);
 
   return (
     <View style={styles.container}>

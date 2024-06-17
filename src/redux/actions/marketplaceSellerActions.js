@@ -1555,15 +1555,15 @@ export const getSellerDetail =
     try {
       dispatch({ type: GET_SELLER_DETAIL_REQUEST });
 
-      const {
-        userLogin: { userInfo },
-      } = getState();
+      // const {
+      //   userLogin: { userInfo },
+      // } = getState();
 
       const config = {
         headers: {
           // "Content-Type": "multipart/form-data",
           "Content-Type": "application/json",
-          Authorization: `Bearer ${userInfo.access}`,
+          // Authorization: `Bearer ${userInfo.access}`,
         },
       };
 
@@ -1592,15 +1592,15 @@ export const getSellerActivePaidAds =
     try {
       dispatch({ type: GET_SELLER_ACTIVE_PAID_ADS_REQUEST });
 
-      const {
-        userLogin: { userInfo },
-      } = getState();
+      // const {
+      //   userLogin: { userInfo },
+      // } = getState();
 
       const config = {
         headers: {
           // "Content-Type": "multipart/form-data",
           "Content-Type": "application/json",
-          Authorization: `Bearer ${userInfo.access}`,
+          // Authorization: `Bearer ${userInfo.access}`,
         },
       };
 
@@ -1629,15 +1629,15 @@ export const getSellerActiveFreeAds =
     try {
       dispatch({ type: GET_SELLER_ACTIVE_FREE_ADS_REQUEST });
 
-      const {
-        userLogin: { userInfo },
-      } = getState();
+      // const {
+      //   userLogin: { userInfo },
+      // } = getState();
 
       const config = {
         headers: {
           // "Content-Type": "multipart/form-data",
           "Content-Type": "application/json",
-          Authorization: `Bearer ${userInfo.access}`,
+          // Authorization: `Bearer ${userInfo.access}`,
         },
       };
 

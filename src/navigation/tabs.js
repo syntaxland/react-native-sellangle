@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { TouchableOpacity, Text, View, StyleSheet } from "react-native";
+// taps.js
+import React, { useEffect } from "react";
+import { Text, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useSelector, useDispatch } from "react-redux";
 import { getUserProfile } from "../redux/actions/userProfileActions";
-// import HomeScreen from "../components/screens/HomeScreen";
 import Marketplace from "../components/marketplace/Marketplace";
 import PostFreeAd from "../components/marketplace/PostFreeAd";
 import CurrentAds from "../components/marketplace/CurrentAds";
@@ -37,7 +37,6 @@ export const HomeTabs = () => {
       dispatch(GetActiveBuyerPaidAdMessages());
       dispatch(listBuyerFreeAdMessages());
       dispatch(listBuyerPaidAdMessages());
-      dispatch(listSupportTicket());
     }
   }, [dispatch, userInfo]);
 
@@ -108,7 +107,7 @@ export const HomeTabs = () => {
         tabBarInactiveTintColor: "#6c757d",
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
-          if (route.name === "HomeTabs") {
+          if (route.name === "Home") {
             iconName = focused ? "home" : "home-outline";
           } else if (route.name === "Dashboard") {
             iconName = focused ? "speedometer" : "speedometer-outline";
@@ -117,7 +116,7 @@ export const HomeTabs = () => {
           } else if (route.name === "Post Free Ad") {
             iconName = focused ? "add" : "add-outline";
           } else if (route.name === "Current Ads") {
-            iconName = focused ? "megaphone " : "megaphone -outline";
+            iconName = focused ? "megaphone" : "megaphone-outline";
           }
 
           return (
@@ -127,8 +126,7 @@ export const HomeTabs = () => {
       })}
     >
       <Tab.Screen
-        name="HomeTaps"
-        // name="Home"
+        name="Home"
         options={{
           title: "Home",
         }}

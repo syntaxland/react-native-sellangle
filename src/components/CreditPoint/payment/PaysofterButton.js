@@ -22,8 +22,6 @@ import QrPayment from "./QrPayment";
 import { formatAmount } from "../../../FormatAmount";
 
 const PaysofterButton = ({
-  showPaymentModal,
-  setShowPaymentModal,
   reference,
   userEmail,
   amount,
@@ -39,6 +37,7 @@ const PaysofterButton = ({
     }
   }, [userInfo]);
 
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPaymentOption, setSelectedPaymentOption] = useState("card");
   const [showMoreOptions, setShowMoreOptions] = useState(false);
 
@@ -50,13 +49,17 @@ const PaysofterButton = ({
     setShowMoreOptions(!showMoreOptions);
   };
 
-  console.log("PaysofterButton")
+  console.log("PaysofterButton", amount, "apiKeys:", paysofterPublicKey);
 
   return (
     <ScrollView>
       <View style={styles.container}>
         <View style={styles.center}>
-          <Button title="Pay Now" onPress={() => setShowPaymentModal(true)} />
+          <Button
+            title="Pay Now"
+            onPress={() => setShowPaymentModal(true)}
+            color="#007bff"
+          />
         </View>
 
         <Modal
@@ -64,13 +67,12 @@ const PaysofterButton = ({
           onRequestClose={() => setShowPaymentModal(false)}
         >
           <View style={styles.modalHeader}>
-            {/* <Button onPress={() => setShowPaymentModal(false)} title="Close" /> */}
-            {/* <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
-            <Text style={styles.closeButton}>
-              <FontAwesomeIcon icon={faTimes} size={16} style={styles.icon} />{" "}
-              Close
-            </Text>
-          </TouchableOpacity> */}
+            <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
+              <Text style={styles.closeButton}>
+                <FontAwesomeIcon icon={faTimes} size={16} style={styles.icon} />{" "}
+                Close
+              </Text>
+            </TouchableOpacity>
 
             <Text style={styles.modalTitle}>Mock Payment (Test)</Text>
             <Text>{userEmail}</Text>
@@ -79,31 +81,78 @@ const PaysofterButton = ({
 
           <ScrollView>
             <View style={styles.options}>
-              <Text>Options</Text>
-              <Button
-                title="Debit Card"
-                onPress={() => handlePaymentOptionChange("card")}
-                color={selectedPaymentOption === "card" ? "#007bff" : "gray"}
-              />
-              <Button
-                title="Paysofter Account Fund"
-                onPress={() => handlePaymentOptionChange("account-fund")}
-                // disabled
-                color={
-                  selectedPaymentOption === "account-fund" ? "#007bff" : "gray"
-                }
-              />
-              <Button
-                title="Paysofter Promise"
-                onPress={() => handlePaymentOptionChange("promise")}
-                color={selectedPaymentOption === "promise" ? "#007bff" : "gray"}
-                disabled
-              />
-              <Button
-                title="More Options"
-                onPress={handleMoreOptions}
-                disabled
-              />
+              <Text style={styles.title}>Options</Text>
+              <View style={styles.payOptionBtn}>
+                <Button
+                  title="Debit Card"
+                  onPress={() => handlePaymentOptionChange("card")}
+                  color={
+                    selectedPaymentOption === "card" ? "#007bff" : "#6c757d"
+                  }
+                />
+              </View>
+
+              {/* <View style={styles.payOptionBtn}>
+                  <Button
+                    title="Paysofter Account Fund"
+                    onPress={() => handlePaymentOptionChange("account-fund")}
+                    // disabled
+                    color={
+                      selectedPaymentOption === "account-fund"
+                        ? "#007bff"
+                        : "#6c757d"
+                    }
+                  />
+                </View> */}
+
+              {currency === "NGN" && (
+                <View style={styles.payOptionBtn}>
+                  <Button
+                    title="Paysofter Account Fund"
+                    onPress={() => handlePaymentOptionChange("account-fund")}
+                    // disabled
+                    color={
+                      selectedPaymentOption === "account-fund"
+                        ? "#007bff"
+                        : "#6c757d"
+                    }
+                  />
+                </View>
+              )}
+
+              {currency === "USD" && (
+                <View style={styles.payOptionBtn}>
+                  <Button
+                    title="Paysofter Account Fund (USD)"
+                    onPress={() => handlePaymentOptionChange("usd-account-fund")}
+                    // disabled
+                    color={
+                      selectedPaymentOption === "usd-account-fund"
+                        ? "#007bff"
+                        : "#6c757d"
+                    }
+                  />
+                </View>
+              )}
+
+              <View style={styles.payOptionBtn}>
+                <Button
+                  title="Paysofter Promise"
+                  onPress={() => handlePaymentOptionChange("promise")}
+                  color={
+                    selectedPaymentOption === "promise" ? "#007bff" : "#6c757d"
+                  }
+                  disabled
+                />
+              </View>
+
+              <View style={styles.payOptionBtn}>
+                <Button
+                  title="More Options"
+                  onPress={handleMoreOptions}
+                  disabled
+                />
+              </View>
 
               {showMoreOptions && (
                 <>
@@ -111,27 +160,31 @@ const PaysofterButton = ({
                     title="Transfer"
                     onPress={() => handlePaymentOptionChange("transfer")}
                     color={
-                      selectedPaymentOption === "transfer" ? "#007bff" : "gray"
+                      selectedPaymentOption === "transfer"
+                        ? "#007bff"
+                        : "#6c757d"
                     }
                   />
                   <Button
                     title="Bank"
                     onPress={() => handlePaymentOptionChange("bank")}
                     color={
-                      selectedPaymentOption === "bank" ? "#007bff" : "gray"
+                      selectedPaymentOption === "bank" ? "#007bff" : "#6c757d"
                     }
                   />
                   <Button
                     title="USSD"
                     onPress={() => handlePaymentOptionChange("ussd")}
                     color={
-                      selectedPaymentOption === "ussd" ? "#007bff" : "gray"
+                      selectedPaymentOption === "ussd" ? "#007bff" : "#6c757d"
                     }
                   />
                   <Button
                     title="Visa QR"
                     onPress={() => handlePaymentOptionChange("qr")}
-                    color={selectedPaymentOption === "qr" ? "#007bff" : "gray"}
+                    color={
+                      selectedPaymentOption === "qr" ? "#007bff" : "#6c757d"
+                    }
                   />
                 </>
               )}
@@ -148,29 +201,37 @@ const PaysofterButton = ({
                 />
               )}
 
-              {selectedPaymentOption === "account-fund" && (
-                <PaysofterAccountFund
-                  currency={currency}
-                  amount={amount}
-                  reference={reference}
-                  userEmail={userEmail}
-                  paysofterPublicKey={paysofterPublicKey}
-                />
+              {currency === "NGN" && (
+                <View style={styles.paymentDetails}>
+                  {selectedPaymentOption === "account-fund" && (
+                    <PaysofterAccountFund
+                      currency={currency}
+                      amount={amount}
+                      reference={reference}
+                      userEmail={userEmail}
+                      paysofterPublicKey={paysofterPublicKey}
+                    />
+                  )}
+                </View>
               )}
 
-              {selectedPaymentOption === "usd-account-fund" && (
-                <PaysofterUsdAccountFund
-                  currency={currency}
-                  amount={amount}
-                  reference={reference}
-                  userEmail={userEmail}
-                  paysofterPublicKey={paysofterPublicKey}
-                />
+              {currency === "USD" && (
+                <View style={styles.paymentDetails}>
+                  {selectedPaymentOption === "usd-account-fund" && (
+                    <PaysofterUsdAccountFund
+                      currency={currency}
+                      amount={amount}
+                      reference={reference}
+                      userEmail={userEmail}
+                      paysofterPublicKey={paysofterPublicKey}
+                    />
+                  )}
+                </View>
               )}
 
               {selectedPaymentOption === "promise" && (
                 <PaysofterPromise
-                  buyerEmail={buyerEmail}
+                  // buyerEmail={buyerEmail}
                   amount={amount}
                   sellerApiKey={sellerApiKey}
                   currency={currency}
@@ -208,6 +269,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "blue",
   },
+  payOptionBtn: {
+    padding: 3,
+  },
   modalTitle: {
     fontSize: 24,
     fontWeight: "bold",
@@ -215,6 +279,11 @@ const styles = StyleSheet.create({
   options: {
     padding: 20,
     alignItems: "center",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    padding: 10,
   },
   paymentDetails: {
     padding: 20,

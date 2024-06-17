@@ -64,7 +64,8 @@ const PaystackPayment = ({
     setPaymentInitiated(true);
   };
 
-  console.log("PaystackPayment")
+  console.log("PaystackPayment");
+  console.log("apiKeys:", paystackPublicKey);
 
   return (
     <ScrollView>
@@ -87,16 +88,23 @@ const PaystackPayment = ({
         </View>
 
         <View style={styles.buttonContainer}>
-          {!paymentInitiated && (
-            <Button title="Pay Now" onPress={initiatePayment} color="#000" />
-          )}
+          <View style={styles.center}>
+            {!paymentInitiated && (
+              <Button
+                title="Pay Now"
+                onPress={initiatePayment}
+                color="#343a40"
+              />
+            )}
+          </View>
 
           {paymentInitiated && (
             <Paystack
               paystackKey={paystackPublicKey}
-              amount={amount * 100}
+              amount={amount}
+              // amount={amount * 100}
               billingEmail={userEmail}
-              billingMobile="1234567890" // replace with actual mobile number
+              // billingMobile="1234567890"
               reference={`ref_${Math.floor(Math.random() * 1000000000)}`}
               activityIndicatorColor="green"
               onCancel={() => setPaymentInitiated(false)}
@@ -113,10 +121,9 @@ const PaystackPayment = ({
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    padding: 2,
     flex: 1,
     justifyContent: "center",
-    // alignItems: "center",
   },
   header: {
     fontSize: 24,
@@ -131,6 +138,9 @@ const styles = StyleSheet.create({
   buttonContainer: {
     marginTop: 20,
     width: "100%",
+  },
+  center: {
+    alignItems: "center",
   },
 });
 

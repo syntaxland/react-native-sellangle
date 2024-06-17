@@ -10,7 +10,6 @@ import {
   Button,
   TextInput,
   TouchableOpacity,
-  Modal,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";

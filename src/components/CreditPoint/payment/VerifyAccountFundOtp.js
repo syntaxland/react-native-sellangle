@@ -21,12 +21,12 @@ import Loader from "../../../Loader";
 import Message from "../../../Message";
 
 const VerifyAccountFundOtp = ({
-  promoTotalPrice,
   paymentData,
   reference,
   userEmail,
+  amount,
   currency,
-  publicApiKey,
+  paysofterPublicKey,
   formattedPayerEmail,
 }) => {
   const [otp, setOtp] = useState("");
@@ -65,22 +65,24 @@ const VerifyAccountFundOtp = ({
   const paysofterPaymentData = {
     payment_id: reference,
     email: userEmail,
-    amount: promoTotalPrice,
-    public_api_key: publicApiKey,
+    amount: amount,
+    currency: currency,
+    public_api_key: paysofterPublicKey,
     created_at: createdAt,
   };
 
   const otpData = {
     otp: otp,
     account_id: sendOtpData?.account_id,
-    amount: promoTotalPrice,
+    amount: amount,
     currency: currency,
   };
 
   const debitAccountData = {
     account_id: sendOtpData?.account_id,
     security_code: sendOtpData?.security_code,
-    amount: promoTotalPrice,
+    amount: amount,
+    currency: currency,
   };
 
   const handleVerifyEmailOtp = () => {
@@ -121,12 +123,12 @@ const VerifyAccountFundOtp = ({
       dispatch(createPayment(paymentData));
       setShowSuccessMessage(true);
       setTimeout(() => {
-        navigation.navigate("Dashboard");
+        navigation.navigate("Home");
       }, 5000);
     }
   }, [dispatch, success, navigation]);
 
-  console.log("VerifyAccountFundOtp")
+  console.log("VerifyAccountFundOtp paysofterPaymentData", paysofterPaymentData);
 
   return (
     <View style={styles.container}>

@@ -90,7 +90,7 @@ function SellerSearchCard({ searchResults, sellerAvatarUrl }) {
           onPress={handleSellerShopFront}
         >
           <Text style={styles.shopfrontButtonText}>
-            <FontAwesomeIcon icon={faShoppingCart} /> Go to Seller Shopfront
+            <FontAwesomeIcon icon={faShoppingCart} color="#fff" /> Go to Seller Shopfront
           </Text>
         </TouchableOpacity>
       </View>

@@ -134,7 +134,7 @@ export const getPaymentApiKeys = () => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.get(
+    const { data } = await axios.get( 
       `${API_URL}/api/get-payment-details/`,
       config
     );

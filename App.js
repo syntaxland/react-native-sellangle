@@ -3,10 +3,12 @@ import React, { useState, useEffect } from "react";
 import { Provider } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
 import { MyDrawer } from "./src/navigation/drawer";
+// import { HomeTabs } from "./src/navigation/tabs";
 import { initializeStore } from "./src/redux/store";
-// import Footer from "./src/Footer"; 
+// import Footer from "./src/Footer";
 import { StatusBar } from "expo-status-bar";
-import * as SplashScreen from 'expo-splash-screen';
+import * as SplashScreen from "expo-splash-screen";
+// import { HomeTabs } from "./src/navigation/tabs";
 
 export default function App() {
   const [store, setStore] = useState(null);
@@ -30,13 +32,15 @@ export default function App() {
   }, []);
 
   if (!store || !isAppReady) {
-    return null; 
+    return null;
   }
 
   return (
     <Provider store={store}>
       <NavigationContainer>
         <MyDrawer />
+        {/* <HomeTabs /> */}
+     
         {/* <Footer /> */}
         <StatusBar style="light" translucent={true} hidden={false} />
       </NavigationContainer>

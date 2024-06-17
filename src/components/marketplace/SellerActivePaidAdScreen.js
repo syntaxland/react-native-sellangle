@@ -6,7 +6,7 @@ import { getSellerActivePaidAds } from "../../redux/actions/marketplaceSellerAct
 import AllPaidAdCard from "./AllPaidAdCard";
 import Loader from "../../Loader";
 import Message from "../../Message";
-import { Pagination } from "../../Pagination";
+import { Pagination } from "../../Pagination"; 
 
 const SellerActivePaidAdScreen = ({ seller_username }) => {
   const dispatch = useDispatch();

@@ -24,6 +24,7 @@ const BuyCreditPoint = ({ currency }) => {
   );
   const { loading, error, paystackPublicKey, paysofterPublicKey } =
     getPaymentApiKeysState;
+  console.log("apiKeys:", paystackPublicKey, paysofterPublicKey);
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -75,28 +76,28 @@ const BuyCreditPoint = ({ currency }) => {
           <>
             <View style={styles.formContainer}>
               <Text style={styles.label}>Select CPS Amount</Text>
-              <RNPickerSelect
-                onValueChange={(value) => setAmount(value)}
-                items={BUY_CPS_CHOICES}
-                placeholder={{ label: "Select CPS Amount", value: null }}
-                style={pickerSelectStyles}
-                value={amount}
-              />
+              <View style={styles.selectBorder}>
+                <RNPickerSelect
+                  onValueChange={(value) => setAmount(value)}
+                  items={BUY_CPS_CHOICES}
+                  placeholder={{ label: "Select CPS Amount", value: null }}
+                  style={pickerSelectStyles}
+                  value={amount}
+                />
+              </View>
+
+              {loading && <Loader />}
+              {error && <Message variant="danger">{error}</Message>}
+
+              <TouchableOpacity
+                onPress={handleShowPaymentScreen}
+                disabled={amount === ""}
+              >
+                <Text style={styles.roundedPrimaryBtn}>
+                  Buy Credit Point (NGN)
+                </Text>
+              </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-              style={[
-                styles.button,
-                { backgroundColor: amount ? "#007bff" : "#cccccc" },
-              ]}
-              onPress={handleShowPaymentScreen}
-              disabled={!amount}
-            >
-              <Text style={styles.buttonText}>Buy Credit Point (NGN)</Text>
-            </TouchableOpacity>
-
-            {loading && <Loader />}
-            {error && <Message variant="danger">{error}</Message>}
           </>
         )}
       </View>
@@ -106,7 +107,7 @@ const BuyCreditPoint = ({ currency }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    // flexGrow: 1,
     padding: 2,
     justifyContent: "center",
   },
@@ -137,10 +138,25 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
   },
-  buttonText: {
+  selectBorder: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    marginBottom: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
   },
 });
 

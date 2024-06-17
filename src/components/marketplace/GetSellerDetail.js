@@ -37,14 +37,14 @@ function GetSellerDetail() {
   const { seller_username } = route.params;
   console.log("GetSellerDetail seller_username:", seller_username);
 
-  const userLogin = useSelector((state) => state.userLogin);
-  const { userInfo } = userLogin;
+  // const userLogin = useSelector((state) => state.userLogin);
+  // const { userInfo } = userLogin;
 
-  useEffect(() => {
-    if (!userInfo) {
-      navigation.navigate("Login");
-    }
-  }, [userInfo]);
+  // useEffect(() => {
+  //   if (!userInfo) {
+  //     navigation.navigate("Login");
+  //   }
+  // }, [userInfo]);
 
   const getSellerDetailState = useSelector(
     (state) => state.getSellerDetailState

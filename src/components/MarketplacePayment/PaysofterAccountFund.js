@@ -307,7 +307,6 @@ const PaysofterAccountFund = ({
               )} ${currency})`}</Text>
             </TouchableOpacity>
           </View>
-
         </>
       )}
     </ScrollView>

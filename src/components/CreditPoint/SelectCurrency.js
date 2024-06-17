@@ -31,14 +31,14 @@ const SelectCurrency = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.pickerContainer}>
-        <Text style={styles.label}>Select Currency</Text>
+      <Text style={styles.label}>Select Currency</Text>
+      <View style={styles.selectInput}>
         <RNPickerSelect
           onValueChange={handleCurrencyChange}
           items={CURRENCY_CHOICES}
           placeholder={{ label: "Select Currency", value: null }}
           value={selectedCurrency}
-          style={pickerSelectStyles}
+          // style={pickerSelectStyles}
         />
       </View>
 
@@ -56,23 +56,27 @@ const SelectCurrency = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    // justifyContent: "center",
-    // alignItems: "center",
     padding: 2,
   },
-  pickerContainer: {
-    width: "100%",
-    marginBottom: 20,
-  },
+  // pickerContainer: {},
   content: {
     width: "100%",
-    alignItems: "center",
   },
   label: {
     padding: 10,
     fontSize: 16,
     fontWeight: "bold",
+  },
+  selectInput: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    marginBottom: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
   },
 });
 

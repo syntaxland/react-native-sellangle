@@ -86,9 +86,10 @@ const PaysofterUsdAccountFund = ({
         setShowVerifyUsdAccountFundOtp(true);
       }, 1000);
       return () => clearTimeout(timer);
-    } else {
-      console.error("Error verifying account");
-    }
+    } 
+    // else {
+    //   console.error("Error verifying account");
+    // }
   }, [success]);
 
   console.log("PaysofterUsdAccountFund")

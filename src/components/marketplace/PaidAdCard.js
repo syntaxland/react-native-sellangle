@@ -135,15 +135,16 @@ function PaidAdCard({ product }) {
           </View>
         )}
 
-        <View style={styles.promoContainer}>
-          <Text style={styles.expiration}>
-            <FontAwesomeIcon icon={faClock} size={16} /> Expires in:{" "}
-            <PromoTimer expirationDate={product?.expiration_date} />
-          </Text>
+        <View style={styles.spaceBtw}>
+          <View style={styles.promoContainer}>
+            <Text style={styles.expiration}>
+              <FontAwesomeIcon icon={faClock} size={16} /> Expires in:{" "}
+              <PromoTimer expirationDate={product?.expiration_date} />
+            </Text>
+          </View>
+
+          <TogglePaidAdSave ad={product} />
         </View>
-
-        <TogglePaidAdSave ad={product} />
-
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={handleEditAd}>
             <Text style={styles.buttonText}>Edit</Text>
@@ -280,6 +281,12 @@ const styles = StyleSheet.create({
   },
   promoContainer: {
     marginVertical: 5,
+  },
+  spaceBtw: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
   },
   promoText: {
     color: "blue",

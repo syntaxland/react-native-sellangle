@@ -11,9 +11,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import {
   HomeStack,
   // UserDashboardStack,
-  HomeTabsStack,
+  // HomeTabsStack,
 } from "./stack";
-
+import { HomeTabs } from "./tabs";
 import { useSelector, useDispatch } from "react-redux";
 import {
   useNavigation,
@@ -44,6 +44,8 @@ import {
   faSignOut,
   faCaretDown,
   faUserCheck,
+  faCodeCompare,
+  faBullhorn
 } from "@fortawesome/free-solid-svg-icons";
 import { logout } from "../redux/actions/userActions";
 import { getUserProfile } from "../redux/actions/userProfileActions";
@@ -91,17 +93,17 @@ export const MyDrawer = (props) => {
             }}
           />
 
-          <Drawer.Screen
+          {/* <Drawer.Screen
             name="HomeTabs"
             component={HomeTabsStack}
             options={{ drawerLabel: "" }}
-          />
-
-          {/* <Drawer.Screen
-            name="Dashboard"
-            component={UserDashboardStack}
-            options={{ drawerLabel: "" }}
           /> */}
+
+          <Drawer.Screen
+            name="HomeTabs"
+            component={HomeTabs}
+            options={{ drawerLabel: "Home" }}
+          />
         </Drawer.Navigator>
       </SafeAreaProvider>
     </>
@@ -501,7 +503,7 @@ export const CustomDrawerContent = (props) => {
           <View style={styles.drawerItemContainer}>
             <FontAwesomeIcon
               color={styles.iconColor}
-              icon={faThumbsUp}
+              icon={faUserCheck}
               size={styles.iconSize}
               style={styles.icon}
             />
@@ -621,7 +623,7 @@ export const CustomDrawerContent = (props) => {
               <View style={styles.drawerItemContainer}>
                 <FontAwesomeIcon
                   color={styles.iconColor}
-                  icon={faAd}
+                  icon={faBullhorn}
                   size={styles.iconSize}
                   style={styles.icon}
                 />
@@ -772,7 +774,7 @@ export const CustomDrawerContent = (props) => {
               <View style={styles.drawerItemContainer}>
                 <FontAwesomeIcon
                   color={styles.iconColor}
-                  icon={faUserCheck}
+                  icon={faCodeCompare}
                   size={styles.iconSize}
                   style={styles.icon}
                 />

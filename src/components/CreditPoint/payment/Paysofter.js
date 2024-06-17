@@ -1,13 +1,6 @@
 // Paysofter.js
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Button,
-  Modal,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import PaysofterButton from "./PaysofterButton";
@@ -25,16 +18,14 @@ const Paysofter = ({ currency, amount, paysofterPublicKey, userEmail }) => {
     }
   }, [userInfo]);
 
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-
-  console.log("Paysofter", amount)
+  console.log("Paysofter", amount, "apiKeys:", paysofterPublicKey);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Paysofter Payment Option</Text>
       </View>
-      
+
       <View style={styles.details}>
         <Text style={styles.amount}>
           Amount: {formatAmount(amount)} {currency}
@@ -43,32 +34,21 @@ const Paysofter = ({ currency, amount, paysofterPublicKey, userEmail }) => {
 
       <View style={styles.buttonContainer}>
         <PaysofterButton
-          showPaymentModal={showPaymentModal}
-          setShowPaymentModal={setShowPaymentModal}
           userEmail={userEmail}
           currency={currency}
           amount={amount}
           paysofterPublicKey={paysofterPublicKey}
         />
       </View>
-
-      <Modal
-        visible={showPaymentModal}
-        onRequestClose={() => setShowPaymentModal(false)}
-      >
-
-
-        <Button title="Close" onPress={() => setShowPaymentModal(false)} />
-      </Modal>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    justifyContent: "center",
-    alignItems: "center",
+    padding: 2,
+    // justifyContent: "center",
+    // alignItems: "center",
   },
   header: {
     marginBottom: 20,

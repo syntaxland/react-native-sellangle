@@ -112,7 +112,8 @@ const CardPayment = ({
   useEffect(() => {
     if (buyCreditPointSuccess) {
       const timer = setTimeout(() => {
-        navigation.goBack();
+      navigation.navigate("Home");
+
       }, 5000);
       return () => clearTimeout(timer);
     }

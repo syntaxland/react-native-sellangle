@@ -117,16 +117,18 @@ function FreeAdCard({ product }) {
             {formatNumber(product?.price)} {product?.currency}{" "}
             {product?.is_price_negotiable ? <Text>(Negotiable)</Text> : null}
           </Text>
+          
+          <View style={styles.spaceBtw}>
+            <View style={styles.promoContainer}>
+              <Text style={styles.promoText}>
+                <FontAwesomeIcon icon={faClock} size={16} /> Expires in:{" "}
+                <PromoTimer expirationDate={product?.expiration_date} />
+              </Text>
+            </View>
 
-          <View style={styles.promoContainer}>
-            <Text style={styles.promoText}>
-              <FontAwesomeIcon icon={faClock} size={16} /> Expires in:{" "}
-              <PromoTimer expirationDate={product?.expiration_date} />
-            </Text>
-          </View>
-
-          <View style={styles.buttonsContainer}>
-            <ToggleFreeAdSave ad={product} />
+            <View style={styles.buttonsContainer}>
+              <ToggleFreeAdSave ad={product} />
+            </View>
           </View>
 
           <View style={styles.locationContainer}>
@@ -255,6 +257,12 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   promoContainer: {
+    marginBottom: 5,
+  },
+  spaceBtw: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 5,
   },
   promoText: {

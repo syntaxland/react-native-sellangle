@@ -1,5 +1,5 @@
 // Dashboard.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   View,
@@ -9,8 +9,8 @@ import {
   Button,
   Modal,
   TouchableOpacity,
+  RefreshControl,
 } from "react-native";
-
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faWallet, faDashboard } from "@fortawesome/free-solid-svg-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -57,102 +57,118 @@ const Dashboard = () => {
 
   const creditPoints = creditPointBalance?.balance || 0;
 
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    dispatch(getCreditPointBalance());
+    setTimeout(() => setRefreshing(false), 2000);
+  }, [dispatch]);
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {loading ? (
-        <Loader />
-      ) : error ? (
-        <Message variant="danger">{error}</Message>
-      ) : (
-        <View style={styles.dashboard}>
-          <Text style={styles.title}>
-            <Text style={styles.icon}>
-              <FontAwesomeIcon
-                icon={faDashboard}
-                style={styles.icon}
-                // color="#fff"
-              />{" "}
-              Dashboard (User)
-            </Text>
+    <ScrollView
+      // contentContainerStyle={styles.scrollContainer}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>
+          <Text style={styles.icon}>
+            <FontAwesomeIcon icon={faDashboard} style={styles.icon} /> Dashboard
+            (User)
           </Text>
-          <View style={styles.walletSection}>
-            <Text style={styles.subtitle}>
-              Credit Point Wallet{" "}
-              <Text style={styles.icon}>
-                <FontAwesomeIcon
-                  icon={faWallet}
-                  style={styles.icon}
-                  // color="#fff"
-                />{" "}
-              </Text>
-            </Text>
-            <Text style={styles.balance}>
-              Balance: {formatNumber(creditPoints)} CPS
-            </Text>
-            <View style={styles.buttonGroup}>
-              {/* <Button title="Buy CPS" onPress={handleBuyCreditPointOpen} />
-              <Button
-                title="Sell/Share CPS"
-                onPress={handleSellCreditPointOpen}
-              /> */}
+        </Text>
+        {loading ? (
+          <Loader />
+        ) : error ? (
+          <Message variant="danger">{error}</Message>
+        ) : (
+          <View style={styles.dashboard}>
+            <View style={styles.formContainer}>
+              <View style={styles.walletSection}>
+                <Text style={styles.subtitle}>
+                  Credit Point Wallet{" "}
+                  <Text style={styles.icon}>
+                    <FontAwesomeIcon icon={faWallet} style={styles.icon} />{" "}
+                  </Text>
+                </Text>
+                <Text style={styles.balance}>
+                  Balance: {formatNumber(creditPoints)} CPS
+                </Text>
+                <View style={styles.buttonGroup}>
+                  <TouchableOpacity
+                    onPress={handleBuyCreditPointOpen}
+                    disabled={loading}
+                  >
+                    <Text style={styles.roundedPrimaryBtn}>Buy CPS</Text>
+                  </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={handleBuyCreditPointOpen}
-                disabled={loading}
-              >
-                <Text style={styles.roundedPrimaryBtn}>Buy CPS</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleSellCreditPointOpen}
-                disabled={loading}
-              >
-                <Text style={styles.roundedPrimaryBtn}>Sell CPS</Text>
-              </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleSellCreditPointOpen}
+                    disabled={loading}
+                  >
+                    <Text style={styles.roundedPrimaryBtn}>Sell CPS</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           </View>
-        </View>
-      )}
+        )}
 
-      <Modal
-        visible={buyCreditPointModal}
-        onRequestClose={handleBuyCreditPointClose}
-      >
-        {/* <View style={styles.paymentContainer}> */}
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Buy Credit Point</Text>
-          <SelectCurrency />
-          <Button title="Close" onPress={handleBuyCreditPointClose} />
-        </View>
-        {/* </View> */}
-      </Modal>
+        <Modal
+          visible={buyCreditPointModal}
+          onRequestClose={handleBuyCreditPointClose}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Buy Credit Point</Text>
+            <SelectCurrency />
 
-      <Modal
-        visible={sellCreditPointModal}
-        onRequestClose={handleSellCreditPointClose}
-      >
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Sell/Share Credit Point</Text>
-          <SellCreditPoint />
-          <Button title="Close" onPress={handleSellCreditPointClose} />
-        </View>
-      </Modal>
+            <View style={styles.closeButton}>
+              <Button title="Close" onPress={handleBuyCreditPointClose} />
+            </View>
+          </View>
+        </Modal>
+
+        <Modal
+          visible={sellCreditPointModal}
+          onRequestClose={handleSellCreditPointClose}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Sell/Share Credit Point</Text>
+            <SellCreditPoint />
+
+            <View style={styles.closeButton}>
+              <Button title="Close" onPress={handleSellCreditPointClose} />
+            </View>
+          </View>
+        </Modal>
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
+    flexGrow: 1,
     padding: 2,
-    justifyContent: "center",
-    alignItems: "center",
   },
-  paymentContainer: {
-    padding: 5,
+  container: {
+    flex: 1,
+    padding: 2,
+    alignItems: "center",
   },
   dashboard: {
-    width: "100%",
     alignItems: "center",
+  },
+  formContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   title: {
     fontSize: 24,
@@ -190,17 +206,17 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    // marginBottom: 20,
     padding: 20,
+  },
+  closeButton: {
+    padding: 10,
+    marginTop: 40,
   },
   roundedPrimaryBtn: {
     backgroundColor: "#007bff",
     color: "#fff",
     padding: 10,
     borderRadius: 25,
-    // justifyContent: "center",
-    // alignItems: "center",
-    // textAlign: "center",
   },
 });
 

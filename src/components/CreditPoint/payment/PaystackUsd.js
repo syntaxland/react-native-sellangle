@@ -4,7 +4,7 @@ import { View, Text, Button, StyleSheet } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { buyCreditPoint } from "../../../redux/actions/creditPointActions";
-import Loader from "../../../Loader";
+import Loader from "../../../Loader"; 
 import Message from "../../../Message";
 import { formatAmount } from "../../../FormatAmount";
 import { Paystack } from "react-native-paystack-webview";

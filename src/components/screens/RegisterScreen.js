@@ -9,7 +9,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
@@ -23,6 +22,8 @@ import {
   faPhone,
   faEye,
   faEyeSlash,
+  // faUserPlus,
+  faCode,
 } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
@@ -61,7 +62,8 @@ const RegisterScreen = () => {
 
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  // const [referralCode, setReferralCode] = useState("");
+  const [referralCode, setReferralCode] = useState("");
+  // const [referralCodeError, setReferralCodeError] = useState("");
 
   const [isTermsConditionsRead, setIsTermsConditionsRead] = useState(false);
   const [termsConditionsError, setTermsConditionsError] = useState("");
@@ -70,13 +72,6 @@ const RegisterScreen = () => {
 
   const userRegister = useSelector((state) => state.userRegister);
   const { loading, success, error } = userRegister;
-
-  // useEffect(() => {
-  //   const { referralCode } = navigation.getParam('referralCode', '');
-  //   if (referralCode) {
-  //     setReferralCode(referralCode);
-  //   }
-  // }, []);
 
   // const [refreshing, setRefreshing] = useState(false);
   // const wait = (timeout) => {
@@ -133,6 +128,11 @@ const RegisterScreen = () => {
         setPhoneNumberError("");
         break;
 
+      case "referralCode":
+        setReferralCode(value);
+        // setReferralCodeError("");
+        break;
+
       default:
         break;
     }
@@ -149,7 +149,7 @@ const RegisterScreen = () => {
       email: lowerCaseEmail,
       password,
       phone_number: phoneNumber,
-      // referral_code: referralCode,
+      referral_code: referralCode,
       is_terms_conditions_read: isTermsConditionsRead,
     };
   }, [
@@ -159,7 +159,7 @@ const RegisterScreen = () => {
     lowerCaseUsername,
     password,
     phoneNumber,
-    // referralCode,
+    referralCode,
     isTermsConditionsRead,
   ]);
 
@@ -220,6 +220,12 @@ const RegisterScreen = () => {
     } else {
       setPhoneNumberError("");
     }
+
+    // if (!referralCode) {
+    //   setReferralCodeError("Please enter your first name.");
+    // } else {
+    //   setReferralCodeError("");
+    // }
 
     if (!isTermsConditionsRead) {
       setTermsConditionsError("Please accept the terms and conditions.");
@@ -376,6 +382,23 @@ const RegisterScreen = () => {
           {phoneNumberError && (
             <Text style={styles.error}>{phoneNumberError}</Text>
           )}
+
+          <View style={styles.inputContainer}>
+            <FontAwesomeIcon icon={faCode} style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Enter referral code if any."
+              value={referralCode}
+              // onChangeText={(value) => handleFieldChange("referralCode", value)}
+              onChangeText={(value) => {
+                if (value.length <= 10) {
+                  handleFieldChange("referralCode", value);
+                }
+              }}
+              maxLength={10}
+            />
+          </View>
+          {/* {referralCodeError && <Text style={styles.error}>{referralCodeError}</Text>} */}
 
           <BouncyCheckbox
             isChecked={isTermsConditionsRead}

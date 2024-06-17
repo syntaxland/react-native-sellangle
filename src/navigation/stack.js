@@ -2,7 +2,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { navOptions } from "./options";
-import { HomeTabs } from "./taps";
+import { HomeTabs } from "./tabs";
 // screens
 // import HomeScreen from "../components/screens/HomeScreen";
 import LoginScreen from "../components/screens/LoginScreen";
@@ -76,8 +76,8 @@ export const HomeStack = () => {
 
   return (
     <Stack.Navigator screenOptions={() => navOptions(navigation)}>
-      <Stack.Screen name="Home" component={Marketplace} />
-      <Stack.Screen name="HomeTabs" component={HomeTabs} />
+      {/* <Stack.Screen name="Home2" component={Marketplace} /> */}
+      <Stack.Screen name="Home" component={HomeTabs} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="VerifyEmailOtp" component={VerifyEmailOtp} />
@@ -165,10 +165,10 @@ export const HomeStack = () => {
 //   );
 // };
 
-export const HomeTabsStack = () => {
-  return (
-    <HomeTabs.Navigator>
-      <HomeTabs.Screen name="Home" component={Marketplace} />
-    </HomeTabs.Navigator>
-  );
-};
+// export const HomeTabsStack = () => {
+//   return (
+//     <HomeTabs.Navigator>
+//       <HomeTabs.Screen name="Home" component={Marketplace} />
+//     </HomeTabs.Navigator>
+//   );
+// };

@@ -11,7 +11,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { getUserProfile } from "../../redux/actions/userProfileActions";
 import {
-  getSellerAccount,
   getSellerDetail,
 } from "../../redux/actions/marketplaceSellerActions";
 import SellerActiveFreeAdScreen from "./SellerActiveFreeAdScreen";
@@ -30,19 +29,15 @@ const SellerShopFront = () => {
   const { userInfo } = userLogin;
 
   useEffect(() => {
-    if (!userInfo) {
-      navigation.navigate("Login");
-    } else {
+    if (userInfo) {
       dispatch(getUserProfile());
-      dispatch(getSellerAccount());
-      dispatch(getSellerDetail(seller_username));
     }
+      dispatch(getSellerDetail(seller_username));
   }, [dispatch, userInfo, navigation, seller_username]);
 
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    dispatch(getSellerAccount());
     dispatch(getSellerDetail(seller_username));
     setTimeout(() => setRefreshing(false), 2000);
   }, [dispatch]);

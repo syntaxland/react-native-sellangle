@@ -28,11 +28,10 @@ import { formatAmount } from "../../../FormatAmount";
 
 const PaysofterAccountFund = ({
   amount,
-  promoTotalPrice,
   paymentData,
+    paysofterPublicKey,
   reference,
   userEmail,
-  publicApiKey,
   duration,
   paymenthMethod,
   currency,
@@ -76,7 +75,8 @@ const PaysofterAccountFund = ({
   const debitAccountData = {
     account_id: accountId,
     security_code: securityCode,
-    amount: promoTotalPrice,
+    amount: amount,
+        public_api_key: paysofterPublicKey,
   };
 
   const submitHandler = async (e) => {
@@ -98,27 +98,30 @@ const PaysofterAccountFund = ({
         setShowVerifyAccountFundOtp(true);
       }, 1000);
       return () => clearTimeout(timer);
-    } else {
-      console.error("Error verifying account");
     }
+    // else {
+    //   console.error("Error verifying account");
+    // }
   }, [success]);
 
   const handleLearnMore = () => {
     Linking.openURL("https://paysofter.com/");
   };
 
-  console.log("PaysofterAccountFund")
+  console.log(
+    "PaysofterAccountFund",
+    debitAccountData
+  );
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {showVerifyAccountFundOtp ? (
         <VerifyAccountFundOtp
-          promoTotalPrice={promoTotalPrice}
+          amount={amount}
           paymentData={paymentData}
           reference={reference}
           currency={currency}
           userEmail={userEmail}
-          publicApiKey={publicApiKey}
           securityCode={securityCode}
           accountId={accountId}
           formattedPayerEmail={formattedPayerEmail}
@@ -293,24 +296,13 @@ const PaysofterAccountFund = ({
             </View>
           </Modal>
 
-          {/* <View style={styles.submitContainer}>
-            <Button
-              title={`Pay (NGN ${promoTotalPrice?.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })})`}
-              onPress={submitHandler}
-            />
-          </View> */}
-
           <View style={styles.submitContainer}>
             <TouchableOpacity onPress={submitHandler}>
               <Text style={styles.roundedPrimaryBtn}>{`Pay (${formatAmount(
-                promoTotalPrice
+                amount
               )} ${currency})`}</Text>
             </TouchableOpacity>
           </View>
-
         </>
       )}
     </ScrollView>

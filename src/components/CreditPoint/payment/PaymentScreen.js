@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import PaystackPayment from "./PaystackPayment";
@@ -48,6 +50,7 @@ const PaymentScreen = ({
   };
 
   console.log("amount:", currency, amount);
+  console.log("apiKeys:", paystackPublicKey, paysofterPublicKey);
 
   return (
     <ScrollView>
@@ -55,50 +58,62 @@ const PaymentScreen = ({
         <Text style={styles.header}>Payment Page</Text>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.payButton}
-            onPress={() => handlePaymentGatewaySelection("paystack")}
-          >
-            <Text style={styles.buttonText}>Pay with Paystack</Text>
-          </TouchableOpacity>
-
-          <View style={styles.infoButtonContainer}>
+          <View style={styles.labelContainer}>
             <TouchableOpacity
-              style={styles.infoButton}
-              onPress={handleInfoModalShow}
+              style={styles.paystackBtn}
+              onPress={() => handlePaymentGatewaySelection("paystack")}
             >
-              <Text style={styles.infoButtonText}>ℹ️</Text>
+              <Text style={styles.buttonText}>Pay with Paystack</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity></TouchableOpacity>
+          </View>
+
+          <View style={styles.buttonGroup}>
             <Modal
               visible={showInfoModal}
+              transparent={true}
               animationType="slide"
               onRequestClose={handleInfoModalClose}
             >
-              <View style={styles.modalContent}>
-                <Text style={styles.modalHeader}>Paysofter Account</Text>
-                <Text style={styles.modalBody}>
-                  Don't have a Paysofter account? You're just about 3 minutes
-                  away! Sign up for a much softer payment experience.
-                </Text>
-                <TouchableOpacity
-                  style={styles.createAccountButton}
-                  onPress={() => Linking.openURL("https://paysofter.com/")}
-                >
-                  <Text style={styles.createAccountButtonText}>
-                    Create A Free Account
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalHeader}>Paysofter Account</Text>
+
+                  <Text style={styles.modalBody}>
+                    Don't have a Paysofter account? You're just about 3 minutes
+                    away! Sign up for a much softer payment experience.
                   </Text>
-                </TouchableOpacity>
-                <Button title="Close" onPress={handleInfoModalClose} />
+                  <TouchableOpacity
+                    style={styles.createAccountButton}
+                    onPress={() => Linking.openURL("https://paysofter.com/")}
+                  >
+                    <Text style={styles.createAccountButtonText}>
+                      Create A Free Account
+                    </Text>
+                  </TouchableOpacity>
+                  <Button title="Close" onPress={handleInfoModalClose} />
+                </View>
               </View>
             </Modal>
           </View>
 
-          <TouchableOpacity
-            style={styles.payButton}
-            onPress={() => handlePaymentGatewaySelection("paysofter")}
-          >
-            <Text style={styles.buttonText}>Pay with Paysofter</Text>
-          </TouchableOpacity>
+          <View style={styles.labelContainer}>
+            <TouchableOpacity
+              style={styles.pasofterBtn}
+              onPress={() => handlePaymentGatewaySelection("paysofter")}
+            >
+              <Text style={styles.buttonText}>Pay with Paysofter</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleInfoModalShow}>
+              <FontAwesomeIcon
+                icon={faInfoCircle}
+                size={16}
+                style={styles.icon}
+                // color="#fff"
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.paymentContainer}>
@@ -136,8 +151,8 @@ const PaymentScreen = ({
 
 const styles = StyleSheet.create({
   container: {
-    padding: 2,
-    marginVertical: 20,
+    padding: 10,
+    // marginVertical: 20,
     // justifyContent: "center",
   },
   header: {
@@ -150,7 +165,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 20,
   },
-  payButton: {
+  paystackBtn: {
+    backgroundColor: "#343a40",
+    padding: 15,
+    borderRadius: 10,
+    width: "100%",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  pasofterBtn: {
     backgroundColor: "#007bff",
     padding: 15,
     borderRadius: 10,
@@ -167,6 +190,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  buttonGroup: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  labelContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   infoButton: {
     backgroundColor: "#fff",
     borderColor: "#007bff",
@@ -180,10 +212,6 @@ const styles = StyleSheet.create({
   infoButtonText: {
     color: "#007bff",
     fontSize: 16,
-  },
-  modalContent: {
-    padding: 20,
-    alignItems: "center",
   },
   modalHeader: {
     fontSize: 20,
@@ -208,6 +236,22 @@ const styles = StyleSheet.create({
   },
   paymentContainer: {
     marginVertical: 20,
+  },
+  icon: {
+    marginLeft: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+    alignItems: "center",
   },
 });
 

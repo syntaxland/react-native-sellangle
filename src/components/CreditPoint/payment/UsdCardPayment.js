@@ -125,7 +125,7 @@ const UsdCardPayment = ({
   useEffect(() => {
     if (buyUsdCreditPointSuccess) {
       const timer = setTimeout(() => {
-        navigation.goBack();
+      navigation.navigate("Home");
       }, 5000);
       return () => clearTimeout(timer);
     }
