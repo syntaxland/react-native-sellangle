@@ -17,8 +17,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
-  faSearch,
-  faShoppingCart,
+  // faSearch,
+  // faShoppingCart,
   faMapMarkerAlt,
   faPlusSquare,
 } from "@fortawesome/free-solid-svg-icons";
@@ -211,9 +211,9 @@ const Marketplace = () => {
     }
   };
 
-  const handleSearchAds = () => {
-    navigation.navigate("Search Results");
-  };
+  // const handleSearchAds = () => {
+  //   navigation.navigate("Search Results");
+  // };
 
   const handleSellerUsernameSearch = async (e) => {
     e.preventDefault();
@@ -280,7 +280,7 @@ const Marketplace = () => {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.buttonContainer}>
+          {/* <View style={styles.buttonContainer}>
             <TouchableOpacity onPress={handleSearchAds}>
               <Text style={styles.roundedPrimaryBtn}>
                 Search Ads{" "}
@@ -292,7 +292,7 @@ const Marketplace = () => {
                 />
               </Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           <View style={styles.searchContainer}>
             <TextInput

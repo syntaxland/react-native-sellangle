@@ -22,6 +22,7 @@ import {
 // import { styles } from "./screens/screenStyles";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
+  faHome,
   faDashboard,
   faUser,
   faUserLock,
@@ -266,6 +267,22 @@ export const CustomDrawerContent = (props) => {
       {userInfo && (
         <View style={styles.drawerContainer}>
           <Text style={styles.title}>User Metrics</Text>
+
+          <View style={styles.drawerItemContainer}>
+            <FontAwesomeIcon
+              color={styles.iconColor}
+              icon={faHome}
+              size={styles.iconSize}
+              style={styles.icon}
+            />
+            <DrawerItem
+              label="Home"
+              onPress={() => navigation.navigate("Home")}
+              style={styles.drawerItem}
+              labelStyle={styles.drawerItemLabel}
+            />
+          </View>
+
           <View style={styles.drawerItemContainer}>
             <FontAwesomeIcon
               color={styles.iconColor}

@@ -273,7 +273,7 @@ const rootReducer = combineReducers({
 
   otpSendState: otpSendReducer,
   otpVerifyState: otpVerifyReducer,
-  otpVerifyUsdPromiseState: otpVerifyUsdPromiseReducer,
+  otpVerifyUsdState: otpVerifyUsdPromiseReducer,
   userProfile: getUserProfileReducer,
   updateProfile: updateUserProfileReducer,
   userChangePassword: changePasswordReducer,

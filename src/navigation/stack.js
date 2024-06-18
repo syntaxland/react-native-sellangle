@@ -9,7 +9,7 @@ import LoginScreen from "../components/screens/LoginScreen";
 import RegisterScreen from "../components/screens/RegisterScreen";
 import VerifyEmailOtp from "../components/emailOtp/VerifyEmailOtp";
 // marketplace
-import Marketplace from "../components/marketplace/Marketplace";
+// import Marketplace from "../components/marketplace/Marketplace";
 import DashboardSeller from "../components/marketplace/DashboardSeller";
 import PostFreeAd from "../components/marketplace/PostFreeAd";
 import PostPaidAd from "../components/marketplace/PostPaidAd";
@@ -77,7 +77,9 @@ export const HomeStack = () => {
   return (
     <Stack.Navigator screenOptions={() => navOptions(navigation)}>
       {/* <Stack.Screen name="Home2" component={Marketplace} /> */}
-      <Stack.Screen name="Home" component={HomeTabs} />
+      {/* <Stack.Screen name="Home" component={HomeTabs} /> */}
+      {/* <Stack.Screen name="Marketplace" component={HomeTabs} /> */}
+      <Stack.Screen name="Sellangle" component={HomeTabs} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="VerifyEmailOtp" component={VerifyEmailOtp} />

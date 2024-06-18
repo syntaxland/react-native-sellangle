@@ -14,8 +14,14 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 // import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
-import { buyCreditPoint } from "../../../redux/actions/creditPointActions";
-import { createPaysofterPayment } from "../../../redux/actions/paymentActions";
+import {
+  buyCreditPoint,
+  resetbuyCreditPointState,
+} from "../../../redux/actions/creditPointActions";
+import {
+  createPaysofterPayment,
+  resetCreatePaysofterPaymentState,
+} from "../../../redux/actions/paymentActions";
 import Message from "../../../Message";
 import Loader from "../../../Loader";
 import { formatAmount } from "../../../FormatAmount";
@@ -45,8 +51,12 @@ const CardPayment = ({
   const { loading, success, error } = paysofterPayment;
 
   const buyCreditPointState = useSelector((state) => state.buyCreditPointState);
-  const { success: buyCreditPointSuccess, error: buyCreditPointError } =
-    buyCreditPointState;
+  const {
+    success: buyCreditPointSuccess,
+    error: buyCreditPointError,
+
+    loading: buyCreditPointLoading,
+  } = buyCreditPointState;
 
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -104,20 +114,19 @@ const CardPayment = ({
   useEffect(() => {
     if (success) {
       dispatch(buyCreditPoint(creditPointData));
-      const timer = setTimeout(() => {}, 5000);
-      return () => clearTimeout(timer);
     }
   }, [dispatch, success]);
 
   useEffect(() => {
     if (buyCreditPointSuccess) {
+      dispatch(resetCreatePaysofterPaymentState());
+      dispatch(resetbuyCreditPointState());
       const timer = setTimeout(() => {
-      navigation.navigate("Home");
-
+        navigation.navigate("Home");
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [buyCreditPointSuccess, navigation]);
+  }, [buyCreditPointSuccess, navigation, dispatch]);
 
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || paymentDetails.expirationMonthYear;
@@ -129,26 +138,34 @@ const CardPayment = ({
     setIsExpirationMonthYearSelected(!!selectedDate);
   };
 
-  console.log("CardPayment", amount)
+  console.log("CardPayment", amount);
 
   return (
     <ScrollView>
       <View style={styles.container}>
         <Text style={styles.header}>Debit Card</Text>
-        {success && (
-          <Message variant="success">Payment made successfully.</Message>
-        )}
+        <View style={styles.message}>
+          {success && (
+            <Message variant="success">Payment made successfully.</Message>
+          )}
+        </View>
         {error && <Message variant="danger">{error}</Message>}
         {loading && <Loader />}
-        {buyCreditPointSuccess && (
-          <Message variant="success">
-            Your account has been credited with the CPS purchased for {amount}{" "}
-            {currency}.
-          </Message>
-        )}
-        {buyCreditPointError && (
-          <Message variant="danger">{buyCreditPointError}</Message>
-        )}
+        <View style={styles.message}>
+          {buyCreditPointSuccess && (
+            <Message variant="success">
+              Your account has been credited with the CPS purchased for {amount}{" "}
+              {currency}.
+            </Message>
+          )}
+        </View>
+        {buyCreditPointLoading && <Loader />}
+
+        <Text style={styles.message}>
+          {buyCreditPointError && (
+            <Message variant="danger">{buyCreditPointError}</Message>
+          )}
+        </Text>
 
         <View style={styles.formGroup}>
           <Text style={styles.label}>Card Number</Text>
@@ -258,6 +275,13 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  message: {
+    padding: 10,
+    marginBottom: 10,
+    alignItems: "center",
+    textAlign: "center",
+    justifyContent: "center",
   },
 });
 

@@ -171,6 +171,14 @@ export const styles = StyleSheet.create({
     width: 100,
     height: 50,
     resizeMode: "contain",
-    marginLeft: 10, // Adjust as needed
+    marginLeft: 10,
+  },
+  headerRightContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    // marginRight: 15,
+  },
+  optionIcon: {
+    marginRight: 20,
   },
 });

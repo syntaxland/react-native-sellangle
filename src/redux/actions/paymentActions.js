@@ -13,68 +13,159 @@ import {
   PAYSOFTER_PAYMENT_CREATE_REQUEST,
   PAYSOFTER_PAYMENT_CREATE_SUCCESS,
   PAYSOFTER_PAYMENT_CREATE_FAIL,
+  RESET_PAYSOFTER_PAYMENT_STATE,
   DEBIT_PAYSOFTER_ACCOUNT_REQUEST,
   DEBIT_PAYSOFTER_ACCOUNT_SUCCESS,
   DEBIT_PAYSOFTER_ACCOUNT_FAIL,
+  RESET_DEBIT_PAYSOFTER_NGN_STATE,
   CREATE_PAYSOFTER_PROMISE_REQUEST,
   CREATE_PAYSOFTER_PROMISE_SUCCESS,
   CREATE_PAYSOFTER_PROMISE_FAIL,
+  RESET_CREATE_PAYSOFTER_PROMISE_STATE,
   GET_PAYMENT_API_KEYS_REQUEST,
   GET_PAYMENT_API_KEYS_SUCCESS,
   GET_PAYMENT_API_KEYS_FAIL,
   DEBIT_PAYSOFTER_USD_ACCOUNT_REQUEST,
   DEBIT_PAYSOFTER_USD_ACCOUNT_SUCCESS,
   DEBIT_PAYSOFTER_USD_ACCOUNT_FAIL,
+  RESET_DEBIT_PAYSOFTER_USD_STATE,
 } from "../constants/paymentConstants";
 
 import {
   VERIFY_OTP_REQUEST,
   VERIFY_OTP_SUCCESS,
   VERIFY_OTP_FAIL,
+  RESET_VERIFY_OTP_STATE,
   VERIFY_USD_OTP_REQUEST,
   VERIFY_USD_OTP_SUCCESS,
   VERIFY_USD_OTP_FAIL,
+  RESET_VERIFY_USD_OTP_STATE,
 } from "../constants/accountFundOtpConstants";
 
 // const API_URL = process.env.REACT_APP_API_URL;
 import { API_URL, PAYSOFTER_API_URL } from "../../config/apiConfig";
 
+export const debitPaysofterAccountFund =
+  (debitAccountData) =>
+  async (
+    dispatch
+    // getState
+  ) => {
+    try {
+      dispatch({
+        type: DEBIT_PAYSOFTER_ACCOUNT_REQUEST,
+      });
 
-export const debitPaysofterUsdAccountFund = (debitUsdAccountData) => async (
-  dispatch
-  // getState
-) => {
+      // const {
+      //   userLogin: { userInfo },
+      // } = getState();
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          // Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
+
+      const { data } = await axios.post(
+        `${PAYSOFTER_API_URL}/api/debit-user-account-balance/`,
+        debitAccountData,
+        config
+      );
+
+      dispatch({
+        type: DEBIT_PAYSOFTER_ACCOUNT_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: DEBIT_PAYSOFTER_ACCOUNT_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
+
+export const resetDebitPaysofterNgnState = () => (dispatch) => {
+  dispatch({ type: RESET_DEBIT_PAYSOFTER_NGN_STATE });
+};
+
+export const debitPaysofterUsdAccountFund =
+  (debitUsdAccountData) =>
+  async (
+    dispatch
+    // getState
+  ) => {
+    try {
+      dispatch({
+        type: DEBIT_PAYSOFTER_USD_ACCOUNT_REQUEST,
+      });
+
+      // const {
+      //   userLogin: { userInfo },
+      // } = getState();
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          // Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
+
+      const { data } = await axios.post(
+        `${PAYSOFTER_API_URL}/api/debit-user-usd-account-fund/`,
+        debitUsdAccountData,
+        config
+      );
+
+      dispatch({
+        type: DEBIT_PAYSOFTER_USD_ACCOUNT_SUCCESS,
+        payload: data,
+      });
+      // window.location.reload();
+      // window.location.href = "/verify-account-fund-otp";
+    } catch (error) {
+      dispatch({
+        type: DEBIT_PAYSOFTER_USD_ACCOUNT_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
+
+export const resetDebitPaysofterUsdState = () => (dispatch) => {
+  dispatch({ type: RESET_DEBIT_PAYSOFTER_USD_STATE });
+};
+
+export const verifyOtp = (otpData) => async (dispatch) => {
   try {
     dispatch({
-      type: DEBIT_PAYSOFTER_USD_ACCOUNT_REQUEST,
+      type: VERIFY_OTP_REQUEST,
     });
-
-    // const {
-    //   userLogin: { userInfo },
-    // } = getState();
 
     const config = {
       headers: {
         "Content-Type": "application/json",
-        // Authorization: `Bearer ${userInfo.access}`,
       },
     };
 
     const { data } = await axios.post(
-      `${PAYSOFTER_API_URL}/api/debit-user-usd-account-fund/`,
-      debitUsdAccountData,
+      `${PAYSOFTER_API_URL}/api/verify-otp/`,
+      { otpData },
       config
     );
 
     dispatch({
-      type: DEBIT_PAYSOFTER_USD_ACCOUNT_SUCCESS,
+      type: VERIFY_OTP_SUCCESS,
       payload: data,
     });
-    // window.location.reload();
-    // window.location.href = "/verify-account-fund-otp";
   } catch (error) {
     dispatch({
-      type: DEBIT_PAYSOFTER_USD_ACCOUNT_FAIL,
+      type: VERIFY_OTP_FAIL,
       payload:
         error.response && error.response.data.detail
           ? error.response.data.detail
@@ -83,7 +174,11 @@ export const debitPaysofterUsdAccountFund = (debitUsdAccountData) => async (
   }
 };
 
-export const verifyUsdPromiseOtp = (otpData) => async (dispatch) => {
+export const resetVerifyOtpState = () => (dispatch) => {
+  dispatch({ type: RESET_VERIFY_OTP_STATE });
+};
+
+export const verifyUsdOtp = (otpData) => async (dispatch) => {
   try {
     dispatch({
       type: VERIFY_USD_OTP_REQUEST,
@@ -105,8 +200,6 @@ export const verifyUsdPromiseOtp = (otpData) => async (dispatch) => {
       type: VERIFY_USD_OTP_SUCCESS,
       payload: data,
     });
-    // window.location.reload();
-    // window.location.href = "/dashboard/users";
   } catch (error) {
     dispatch({
       type: VERIFY_USD_OTP_FAIL,
@@ -116,6 +209,10 @@ export const verifyUsdPromiseOtp = (otpData) => async (dispatch) => {
           : error.message,
     });
   }
+};
+
+export const resetVerifyUsdOtpState = () => (dispatch) => {
+  dispatch({ type: RESET_VERIFY_USD_OTP_STATE });
 };
 
 export const getPaymentApiKeys = () => async (dispatch, getState) => {
@@ -134,7 +231,7 @@ export const getPaymentApiKeys = () => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.get( 
+    const { data } = await axios.get(
       `${API_URL}/api/get-payment-details/`,
       config
     );
@@ -181,8 +278,6 @@ export const createPayment = (paymentData) => async (dispatch, getState) => {
       type: PAYMENT_CREATE_SUCCESS,
       payload: data,
     });
-    // window.location.reload();
-    // window.location.href = "/dashboard/users";
   } catch (error) {
     dispatch({
       type: PAYMENT_CREATE_FAIL,
@@ -194,157 +289,88 @@ export const createPayment = (paymentData) => async (dispatch, getState) => {
   }
 };
 
-export const createPaysofterPayment = (paysofterPaymentData) => async ( 
-  dispatch
-) => {
-  try {
-    dispatch({
-      type: PAYSOFTER_PAYMENT_CREATE_REQUEST,
-    });
+// export const resetCreatePaymentState = () => (dispatch) => {
+//   dispatch({ type: RESET_PAYMENT_CREATE_STATE });
+// };
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        // Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+export const createPaysofterPayment =
+  (paysofterPaymentData) => async (dispatch) => {
+    try {
+      dispatch({
+        type: PAYSOFTER_PAYMENT_CREATE_REQUEST,
+      });
 
-    const { data } = await axios.post(
-      `${PAYSOFTER_API_URL}/api/initiate-transaction/`,
-      paysofterPaymentData,
-      config
-    );
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          // Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    dispatch({
-      type: PAYSOFTER_PAYMENT_CREATE_SUCCESS,
-      payload: data,
-    });
-    // window.location.reload();
-    // window.location.href = "/dashboard/users";
-  } catch (error) {
-    dispatch({
-      type: PAYSOFTER_PAYMENT_CREATE_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
+      const { data } = await axios.post(
+        `${PAYSOFTER_API_URL}/api/initiate-transaction/`,
+        paysofterPaymentData,
+        config
+      );
+
+      dispatch({
+        type: PAYSOFTER_PAYMENT_CREATE_SUCCESS,
+        payload: data,
+      });
+      // window.location.reload();
+      // window.location.href = "/dashboard/users";
+    } catch (error) {
+      dispatch({
+        type: PAYSOFTER_PAYMENT_CREATE_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
+
+export const resetCreatePaysofterPaymentState = () => (dispatch) => {
+  dispatch({ type: RESET_PAYSOFTER_PAYMENT_STATE });
 };
 
-export const createPaysofterPromise = (paysofterPromiseData) => async (
-  dispatch
-) => {
-  try {
-    dispatch({
-      type: CREATE_PAYSOFTER_PROMISE_REQUEST,
-    });
+export const createPaysofterPromise =
+  (paysofterPromiseData) => async (dispatch) => {
+    try {
+      dispatch({
+        type: CREATE_PAYSOFTER_PROMISE_REQUEST,
+      });
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        // Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          // Authorization: `Bearer ${userInfo.access}`,
+        },
+      };
 
-    const { data } = await axios.post(
-      `${PAYSOFTER_API_URL}/api/create-promise/`,
-      paysofterPromiseData,
-      config
-    );
+      const { data } = await axios.post(
+        `${PAYSOFTER_API_URL}/api/create-promise/`,
+        paysofterPromiseData,
+        config
+      );
 
-    dispatch({
-      type: CREATE_PAYSOFTER_PROMISE_SUCCESS,
-      payload: data,
-    });
-    // window.location.reload();
-    // window.location.href = "/dashboard/users";
-  } catch (error) {
-    dispatch({
-      type: CREATE_PAYSOFTER_PROMISE_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
+      dispatch({
+        type: CREATE_PAYSOFTER_PROMISE_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: CREATE_PAYSOFTER_PROMISE_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
 
-export const debitPaysofterAccountFund = (debitAccountData) => async (
-  dispatch
-  // getState
-) => {
-  try {
-    dispatch({
-      type: DEBIT_PAYSOFTER_ACCOUNT_REQUEST,
-    });
-
-    // const {
-    //   userLogin: { userInfo },
-    // } = getState();
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        // Authorization: `Bearer ${userInfo.access}`,
-      },
-    };
-
-    const { data } = await axios.post(
-      `${PAYSOFTER_API_URL}/api/debit-user-account-balance/`,
-      debitAccountData,
-      config
-    );
-
-    dispatch({
-      type: DEBIT_PAYSOFTER_ACCOUNT_SUCCESS,
-      payload: data,
-    });
-
-  } catch (error) {
-    dispatch({
-      type: DEBIT_PAYSOFTER_ACCOUNT_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
-};
-
-export const verifyOtp = (otpData) => async (dispatch) => {
-  try {
-    dispatch({
-      type: VERIFY_OTP_REQUEST,
-    });
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-
-    const { data } = await axios.post(
-      `${PAYSOFTER_API_URL}/api/verify-otp/`,
-      { otpData },
-      config
-    );
-
-    dispatch({
-      type: VERIFY_OTP_SUCCESS,
-      payload: data,
-    });
-    // window.location.reload();
-    // window.location.href = "/dashboard/users";
-  } catch (error) {
-    dispatch({
-      type: VERIFY_OTP_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
-    });
-  }
+export const resetCreatePaysofterPromiseState = () => (dispatch) => {
+  dispatch({ type: RESET_CREATE_PAYSOFTER_PROMISE_STATE });
 };
 
 export const listPayments = () => async (dispatch, getState) => {

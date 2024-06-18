@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import CardPayment from "./CardPayment";
+import UsdCardPayment from "./UsdCardPayment";
 import UssdPayment from "./UssdPayment";
 import BankPayment from "./BankPayment";
 import TransferPayment from "./TransferPayment";
@@ -124,7 +125,9 @@ const PaysofterButton = ({
                 <View style={styles.payOptionBtn}>
                   <Button
                     title="Paysofter Account Fund (USD)"
-                    onPress={() => handlePaymentOptionChange("usd-account-fund")}
+                    onPress={() =>
+                      handlePaymentOptionChange("usd-account-fund")
+                    }
                     // disabled
                     color={
                       selectedPaymentOption === "usd-account-fund"
@@ -191,14 +194,32 @@ const PaysofterButton = ({
             </View>
 
             <View style={styles.paymentDetails}>
-              {selectedPaymentOption === "card" && (
-                <CardPayment
-                  amount={amount}
-                  currency={currency}
-                  reference={reference}
-                  userEmail={userEmail}
-                  paysofterPublicKey={paysofterPublicKey}
-                />
+              {currency === "NGN" && (
+                <View style={styles.paymentDetails}>
+                  {selectedPaymentOption === "card" && (
+                    <CardPayment
+                      amount={amount}
+                      currency={currency}
+                      reference={reference}
+                      userEmail={userEmail}
+                      paysofterPublicKey={paysofterPublicKey}
+                    />
+                  )}
+                </View>
+              )}
+
+              {currency === "USD" && (
+                <View style={styles.paymentDetails}>
+                  {selectedPaymentOption === "card" && (
+                    <UsdCardPayment
+                      amount={amount}
+                      currency={currency}
+                      reference={reference}
+                      userEmail={userEmail}
+                      paysofterPublicKey={paysofterPublicKey}
+                    />
+                  )}
+                </View>
               )}
 
               {currency === "NGN" && (

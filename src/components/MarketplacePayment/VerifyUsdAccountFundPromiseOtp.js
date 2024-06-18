@@ -11,10 +11,12 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  createPayment,
   debitPaysofterUsdAccountFund,
-  verifyUsdPromiseOtp,
+  resetDebitPaysofterUsdState,
+  verifyUsdOtp,
+  resetVerifyUsdOtpState,
   createPaysofterPromise,
+  resetCreatePaysofterPromiseState,
 } from "../../redux/actions/paymentActions";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -53,8 +55,8 @@ const VerifyUsdAccountFundPromiseOtp = ({
     }
   }, [userInfo]);
 
-  const otpVerifyUsdPromiseState = useSelector((state) => state.otpVerifyUsdPromiseState);
-  const { loading, success, error } = otpVerifyUsdPromiseState;
+  const otpVerifyUsdState = useSelector((state) => state.otpVerifyUsdState);
+  const { loading, success, error } = otpVerifyUsdState;
 
   const createPaysofterPromiseState = useSelector((state) => state.createPaysofterPromiseState);
   const { loading: promiseLoading, error: promiseError } = createPaysofterPromiseState;
@@ -95,7 +97,7 @@ const VerifyUsdAccountFundPromiseOtp = ({
   };
 
   const handleVerifyEmailOtp = () => {
-    dispatch(verifyUsdPromiseOtp(otpData));
+    dispatch(verifyUsdOtp(otpData));
   };
 
   const handleResendEmailOtp = async () => {
@@ -129,12 +131,14 @@ const VerifyUsdAccountFundPromiseOtp = ({
     if (success) {
       dispatch(createPaysofterPromise(paysofterPromiseData));
       setShowConfirmPaysofterPromise(true);
-      dispatch(createPayment(paymentData));
+      dispatch(resetDebitPaysofterUsdState());
+      dispatch(resetVerifyUsdOtpState());
+      dispatch(resetCreatePaysofterPromiseState());
       AsyncStorage.removeItem("debitUsdAccountData");
       setShowSuccessMessage(true);
       // setTimeout(() => {
-      //   navigation.navigate("Login");
-      // }, 5000);
+        // setShowConfirmPaysofterPromise(true);
+      // }, 2000);
     }
   }, [dispatch, success, navigation]);
 

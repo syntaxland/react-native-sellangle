@@ -201,7 +201,6 @@ const PaysofterUsdAccountFundPromise = ({
                 onChangeText={(value) => handleFieldChange("accountId", value)}
                 maxLength={12}
               />
-              
             </View>
             {accountIdError ? (
               <Text style={styles.errorText}>{accountIdError}</Text>
@@ -232,13 +231,11 @@ const PaysofterUsdAccountFundPromise = ({
                 maxLength={4}
                 secureTextEntry={!securityCodeVisible}
               />
-             
+
               <TouchableOpacity
                 onPress={toggleSecurityCodeVisibility}
                 style={styles.iconButton}
               >
-               
-
                 <Text style={styles.icon}>
                   {securityCodeVisible ? (
                     <>
@@ -264,8 +261,6 @@ const PaysofterUsdAccountFundPromise = ({
               <Text style={styles.errorText}>{securityCodeError}</Text>
             ) : null}
           </View>
-
-      
 
           <View style={styles.submitContainer}>
             <TouchableOpacity onPress={submitHandler}>

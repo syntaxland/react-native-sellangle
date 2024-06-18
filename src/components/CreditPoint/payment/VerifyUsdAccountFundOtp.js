@@ -11,10 +11,16 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import {
   createPaysofterPayment,
+  resetCreatePaysofterPaymentState,
   debitPaysofterUsdAccountFund,
-  verifyOtp,
+  resetDebitPaysofterUsdState,
+  verifyUsdOtp,
+  resetVerifyUsdOtpState,
 } from "../../../redux/actions/paymentActions";
-import { buyCreditPoint } from "../../../redux/actions/creditPointActions";
+import {
+  buyUsdCreditPoint,
+  resetbuyUsdCreditPointState,
+} from "../../../redux/actions/creditPointActions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import Loader from "../../../Loader";
@@ -48,12 +54,24 @@ const VerifyUsdAccountFundOtp = ({
     }
   }, [userInfo, navigation]);
 
-  const otpVerifyState = useSelector((state) => state.otpVerifyState);
-  const { loading, success, error } = otpVerifyState;
+  const otpVerifyUsdState = useSelector((state) => state.otpVerifyUsdState);
+  const { loading, success, error } = otpVerifyUsdState;
 
-  const buyCreditPointState = useSelector((state) => state.buyCreditPointState);
-  const { success: buyCreditPointSuccess, error: buyCreditPointError } =
-    buyCreditPointState;
+  const buyUsdCreditPointState = useSelector(
+    (state) => state.buyUsdCreditPointState
+  );
+  const {
+    success: buyCreditPointSuccess,
+    error: buyCreditPointError,
+    loading: buyCreditPointLoading,
+  } = buyUsdCreditPointState;
+
+  const paysofterPayment = useSelector((state) => state.paysofterPayment);
+  const {
+    success: paysofterPaymentSuccess,
+    // error: paysofterPaymentError,
+    // loading:paysofterPaymentLoading,
+  } = paysofterPayment;
 
   const [sendOtpData, setSendOtpData] = useState(null);
 
@@ -89,7 +107,7 @@ const VerifyUsdAccountFundOtp = ({
   };
 
   const handleVerifyEmailOtp = () => {
-    dispatch(verifyOtp(otpData));
+    dispatch(verifyUsdOtp(otpData));
   };
 
   const handleResendEmailOtp = async () => {
@@ -128,25 +146,29 @@ const VerifyUsdAccountFundOtp = ({
   useEffect(() => {
     if (success) {
       dispatch(createPaysofterPayment(paysofterPaymentData));
-      dispatch(buyCreditPoint(creditPointData));
-      AsyncStorage.removeItem("debitUsdAccountData");
-      setShowSuccessMessage(true);
-      // setTimeout(() => {
-      //   navigation.navigate("Home");
-      // }, 5000);
+      dispatch(buyUsdCreditPoint(creditPointData));
     }
-  }, [success, dispatch, navigation, paysofterPaymentData, creditPointData]);
+  }, [success, dispatch, navigation]);
 
   useEffect(() => {
-    if (buyCreditPointSuccess) {
+    if (buyCreditPointSuccess && paysofterPaymentSuccess) {
+      setShowSuccessMessage(true);
+      dispatch(resetCreatePaysofterPaymentState());
+      dispatch(resetDebitPaysofterUsdState());
+      dispatch(resetVerifyUsdOtpState());
+      dispatch(resetbuyUsdCreditPointState());
+      AsyncStorage.removeItem("debitUsdAccountData");
       const timer = setTimeout(() => {
         navigation.navigate("Home");
-      }, 5000); 
+      }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [buyCreditPointSuccess, navigation]);
+  }, [dispatch, navigation, buyCreditPointSuccess, paysofterPaymentSuccess]);
 
-  console.log("VerifyUsdAccountFundOtp paysofterPaymentData", paysofterPaymentData);
+  console.log(
+    "VerifyUsdAccountFundOtp paysofterPaymentData",
+    paysofterPaymentData
+  );
 
   return (
     <View style={styles.container}>
@@ -156,17 +178,22 @@ const VerifyUsdAccountFundOtp = ({
       )}
       {loading && <Loader />}
       {error && <Message variant="danger">{error}</Message>}
-      {resendMessage && (
-        <Message variant={resendLoading ? "info" : "success"}>
-          {resendMessage}
-        </Message>
-      )}
-      {buyCreditPointSuccess && (
-        <Message variant="success">
-          Your account has been credited with the CPS purchased for {amount}{" "}
-          {currency}.
-        </Message>
-      )}
+      <View style={styles.message}>
+        {resendMessage && (
+          <Message variant={resendLoading ? "info" : "success"}>
+            {resendMessage}
+          </Message>
+        )}
+      </View>
+      {buyCreditPointLoading && <Loader />}
+      <View style={styles.message}>
+        {buyCreditPointSuccess && (
+          <Message variant="success">
+            Your account has been credited with the CPS purchased for {amount}{" "}
+            {currency}.
+          </Message>
+        )}
+      </View>
       {buyCreditPointError && (
         <Message variant="danger">{buyCreditPointError}</Message>
       )}
@@ -180,7 +207,7 @@ const VerifyUsdAccountFundOtp = ({
       <Button
         onPress={handleVerifyEmailOtp}
         title="Verify OTP"
-        disabled={loading || success}
+        disabled={loading}
         color="#28a745"
       />
       <Text style={styles.otpInfo}>
@@ -232,6 +259,13 @@ const styles = StyleSheet.create({
     color: "#007bff",
     textAlign: "center",
     marginTop: 20,
+  },
+  message: {
+    padding: 10,
+    marginBottom: 10,
+    alignItems: "center",
+    textAlign: "center",
+    justifyContent: "center",
   },
 });
 

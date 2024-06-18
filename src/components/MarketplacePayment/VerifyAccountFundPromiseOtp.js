@@ -11,10 +11,13 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  createPayment,
+  // createPayment,
   debitPaysofterAccountFund,
+  resetDebitPaysofterNgnState,
   verifyOtp,
+  resetVerifyOtpState,
   createPaysofterPromise,
+  resetCreatePaysofterPromiseState
 } from "../../redux/actions/paymentActions";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -129,12 +132,14 @@ const VerifyAccountFundPromiseOtp = ({
     if (success) {
       dispatch(createPaysofterPromise(paysofterPromiseData));
       setShowConfirmPaysofterPromise(true);
-      dispatch(createPayment(paymentData));
-      AsyncStorage.removeItem("debitAccountData");
       setShowSuccessMessage(true);
+      dispatch(resetCreatePaysofterPromiseState());
+      dispatch(resetDebitPaysofterNgnState());
+      dispatch(resetVerifyOtpState());
+      AsyncStorage.removeItem("debitAccountData");
       // setTimeout(() => {
-      //   navigation.navigate("Login");
-      // }, 5000);
+      //  setShowConfirmPaysofterPromise(true);
+      // }, 2000);
     }
   }, [dispatch, success, navigation]);
 
