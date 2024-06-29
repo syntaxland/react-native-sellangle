@@ -4,7 +4,7 @@ import { View, ActivityIndicator } from 'react-native';
 
 function Loader() {
   return (
-    <View style={{ justifyContent: 'center', alignItems: 'center', padding: '10' }}>
+    <View style={{ justifyContent: 'center', alignItems: 'center', padding: '20' }}>
       <ActivityIndicator size="large" color="#007bff" />
     </View>
   );

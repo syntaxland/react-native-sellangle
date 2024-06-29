@@ -9,9 +9,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-// import DatePicker from "react-native-date-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
-// import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -144,21 +142,17 @@ const CardPayment = ({
     <ScrollView>
       <View style={styles.container}>
         <Text style={styles.header}>Debit Card</Text>
-        <View style={styles.message}>
           {success && (
             <Message variant="success">Payment made successfully.</Message>
           )}
-        </View>
         {error && <Message variant="danger">{error}</Message>}
         {loading && <Loader />}
-        <View style={styles.message}>
           {buyCreditPointSuccess && (
             <Message variant="success">
               Your account has been credited with the CPS purchased for {amount}{" "}
               {currency}.
             </Message>
           )}
-        </View>
         {buyCreditPointLoading && <Loader />}
 
         <Text style={styles.message}>

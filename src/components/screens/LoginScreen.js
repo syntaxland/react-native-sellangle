@@ -65,7 +65,7 @@ const LoginScreen = () => {
           {error && <Message variant="danger">{error}</Message>}
           {success && <Message variant="success">Login successful</Message>}
 
-          <View style={styles.inputContainer}>
+          <View style={styles.inputContainer}> 
             <FontAwesomeIcon icon={faUser} style={styles.icon} />
             <TextInput
               style={styles.input}

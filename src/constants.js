@@ -1,15 +1,5 @@
 // constants.js
 
-// export const DURATION_CHOICES = [
-//   ["1 day", "1 day (Free)"],
-//   ["2 days", "2 days (Free)"],
-//   ["3 days", "3 days (Free)"],
-//   ["5 days", "5 days (Free)"],
-//   ["1 week", "1 week (Free)"],
-//   ["2 weeks", "2 weeks (Free)"],
-//   ["1 month", "1 month (Free)"],
-// ];
-
 export const SUPPORT_CHOICES = [
   ["Support", "Support"],
   ["Account Fund", "Account Fund"],

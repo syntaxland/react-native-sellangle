@@ -19,7 +19,6 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import Accordion from "react-native-collapsible/Accordion";
 import { List } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";

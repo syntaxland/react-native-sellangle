@@ -29,7 +29,7 @@ function Message({ variant, children, fixed }) {
         onPress={() => setShowMessage(false)}
         style={{
           backgroundColor: variant === "danger" ? "#dc3545" : "#28a745",
-          padding: 10,
+          padding: 20,
           borderRadius: 5,
         }}
       >

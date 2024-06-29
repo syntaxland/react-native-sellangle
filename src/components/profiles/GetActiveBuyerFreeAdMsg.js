@@ -46,7 +46,7 @@ const GetActiveBuyerFreeAdMsg = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
+ 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = activeBuyerFreeAdMessages?.slice(

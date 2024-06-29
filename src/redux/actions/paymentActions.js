@@ -289,8 +289,8 @@ export const createPayment = (paymentData) => async (dispatch, getState) => {
   }
 };
 
-// export const resetCreatePaymentState = () => (dispatch) => {
-//   dispatch({ type: RESET_PAYMENT_CREATE_STATE });
+// export const resetPaymentState = () => (dispatch) => {
+//   dispatch({ type: RESET_PAYMENT_STATE });
 // };
 
 export const createPaysofterPayment =

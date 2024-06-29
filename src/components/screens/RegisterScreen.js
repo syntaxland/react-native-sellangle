@@ -438,6 +438,7 @@ const RegisterScreen = () => {
               <Text style={styles.roundedSuccessBtn}>Login</Text>
             </TouchableOpacity>
           </View>
+          
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -11,10 +11,10 @@ import {
 } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faPaperPlane, faTicket } from "@fortawesome/free-solid-svg-icons";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux"; 
 import { Button, DataTable } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import { listSupportTicket } from "../../redux/actions/supportActions";
+import { listSupportTicket } from "../../redux/actions/supportActions"; 
 import Message from "../../Message";
 import Loader from "../../Loader";
 import { Pagination } from "../../Pagination";

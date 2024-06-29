@@ -29,7 +29,9 @@ function SellerPhoto() {
     }
   }, [userInfo, navigation]);
 
-  const marketplaceSellerPhotoState = useSelector((state) => state.marketplaceSellerPhotoState);
+  const marketplaceSellerPhotoState = useSelector(
+    (state) => state.marketplaceSellerPhotoState
+  );
   const { success, error, loading } = marketplaceSellerPhotoState;
 
   const [photo, setPhoto] = useState(null);
@@ -49,7 +51,6 @@ function SellerPhoto() {
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
-        // navigation.navigate("Seller Dashboard");
         navigation.navigate("Home");
         onRefresh();
       }, 3000);
@@ -95,12 +96,18 @@ function SellerPhoto() {
 
   return (
     <ScrollView
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     >
       <View style={styles.container}>
         <Text style={styles.heading}>Take Seller's Picture</Text>
         {loading && <Loader />}
-        {success && <Message variant="success">Seller Account created successfully.</Message>}
+        {success && (
+          <Message variant="success">
+            Seller Account created successfully.
+          </Message>
+        )}
         {error && <Message variant="danger">{error}</Message>}
 
         <View style={styles.formGroup}>
@@ -110,7 +117,9 @@ function SellerPhoto() {
               style={styles.imagePicker}
               onPress={() => pickImage(true)}
             >
-              <Text style={styles.uploadText}>{photo ? "Change Photo" : "Select Photo"}</Text>
+              <Text style={styles.uploadText}>
+                {photo ? "Change Photo" : "Select Photo"}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.imagePicker}
@@ -120,7 +129,10 @@ function SellerPhoto() {
             </TouchableOpacity>
             {photo ? (
               <>
-                <Image source={{ uri: photo.uri }} style={styles.imagePreview} />
+                <Image
+                  source={{ uri: photo.uri }}
+                  style={styles.imagePreview}
+                />
                 <TouchableOpacity
                   style={styles.removeButton}
                   onPress={() => setPhoto(null)}
@@ -134,7 +146,6 @@ function SellerPhoto() {
         </View>
 
         <View style={styles.formGroup}>
-          {/* {loading && <Loader />} */}
           <TouchableOpacity onPress={handleSellerPhoto} disabled={loading}>
             <Text style={styles.roundedPrimaryBtn}>Upload</Text>
           </TouchableOpacity>

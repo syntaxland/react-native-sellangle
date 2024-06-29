@@ -24,9 +24,18 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
   header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    // paddingBottom: 10,
+    padding: 20,
+  },
+  headerCard: {
+    marginBottom: 16,
+    borderRadius: 8,
+  },
+  cardContainer: {
     padding: 10,
-    // backgroundColor: "#0f172a",
-    // paddingHorizontal: 20,
   },
   button: {
     backgroundColor: "#007bff",

@@ -161,14 +161,12 @@ const UsdCardPayment = ({
           </Text>
         )}
 
-        <Text style={styles.message}>
           {buyUsdCreditPointSuccess && (
             <Message variant="success">
               Your account has been credited with the CPS purchased for {amount}{" "}
               {currency}.
             </Message>
           )}
-        </Text>
         {buyUsdCreditPointError && (
           <Message variant="danger">{buyUsdCreditPointError}</Message>
         )}

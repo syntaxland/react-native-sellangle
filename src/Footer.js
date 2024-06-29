@@ -6,14 +6,21 @@ const currentYear = new Date().getFullYear();
 function Footer() {
   const softGlobalLink = () => {
     Linking.openURL("http://softglobal.org");
+    Linking;
   };
 
   return (
-    <View style={{ backgroundColor: "#007bff", paddingVertical: 10 }}>
-      <View style={{ alignItems: "center" }}>
-        <Text style={{ color: "#fff" }}>
-          &copy; Sellangle Inc., {currentYear}. All rights reserved.
+    <View
+      style={{
+        backgroundColor: "#007bff",
+        paddingVertical: 10,
+      }}
+    >
+      <View style={{ alignItems: "center", textAlign: "center" }}>
+        <Text style={{ color: "gray" }}>
+          &copy; Sellangle Inc., {currentYear}.
         </Text>
+        <Text style={{ color: "gray" }}>All rights reserved.</Text> 
         <TouchableOpacity onPress={softGlobalLink}>
           <Text style={{ color: "#fff", fontSize: 12, fontStyle: "italic" }}>
             Powered by SoftGlobal

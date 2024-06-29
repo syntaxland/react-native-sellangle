@@ -31,7 +31,7 @@ import {
 
 const CreateMarketplaceSeller = () => {
   const dispatch = useDispatch();
-  const navigation = useNavigation();
+  const navigation = useNavigation(); 
 
   const [idTypeChoices, setIdTypeChoices] = useState([]);
   const [countryChoices, setCountryChoices] = useState([]);

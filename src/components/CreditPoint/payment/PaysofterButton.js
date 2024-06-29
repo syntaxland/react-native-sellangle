@@ -16,10 +16,10 @@ import CardPayment from "./CardPayment";
 import UsdCardPayment from "./UsdCardPayment";
 import UssdPayment from "./UssdPayment";
 import BankPayment from "./BankPayment";
+import QrPayment from "./QrPayment";
 import TransferPayment from "./TransferPayment";
 import PaysofterAccountFund from "./PaysofterAccountFund";
 import PaysofterUsdAccountFund from "./PaysofterUsdAccountFund";
-import QrPayment from "./QrPayment";
 import { formatAmount } from "../../../FormatAmount";
 
 const PaysofterButton = ({
@@ -92,19 +92,6 @@ const PaysofterButton = ({
                   }
                 />
               </View>
-
-              {/* <View style={styles.payOptionBtn}>
-                  <Button
-                    title="Paysofter Account Fund"
-                    onPress={() => handlePaymentOptionChange("account-fund")}
-                    // disabled
-                    color={
-                      selectedPaymentOption === "account-fund"
-                        ? "#007bff"
-                        : "#6c757d"
-                    }
-                  />
-                </View> */}
 
               {currency === "NGN" && (
                 <View style={styles.payOptionBtn}>

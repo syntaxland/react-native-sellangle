@@ -172,12 +172,9 @@ const VerifyAccountFundOtp = ({
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Verify OTP ({currency})</Text>
-      <View style={styles.message}>
-        
-        {showSuccessMessage && (
-          <Message variant="success">Payment made successfully!</Message>
-        )}
-      </View>
+      {showSuccessMessage && (
+        <Message variant="success">Payment made successfully!</Message>
+      )}
       {loading && <Loader />}
       {error && <Message variant="danger">{error}</Message>}
       {resendMessage && (
@@ -186,14 +183,12 @@ const VerifyAccountFundOtp = ({
         </Message>
       )}
       {buyCreditPointLoading && <Loader />}
-      <View style={styles.message}>
-        {buyCreditPointSuccess && (
-          <Message variant="success">
-            Your account has been credited with the CPS purchased for {amount}{" "}
-            {currency}.
-          </Message>
-        )}
-      </View>
+      {buyCreditPointSuccess && (
+        <Message variant="success">
+          Your account has been credited with the CPS purchased for {amount}{" "}
+          {currency}.
+        </Message>
+      )}
       {buyCreditPointError && (
         <Message variant="danger">{buyCreditPointError}</Message>
       )}

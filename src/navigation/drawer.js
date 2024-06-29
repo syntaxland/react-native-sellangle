@@ -61,6 +61,7 @@ import {
   listSupportTicket,
   listAllSupportTickets,
 } from "../redux/actions/supportActions";
+import Footer from "../Footer";
 
 const Drawer = createDrawerNavigator();
 
@@ -871,6 +872,11 @@ export const CustomDrawerContent = (props) => {
         // style={styles.drawerItem}
         labelStyle={styles.drawerItemLabel}
       />
+
+<View style={styles.versionContainer}>
+        <Text style={styles.versionText}>Version: 2.0.6</Text>
+        <Footer />
+      </View>
     </DrawerContentScrollView>
   );
 };
@@ -948,5 +954,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
+  },
+  versionContainer: {
+    marginTop: 100,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    // borderBottomColor: "#ECECEC",
+  },
+  versionText: {
+    color: "gray",
+    textAlign: "center" 
   },
 });

@@ -159,7 +159,8 @@ const VerifyUsdAccountFundOtp = ({
       dispatch(resetbuyUsdCreditPointState());
       AsyncStorage.removeItem("debitUsdAccountData");
       const timer = setTimeout(() => {
-        navigation.navigate("Home");
+      setShowSuccessMessage(false);
+      navigation.navigate("Home");
       }, 5000);
       return () => clearTimeout(timer);
     }
@@ -178,22 +179,18 @@ const VerifyUsdAccountFundOtp = ({
       )}
       {loading && <Loader />}
       {error && <Message variant="danger">{error}</Message>}
-      <View style={styles.message}>
         {resendMessage && (
           <Message variant={resendLoading ? "info" : "success"}>
             {resendMessage}
           </Message>
         )}
-      </View>
       {buyCreditPointLoading && <Loader />}
-      <View style={styles.message}>
         {buyCreditPointSuccess && (
           <Message variant="success">
             Your account has been credited with the CPS purchased for {amount}{" "}
             {currency}.
           </Message>
         )}
-      </View>
       {buyCreditPointError && (
         <Message variant="danger">{buyCreditPointError}</Message>
       )}

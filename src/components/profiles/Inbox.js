@@ -1,6 +1,6 @@
 // Inbox.js
 import React, { useEffect, useState } from "react";
-import { FlatList, View, Text, StyleSheet, RefreshControl } from "react-native";
+import { FlatList, View, Text, StyleSheet, RefreshControl } from "react-native"; 
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { useSelector, useDispatch } from "react-redux";

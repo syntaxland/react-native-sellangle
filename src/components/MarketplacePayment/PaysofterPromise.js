@@ -184,7 +184,7 @@ const PaysofterPromise = ({
                 value={duration}
               />
             </View>
-
+ 
             <View style={styles.formGroup}>
               <TouchableOpacity onPress={submitHandler}>
                 <Text style={styles.roundedPrimaryBtn}>Submit</Text>

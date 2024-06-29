@@ -25,7 +25,7 @@ import {
 import { sendEmailOtp } from "../../redux/actions/emailOtpActions";
 import { List } from "react-native-paper";
 
-import Message from "../../Message";
+import Message from "../../Message"; 
 import Loader from "../../Loader";
 
 function UserProfile() {

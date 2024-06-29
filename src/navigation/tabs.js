@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { Text, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 import { getUserProfile } from "../redux/actions/userProfileActions";
 import Marketplace from "../components/marketplace/Marketplace";
 import PostFreeAd from "../components/marketplace/PostFreeAd";
@@ -22,6 +23,7 @@ const Tab = createBottomTabNavigator();
 
 export const HomeTabs = () => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -101,9 +103,10 @@ export const HomeTabs = () => {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "#0f172a",
+          backgroundColor: "#007bff",
+          paddingBottom: 5,
         },
-        tabBarActiveTintColor: "#007bff",
+        tabBarActiveTintColor: "#fff",
         tabBarInactiveTintColor: "#6c757d",
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
@@ -132,7 +135,19 @@ export const HomeTabs = () => {
         }}
         component={Marketplace}
       />
-      <Tab.Screen name="Dashboard" component={Dashboard} />
+      {/* <Tab.Screen name="Dashboard" component={Dashboard} /> */}
+      <Tab.Screen
+        name="Dashboard"
+        component={Dashboard}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            if (!userInfo) {
+              e.preventDefault();
+              navigation.navigate("Login");
+            }
+          },
+        })}
+      />
 
       {userInfo && (
         <>
@@ -148,7 +163,24 @@ export const HomeTabs = () => {
           />
         </>
       )}
-      <Tab.Screen name="Post Free Ad" component={PostFreeAd} />
+      {/* <Tab.Screen name="Post Free Ad" component={PostFreeAd} /> */}
+
+      <Tab.Screen
+        name="Post Free Ad"
+        component={PostFreeAd}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            if (!userInfo) {
+              navigation.navigate("Login");
+            } else if (userInfo && !profile.is_marketplace_seller) {
+              navigation.navigate("Create Seller Account");
+            } else {
+              navigation.navigate("Post Free Ad");
+            }
+          },
+        })}
+      />
 
       {/* {userInfo && (
         <>
