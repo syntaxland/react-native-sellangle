@@ -42,7 +42,6 @@ import {
   RESET_VERIFY_USD_OTP_STATE,
 } from "../constants/accountFundOtpConstants";
 
-// const API_URL = process.env.REACT_APP_API_URL;
 import { API_URL, PAYSOFTER_API_URL } from "../../config/apiConfig";
 
 export const debitPaysofterAccountFund =

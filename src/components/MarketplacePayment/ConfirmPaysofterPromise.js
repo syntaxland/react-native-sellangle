@@ -8,9 +8,12 @@ import {
   StyleSheet,
   Linking,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
-const ConfirmPaysofterPromise = ({ navigation }) => {
-  // const dispatch = useDispatch();
+const ConfirmPaysofterPromise = () => {
+  // const dispatch = useDispatch();  
+  const navigation = useNavigation();
+
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;

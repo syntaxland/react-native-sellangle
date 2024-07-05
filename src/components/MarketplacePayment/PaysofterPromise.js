@@ -20,7 +20,7 @@ import PaysofterUsdAccountFundPromise from "./PaysofterUsdAccountFundPromise";
 import { useNavigation } from "@react-navigation/native";
 import Message from "../../Message";
 import Loader from "../../Loader";
-import { PAYMENT_DURATION_CHOICES } from "../../constants";
+import { PAYMENT_DURATION_CHOICES } from "./payment-constants";
 
 const PaysofterPromise = ({
   buyerEmail,
