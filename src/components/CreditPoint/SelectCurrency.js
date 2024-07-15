@@ -1,11 +1,12 @@
 // SelectCurrency.js
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { View, Text, StyleSheet, ScrollView, Modal } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import BuyCreditPoint from "./BuyCreditPoint";
 import BuyUsdCreditPoint from "./BuyUsdCreditPoint";
 import RNPickerSelect from "react-native-picker-select";
+import { Card } from "react-native-paper";
 
 const SelectCurrency = () => {
   const navigation = useNavigation();
@@ -31,25 +32,29 @@ const SelectCurrency = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Select Currency</Text>
-      <View style={styles.selectInput}>
-        <RNPickerSelect
-          onValueChange={handleCurrencyChange}
-          items={CURRENCY_CHOICES}
-          placeholder={{ label: "Select Currency", value: null }}
-          value={selectedCurrency}
-          // style={pickerSelectStyles}
-        />
-      </View>
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text style={styles.label}>Select Currency</Text>
+          <View style={styles.selectInput}>
+            <RNPickerSelect
+              onValueChange={handleCurrencyChange}
+              items={CURRENCY_CHOICES}
+              placeholder={{ label: "Select Currency", value: null }}
+              value={selectedCurrency}
+              // style={pickerSelectStyles}
+            />
+          </View>
 
-      <View style={styles.content}>
-        {selectedCurrency === "NGN" && (
-          <BuyCreditPoint currency={selectedCurrency} />
-        )}
-        {selectedCurrency === "USD" && (
-          <BuyUsdCreditPoint currency={selectedCurrency} />
-        )}
-      </View>
+          <View style={styles.content}>
+            {selectedCurrency === "NGN" && (
+              <BuyCreditPoint currency={selectedCurrency} />
+            )}
+            {selectedCurrency === "USD" && (
+              <BuyUsdCreditPoint currency={selectedCurrency} />
+            )}
+          </View>
+        </Card.Content>
+      </Card>
     </View>
   );
 };

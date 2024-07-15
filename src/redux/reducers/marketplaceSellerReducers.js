@@ -171,6 +171,7 @@ import {
   APPLY_PROMO_CODE_REQUEST,
   APPLY_PROMO_CODE_SUCCESS,
   APPLY_PROMO_CODE_FAIL,
+  RESET_APPLY_PROMO_CODE_STATE,
   GET_SELLER_PAID_ADS_CHARGES_REQUEST,
   GET_SELLER_PAID_ADS_CHARGES_SUCCESS,
   GET_SELLER_PAID_ADS_CHARGES_FAIL,
@@ -492,6 +493,8 @@ export const applyPomoCodeReducer = (state = initialState, action) => {
       };
     case APPLY_PROMO_CODE_FAIL:
       return { loading: false, error: action.payload };
+    case RESET_APPLY_PROMO_CODE_STATE:
+      return {};
     default:
       return state;
   }

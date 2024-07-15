@@ -172,6 +172,7 @@ import {
   APPLY_PROMO_CODE_REQUEST,
   APPLY_PROMO_CODE_SUCCESS,
   APPLY_PROMO_CODE_FAIL,
+  RESET_APPLY_PROMO_CODE_STATE,
   GET_SELLER_PAID_ADS_CHARGES_REQUEST,
   GET_SELLER_PAID_ADS_CHARGES_SUCCESS,
   GET_SELLER_PAID_ADS_CHARGES_FAIL,
@@ -689,6 +690,10 @@ export const applyPromoCode = (promoData) => async (dispatch, getState) => {
           : error.message,
     });
   }
+};
+
+export const resetApplyPromoCode = () => (dispatch) => {
+  dispatch({ type: RESET_APPLY_PROMO_CODE_STATE });
 };
 
 export const getFreeAdSellerReviews =

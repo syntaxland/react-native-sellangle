@@ -1,5 +1,5 @@
 // VerifyUsdAccountFundOtp.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 import {
   createPaysofterPayment,
   resetCreatePaysofterPaymentState,
@@ -17,31 +18,20 @@ import {
   verifyUsdOtp,
   resetVerifyUsdOtpState,
 } from "../../../redux/actions/paymentActions";
-import {
-  buyUsdCreditPoint,
-  resetbuyUsdCreditPointState,
-} from "../../../redux/actions/creditPointActions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
 import Loader from "../../../Loader";
 import Message from "../../../Message";
 
 const VerifyUsdAccountFundOtp = ({
   amount,
   reference,
-  userEmail,
+  email,
   currency,
   paysofterPublicKey,
   formattedPayerEmail,
+  onSuccess,
+  onClose,
 }) => {
-  const [otp, setOtp] = useState("");
-  const [resendDisabled, setResendDisabled] = useState(false);
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendMessage, setResendMessage] = useState("");
-  const [countdown, setCountdown] = useState(60);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const createdAt = new Date().toISOString();
-
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
@@ -52,25 +42,25 @@ const VerifyUsdAccountFundOtp = ({
     if (!userInfo) {
       navigation.navigate("Login");
     }
-  }, [userInfo, navigation]);
+  }, [userInfo]);
+
+  const [otp, setOtp] = useState("");
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
+  const [countdown, setCountdown] = useState(60);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const createdAt = new Date().toISOString();
+  const [hasHandledSuccess, setHasHandledSuccess] = useState(false);
 
   const otpVerifyUsdState = useSelector((state) => state.otpVerifyUsdState);
   const { loading, success, error } = otpVerifyUsdState;
 
-  const buyUsdCreditPointState = useSelector(
-    (state) => state.buyUsdCreditPointState
-  );
-  const {
-    success: buyCreditPointSuccess,
-    error: buyCreditPointError,
-    loading: buyCreditPointLoading,
-  } = buyUsdCreditPointState;
-
   const paysofterPayment = useSelector((state) => state.paysofterPayment);
   const {
     success: paysofterPaymentSuccess,
-    // error: paysofterPaymentError,
-    // loading:paysofterPaymentLoading,
+    error: paysofterPaymentError,
+    loading: paysofterPaymentLoading,
   } = paysofterPayment;
 
   const [sendOtpData, setSendOtpData] = useState(null);
@@ -85,7 +75,7 @@ const VerifyUsdAccountFundOtp = ({
 
   const paysofterPaymentData = {
     payment_id: reference,
-    email: userEmail,
+    email: email,
     amount: amount,
     currency: currency,
     public_api_key: paysofterPublicKey,
@@ -146,30 +136,39 @@ const VerifyUsdAccountFundOtp = ({
   useEffect(() => {
     if (success) {
       dispatch(createPaysofterPayment(paysofterPaymentData));
-      dispatch(buyUsdCreditPoint(creditPointData));
     }
-  }, [success, dispatch, navigation]);
+  }, [success, dispatch]);
+
+  const handleOnSuccess = useCallback(() => {
+    onSuccess();
+  }, [onSuccess]);
+
+  const handleOnClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
 
   useEffect(() => {
-    if (buyCreditPointSuccess && paysofterPaymentSuccess) {
+    if (paysofterPaymentSuccess && !hasHandledSuccess) {
       setShowSuccessMessage(true);
+      setHasHandledSuccess(true);
+      handleOnSuccess();
       dispatch(resetCreatePaysofterPaymentState());
-      dispatch(resetDebitPaysofterUsdState());
       dispatch(resetVerifyUsdOtpState());
-      dispatch(resetbuyUsdCreditPointState());
+      dispatch(resetDebitPaysofterUsdState());
       AsyncStorage.removeItem("debitUsdAccountData");
-      const timer = setTimeout(() => {
-      setShowSuccessMessage(false);
-      navigation.navigate("Home");
-      }, 5000);
-      return () => clearTimeout(timer);
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+        handleOnClose();
+      }, 3000);
     }
-  }, [dispatch, navigation, buyCreditPointSuccess, paysofterPaymentSuccess]);
+  }, [
+    dispatch,
+    paysofterPaymentSuccess,
+    handleOnSuccess,
+    hasHandledSuccess,
 
-  console.log(
-    "VerifyUsdAccountFundOtp paysofterPaymentData",
-    paysofterPaymentData
-  );
+    handleOnClose,
+  ]);
 
   return (
     <View style={styles.container}>
@@ -179,21 +178,16 @@ const VerifyUsdAccountFundOtp = ({
       )}
       {loading && <Loader />}
       {error && <Message variant="danger">{error}</Message>}
-        {resendMessage && (
-          <Message variant={resendLoading ? "info" : "success"}>
-            {resendMessage}
-          </Message>
-        )}
-      {buyCreditPointLoading && <Loader />}
-        {buyCreditPointSuccess && (
-          <Message variant="success">
-            Your account has been credited with the CPS purchased for {amount}{" "}
-            {currency}.
-          </Message>
-        )}
-      {buyCreditPointError && (
-        <Message variant="danger">{buyCreditPointError}</Message>
+
+      {paysofterPaymentLoading && <Loader />}
+      {paysofterPaymentError && <Message variant="danger">{error}</Message>}
+
+      {resendMessage && (
+        <Message variant={resendLoading ? "info" : "success"}>
+          {resendMessage}
+        </Message>
       )}
+
       <TextInput
         style={styles.input}
         value={otp}
@@ -204,7 +198,7 @@ const VerifyUsdAccountFundOtp = ({
       <Button
         onPress={handleVerifyEmailOtp}
         title="Verify OTP"
-        disabled={loading}
+        disabled={otp === "" || loading || success}
         color="#28a745"
       />
       <Text style={styles.otpInfo}>

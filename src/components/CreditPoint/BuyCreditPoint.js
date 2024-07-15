@@ -9,11 +9,16 @@ import {
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import { useDispatch, useSelector } from "react-redux";
+import { Card } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { getPaymentApiKeys } from "../../redux/actions/paymentActions";
 import PaymentScreen from "./payment/PaymentScreen";
-import Loader from "../../Loader";
+import {
+  buyCreditPoint,
+  resetbuyCreditPointState,
+} from "../../redux/actions/creditPointActions";
 import Message from "../../Message";
+import Loader from "../../Loader";
 
 const BuyCreditPoint = ({ currency }) => {
   const dispatch = useDispatch();
@@ -25,6 +30,15 @@ const BuyCreditPoint = ({ currency }) => {
   const { loading, error, paystackPublicKey, paysofterPublicKey } =
     getPaymentApiKeysState;
   console.log("apiKeys:", paystackPublicKey, paysofterPublicKey);
+
+  const buyCreditPointState = useSelector((state) => state.buyCreditPointState);
+  const {
+    loading: buyCreditPointLoading,
+    success: buyCreditPointSuccess,
+    error: buyCreditPointError,
+  } = buyCreditPointState;
+
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -59,48 +73,101 @@ const BuyCreditPoint = ({ currency }) => {
     { label: "1,500,000 cps for 1,000,000 NGN", value: "1000000" },
   ];
 
+  const handleOnSuccess = () => {
+    console.log("handling onSuccess...");
+    const creditPointData = {
+      amount: amount,
+    };
+    dispatch(buyCreditPoint(creditPointData));
+  };
+
+  const onSuccess = () => {
+    handleOnSuccess();
+  };
+
+  const handleOnClose = () => {
+    console.log("handling onClose...");
+    navigation.navigate("Home");
+  };
+
+  const onClose = () => {
+    handleOnClose();
+  };
+
+  useEffect(() => {
+    if (buyCreditPointSuccess) {
+      setShowSuccessMessage(true);
+      dispatch(resetbuyCreditPointState());
+      setTimeout(() => {
+        navigation.navigate("Home");
+        setShowSuccessMessage(false);
+      }, 3000);
+    }
+  }, [dispatch, buyCreditPointSuccess, navigation]);
+
   return (
     <ScrollView>
-      <View style={styles.container}>
-        {showPaymentScreen ? (
-          <View style={styles.paymentContainer}>
-            <PaymentScreen
-              currency={currency}
-              amount={amount}
-              paysofterPublicKey={paysofterPublicKey}
-              paystackPublicKey={paystackPublicKey}
-              userEmail={userEmail}
-            />
-          </View>
-        ) : (
-          <>
-            <View style={styles.formContainer}>
-              <Text style={styles.label}>Select CPS Amount</Text>
-              <View style={styles.selectBorder}>
-                <RNPickerSelect
-                  onValueChange={(value) => setAmount(value)}
-                  items={BUY_CPS_CHOICES}
-                  placeholder={{ label: "Select CPS Amount", value: null }}
-                  style={pickerSelectStyles}
-                  value={amount}
+      <Card style={styles.card}>
+        <Card.Content>
+          <View style={styles.container}>
+            {showSuccessMessage && (
+              <Message variant="success">
+                Your account has been credited with the CPS purchased for{" "}
+                {amount} {currency}.
+              </Message>
+            )}
+            {buyCreditPointLoading && <Loader />}
+            {buyCreditPointError && (
+              <Message variant="danger" fixed>
+                {buyCreditPointError}
+              </Message>
+            )}
+            {showPaymentScreen ? (
+              <View style={styles.paymentContainer}>
+                <PaymentScreen
+                  currency={currency}
+                  amount={amount}
+                  paysofterPublicKey={paysofterPublicKey}
+                  paystackPublicKey={paystackPublicKey}
+                  email={userEmail}
+                  onSuccess={onSuccess}
+                  onClose={onClose}
                 />
               </View>
+            ) : (
+              <>
+                <View style={styles.formContainer}>
+                  <Text style={styles.label}>Select CPS Amount</Text>
+                  <View style={styles.selectBorder}>
+                    <RNPickerSelect
+                      onValueChange={(value) => setAmount(value)}
+                      items={BUY_CPS_CHOICES}
+                      placeholder={{ label: "Select CPS Amount", value: null }}
+                      style={pickerSelectStyles}
+                      value={amount}
+                    />
+                  </View>
 
-              {loading && <Loader />}
-              {error && <Message variant="danger">{error}</Message>}
+                  {loading && <Loader />}
+                  {error && <Message variant="danger">{error}</Message>}
 
-              <TouchableOpacity
-                onPress={handleShowPaymentScreen}
-                disabled={amount === ""}
-              >
-                <Text style={styles.roundedPrimaryBtn}>
-                  Buy Credit Point (NGN)
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-      </View>
+                  <TouchableOpacity
+                    onPress={handleShowPaymentScreen}
+                    disabled={amount === ""}
+                    style={
+                      amount === ""
+                        ? styles.roundedDisabledBtn
+                        : styles.roundedPrimaryBtn
+                    }
+                  >
+                    <Text style={styles.btnText}>Buy Credit Point (NGN)</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        </Card.Content>
+      </Card>
     </ScrollView>
   );
 };
@@ -157,6 +224,30 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
+  },
+
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  roundedDisabledBtn: {
+    backgroundColor: "#d3d3d3",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  btnText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
 

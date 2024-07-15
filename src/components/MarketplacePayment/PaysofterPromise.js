@@ -13,7 +13,8 @@ import {
 } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import RNPickerSelect from "react-native-picker-select";
+import { Picker } from "@react-native-picker/picker";
+import { Card } from "react-native-paper";
 import { useSelector } from "react-redux";
 import PaysofterAccountFundPromise from "./PaysofterAccountFundPromise";
 import PaysofterUsdAccountFundPromise from "./PaysofterUsdAccountFundPromise";
@@ -23,14 +24,13 @@ import Loader from "../../Loader";
 import { PAYMENT_DURATION_CHOICES } from "./payment-constants";
 
 const PaysofterPromise = ({
-  buyerEmail,
+  email,
   currency,
   amount,
-  sellerApiKey,
-  paymentData,
-  reference,
+  paysofterPublicKey,
+  onSuccess,
+  onClose,
 }) => {
-  // const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
@@ -96,102 +96,127 @@ const PaysofterPromise = ({
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-        {showPaysofterAccountFundPromise ? (
-          <>
-            {currency === "USD" ? (
-              <PaysofterUsdAccountFundPromise
-                currency={currency}
-                amount={amount}
-                buyerEmail={buyerEmail}
-                sellerApiKey={sellerApiKey}
-                paymentData={paymentData}
-                reference={reference}
-                duration={duration}
-              />
-            ) : (
-              <PaysofterAccountFundPromise
-                currency={currency}
-                amount={amount}
-                buyerEmail={buyerEmail}
-                sellerApiKey={sellerApiKey}
-                paymentData={paymentData}
-                reference={reference}
-                duration={duration}
-              />
-            )}
-          </>
-        ) : (
-          <View style={styles.container}>
-            <View style={styles.headerContainer}>
-              <View style={styles.labelContainer}>
-                <Text style={styles.headerText}>Paysofter Promise </Text>
-                <TouchableOpacity onPress={handleInfoModalShow}>
-                  <FontAwesomeIcon
-                    icon={faInfoCircle}
-                    size={16}
-                    style={styles.icon}
+        <Card style={styles.card}>
+          <Card.Content>
+            {showPaysofterAccountFundPromise ? (
+              <>
+                {currency === "USD" ? (
+                  <PaysofterUsdAccountFundPromise
+                    amount={amount}
+                    email={email}
+                    currency={currency}
+                    paysofterPublicKey={paysofterPublicKey}
+                    duration={duration}
+                    onSuccess={onSuccess}
+                    onClose={onClose}
                   />
-                </TouchableOpacity>
-              </View>
-            </View>
-            <Modal
-              visible={showInfoModal}
-              onRequestClose={handleInfoModalClose}
-              transparent={true}
-              animationType="slide"
-            >
-              <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>Paysofter Promise</Text>
-                  <Text style={styles.modalText}>
-                    Paysofter Promise option escrows or places in custody the
-                    payment made to a seller (using the payer's funded Paysofter
-                    Account Fund) until a specified condition has been
-                    fulfilled.
-                  </Text>
-                  <View style={styles.learnMoreBtn}>
-                    <Button title="Learn more" onPress={handleLearnMore} />
+                ) : (
+                  <PaysofterAccountFundPromise
+                    amount={amount}
+                    email={email}
+                    currency={currency}
+                    paysofterPublicKey={paysofterPublicKey}
+                    duration={duration}
+                    onSuccess={onSuccess}
+                    onClose={onClose}
+                  />
+                )}
+              </>
+            ) : (
+              <View style={styles.container}>
+                <View style={styles.headerContainer}>
+                  <View style={styles.labelContainer}>
+                    <Text style={styles.headerText}>Paysofter Promise </Text>
+                    <TouchableOpacity onPress={handleInfoModalShow}>
+                      <FontAwesomeIcon
+                        icon={faInfoCircle}
+                        size={16}
+                        style={styles.icon}
+                      />
+                    </TouchableOpacity>
                   </View>
-                  <Button title="Close" onPress={handleInfoModalClose} />
+                </View>
+                <Modal
+                  visible={showInfoModal}
+                  onRequestClose={handleInfoModalClose}
+                  transparent={true}
+                  animationType="slide"
+                >
+                  <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                      <Text style={styles.modalTitle}>Paysofter Promise</Text>
+                      <Text style={styles.modalText}>
+                        Paysofter Promise option escrows or places in custody
+                        the payment made to a seller (using the payer's funded
+                        Paysofter Account Fund) until a specified condition has
+                        been fulfilled.
+                      </Text>
+                      <View style={styles.learnMoreBtn}>
+                        <Button title="Learn more" onPress={handleLearnMore} />
+                      </View>
+                      <Button title="Close" onPress={handleInfoModalClose} />
+                    </View>
+                  </View>
+                </Modal>
+
+                {success && (
+                  <Message variant="success">
+                    Payment made successfully.
+                  </Message>
+                )}
+                {error && <Message variant="danger">{error}</Message>}
+                {loading && <Loader />}
+
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Currency</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={currency}
+                    editable={false}
+                  />
+                </View>
+
+                {/* <View style={styles.formGroup}>
+                  <Text style={styles.label}>Expected Settlement Duration</Text>
+                  <RNPickerSelect
+                    onValueChange={(value) =>
+                      handleFieldChange("duration", value)
+                    }
+                    items={durationChoices?.map(([value, label]) => ({
+                      label,
+                      value,
+                    }))}
+                    style={pickerSelectStyles}
+                    value={duration}
+                  />
+                </View> */}
+
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Expected Settlement Duration</Text>
+                  <View style={styles.selectContainer}>
+                    <Picker
+                      style={styles.picker}
+                      selectedValue={duration}
+                      onValueChange={(itemValue) =>
+                        handleFieldChange("duration", itemValue)
+                      }
+                    >
+                      {durationChoices.map(([value, label]) => (
+                        <Picker.Item key={value} label={label} value={value} />
+                      ))}
+                    </Picker>
+                  </View>
+                </View>
+
+                <View style={styles.formGroup}>
+                  <TouchableOpacity onPress={submitHandler}>
+                    <Text style={styles.roundedPrimaryBtn}>Submit</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-            </Modal>
-
-            {success && (
-              <Message variant="success">Payment made successfully.</Message>
             )}
-            {error && <Message variant="danger">{error}</Message>}
-            {loading && <Loader />}
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>Currency</Text>
-              <TextInput
-                style={styles.input}
-                value={currency}
-                editable={false}
-              />
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>Expected Settlement Duration</Text>
-              <RNPickerSelect
-                onValueChange={(value) => handleFieldChange("duration", value)}
-                items={durationChoices?.map(([value, label]) => ({
-                  label,
-                  value,
-                }))}
-                style={pickerSelectStyles}
-                value={duration}
-              />
-            </View>
- 
-            <View style={styles.formGroup}>
-              <TouchableOpacity onPress={submitHandler}>
-                <Text style={styles.roundedPrimaryBtn}>Submit</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
+          </Card.Content>
+        </Card>
       </ScrollView>
     </SafeAreaView>
   );
@@ -223,6 +248,17 @@ const styles = StyleSheet.create({
   },
   formGroup: {
     marginBottom: 16,
+  },
+  selectContainer: {
+    // width: "100%",
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    justifyContent: "center",
+    // alignItems: "center",
+    textAlign: "center",
+    padding: 2,
   },
   label: {
     fontSize: 16,

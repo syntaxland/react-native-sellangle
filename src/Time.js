@@ -1,5 +1,8 @@
+// Time.js
 import React, { useState, useEffect } from "react";
-import { Button } from "react-bootstrap";
+import { Text, StyleSheet, View, TouchableOpacity } from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faClock } from "@fortawesome/free-solid-svg-icons";
 
 const Time = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -7,17 +10,15 @@ const Time = () => {
   useEffect(() => {
     const intervalId = setInterval(() => {
       setCurrentTime(new Date());
-    }, 1000); 
+    }, 1000);
 
-    return () => clearInterval(intervalId); 
+    return () => clearInterval(intervalId);
   }, []);
 
   const formattedTime = currentTime.toLocaleString("en-US", {
     weekday: "short",
-    // weekday: "long",
     day: "numeric",
     month: "short",
-    // month: "long",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
@@ -26,17 +27,30 @@ const Time = () => {
   });
 
   return (
-      <div className="d-flex justify-content-center text-center py-2 digital-clock">
-        <Button
-          variant="outline-primary"
-          size="sm"
-          className="rounded"
-          disabled
-        >
-          <i className="fas fa-clock"></i> {formattedTime}
-        </Button>
-      </div>
+    <View>
+      <TouchableOpacity style={styles.squaredButton} disabled>
+        <Text style={styles.timerText}>
+          <FontAwesomeIcon icon={faClock} color="#fff" size={12} /> {formattedTime}
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  timerText: {
+    color: "#fff",
+    fontSize: 12,
+
+  },
+  squaredButton: {
+    backgroundColor: "#007bff",
+    padding: 5,
+    borderRadius: 5,
+    textAlign: "center",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
 
 export default Time;

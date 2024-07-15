@@ -14,6 +14,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faWallet, faDashboard } from "@fortawesome/free-solid-svg-icons";
 import { useNavigation } from "@react-navigation/native";
+
+import { Card } from "react-native-paper";
 import { getCreditPointBalance } from "../../redux/actions/creditPointActions";
 import SellCreditPoint from "../CreditPoint/SellCreditPoint";
 import SelectCurrency from "../CreditPoint/SelectCurrency";
@@ -72,45 +74,65 @@ const Dashboard = () => {
       }
     >
       <View style={styles.container}>
-        <Text style={styles.title}>
-          <Text style={styles.icon}>
-            <FontAwesomeIcon icon={faDashboard} style={styles.icon} /> Dashboard
-            (User)
-          </Text>
-        </Text>
+        <View style={styles.cardContainer}>
+          <Card style={styles.card}>
+            <Card.Content>
+              <Text style={styles.title}>
+                <Text style={styles.icon}>
+                  <FontAwesomeIcon icon={faDashboard} style={styles.icon} />{" "}
+                  Dashboard (User)
+                </Text>
+              </Text>
+            </Card.Content>
+          </Card>
+        </View>
         {loading ? (
           <Loader />
         ) : error ? (
           <Message variant="danger">{error}</Message>
         ) : (
           <View style={styles.dashboard}>
-            <View style={styles.formContainer}>
-              <View style={styles.walletSection}>
-                <Text style={styles.subtitle}>
-                  Credit Point Wallet{" "}
-                  <Text style={styles.icon}>
-                    <FontAwesomeIcon icon={faWallet} style={styles.icon} />{" "}
-                  </Text>
-                </Text>
-                <Text style={styles.balance}>
-                  Balance: {formatNumber(creditPoints)} CPS
-                </Text>
-                <View style={styles.buttonGroup}>
-                  <TouchableOpacity
-                    onPress={handleBuyCreditPointOpen}
-                    disabled={loading}
-                  >
-                    <Text style={styles.roundedPrimaryBtn}>Buy CPS</Text>
-                  </TouchableOpacity>
+            <View style={styles.cardContainer}>
+              <Card style={styles.card}>
+                <Card.Content>
+                  <View style={styles.formContainer}>
+                    <View style={styles.walletSection}>
+                      <Card style={styles.card}>
+                        <Card.Content>
+                          <Text style={styles.subtitle}>
+                            Credit Point Wallet{" "}
+                            <Text style={styles.icon}>
+                              <FontAwesomeIcon
+                                icon={faWallet}
+                                style={styles.icon}
+                              />{" "}
+                            </Text>
+                          </Text>
+                        </Card.Content>
+                      </Card>
+                      <Text style={styles.balance}>
+                        Balance: {formatNumber(creditPoints)} CPS
+                      </Text>
 
-                  <TouchableOpacity
-                    onPress={handleSellCreditPointOpen}
-                    disabled={loading}
-                  >
-                    <Text style={styles.roundedPrimaryBtn}>Sell CPS</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+                      <View style={styles.buttonGroup}>
+                        <TouchableOpacity
+                          onPress={handleBuyCreditPointOpen}
+                          // disabled={loading}
+                        >
+                          <Text style={styles.roundedPrimaryBtn}>Buy CPS</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          onPress={handleSellCreditPointOpen}
+                          // disabled={loading}
+                        >
+                          <Text style={styles.roundedPrimaryBtn}>Sell CPS</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                </Card.Content>
+              </Card>
             </View>
           </View>
         )}
@@ -217,6 +239,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     padding: 10,
     borderRadius: 25,
+  },
+
+  cardContainer: {
+    padding: 3,
   },
 });
 

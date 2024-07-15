@@ -25,9 +25,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { Picker } from "@react-native-picker/picker";
 import {
   getSellerAccount,
   getPaidAdDetail,
+  resetApplyPromoCode,
 } from "../../redux/actions/marketplaceSellerActions";
 import RenderHtml from "react-native-render-html";
 import ReportPaidAd from "./ReportPaidAd";
@@ -39,6 +41,7 @@ import Loader from "../../Loader";
 import Message from "../../Message";
 import RatingSeller from "../../RatingSeller";
 import PromoTimer from "../../PromoTimer";
+import ApplyPromoCode from "./ApplyPromoCode";
 import { formatAmount } from "../../FormatAmount";
 
 const PaidAdProductDetail = () => {
@@ -70,6 +73,22 @@ const PaidAdProductDetail = () => {
     sellerRating,
     sellerReviewCount,
   } = getPaidAdDetailState;
+
+  const applyPromoCodeState = useSelector((state) => state.applyPromoCodeState);
+  const { discountPercentage, promoDiscount } = applyPromoCodeState;
+
+  const [selectedQty, setSelectedQty] = useState(1);
+
+  const handleQtyChange = (itemValue) => {
+    setSelectedQty(itemValue);
+  };
+
+  const calculateTotalPrice = () => {
+    return selectedQty * ads?.price;
+  };
+
+  const promoTotalPrice = calculateTotalPrice() - promoDiscount;
+  console.log("promoTotalPrice", promoTotalPrice);
 
   const [showPhoneNumber, setShowPhoneNumber] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -189,9 +208,24 @@ const PaidAdProductDetail = () => {
     html: ads?.description || "<div>No description available.</div>",
   };
 
-  const truncatedDescription = ads?.description
-    ? ads.description.split(" ").slice(0, 10).join(" ") + "..."
-    : "";
+  const handleOnSuccess = () => {
+    console.log("handling onSuccess...");
+    dispatch(resetApplyPromoCode());
+  };
+
+  const onSuccess = () => {
+    handleOnSuccess();
+  };
+
+  const handleonClose = () => {
+    console.log("handling onClose...");
+    onRefresh();
+    navigation.navigate("Home");
+  };
+
+  const onClose = () => {
+    handleonClose();
+  };
 
   return (
     <ScrollView
@@ -235,61 +269,26 @@ const PaidAdProductDetail = () => {
               Promo Code: {ads?.promo_code} ({ads?.discount_percentage}% Off)
             </Text>
             <View style={styles.card}>
-              <Text style={styles.expirationText}>
-                <FontAwesomeIcon icon={faClock} color="#fff" /> Expires in:{" "}
-                <PromoTimer expirationDate={ads?.expiration_date} />
-              </Text>
               <Text>
-                Price: {formatAmount(ads.price)} {ads.currency}
+                <Text style={styles.expirationText}>
+                  <FontAwesomeIcon icon={faClock} /> Expires in:{" "}
+                  <PromoTimer expirationDate={ads?.expiration_date} />
+                </Text>
+                <View>
+                  <Text>
+                    Price: {formatAmount(ads.price)} {ads.currency}{" "}
+                    {ads?.usd_price && (
+                      <>
+                        / {formatAmount(ads?.usd_price)} {ads?.usd_currency}
+                      </>
+                    )}
+                  </Text>
+                </View>
+                {/* {ads?.count_in_stock > 0 && (
+                  <Text>Quantity in Stock: {ads?.count_in_stock}</Text>
+                )} */}
               </Text>
-              {ads?.usd_price && (
-                <Text>
-                  / {formatAmount(ads?.usd_price)} {ads?.usd_currency}
-                </Text>
-              )}
-              {ads?.count_in_stock > 0 && (
-                <Text>Quantity in Stock: {ads?.count_in_stock}</Text>
-              )}
             </View>
-
-            {/* <View style={styles.description}>
-              <Text>Ad Description:</Text>
-              {ads?.description && (
-                <Text style={styles.description}>
-                  {expanded
-                    ? ads.description
-                    : ads.description.split(" ").slice(0, 10).join(" ") + "..."}
-                </Text>
-              )}
-              {ads?.description?.split(" ").length > 10 && (
-                <TouchableOpacity onPress={handleClickMore}>
-                  <Text style={styles.toggleDescription}>
-                    {expanded ? "Less" : "More"}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View> */}
-
-            {/* <View style={styles.description}>
-              <Text>Ad Description:</Text>
-              <RenderHtml
-                contentWidth={width}
-                source={descriptionHtml}
-                tagsStyles={{
-                  div: {
-                    maxHeight: expanded ? undefined : 100,
-                    overflow: "hidden",
-                  },
-                }}
-              />
-              {ads?.description?.split(" ").length > 10 && (
-                <TouchableOpacity onPress={handleClickMore}>
-                  <Text style={styles.toggleDescription}>
-                    {expanded ? "Less" : "More"}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View> */}
 
             <View style={styles.description}>
               <Text>Ad Description:</Text>
@@ -303,14 +302,16 @@ const PaidAdProductDetail = () => {
                   },
                 }}
               />
-              {/* {!expanded && <Text>{truncatedDescription}</Text>} */}
-              {ads?.description?.split(" ").length > 10 && (
-                <TouchableOpacity onPress={handleClickMore}>
-                  <Text style={styles.toggleDescription}>
-                    {expanded ? "Less" : "More"}
-                  </Text>
-                </TouchableOpacity>
-              )}
+
+              <Text>
+                {ads?.description?.split(" ").length > 10 && (
+                  <TouchableOpacity onPress={handleClickMore}>
+                    <Text style={styles.toggleDescription}>
+                      {expanded ? "Less" : "More"}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </Text>
             </View>
 
             <View style={styles.sellerDetails}>
@@ -404,6 +405,73 @@ const PaidAdProductDetail = () => {
                   </Text>
                 </TouchableOpacity>
               </View>
+
+              <View style={styles.spaceBtwGroup}>
+                <Text style={styles.title}>Ads in Stock Count:</Text>
+                <Text style={styles.title}>
+                  {ads?.count_in_stock > 0 ? (
+                    <Text>{ads?.count_in_stock}</Text>
+                  ) : (
+                    <Text>Out of Stock</Text>
+                  )}
+                </Text>
+              </View>
+
+              <View style={styles.spaceBtwGroup}>
+                <Text style={styles.title}>Total Price: </Text>
+                <Text style={styles.title}>
+                  {ads?.currency} {formatAmount(calculateTotalPrice())}
+                </Text>
+              </View>
+
+              <View style={styles.promoSection}>
+                <Text>Selected Quantity:</Text>
+                <View style={styles.selectContainer}>
+                  <Picker
+                    selectedValue={selectedQty}
+                    onValueChange={handleQtyChange}
+                  >
+                    {Array.from(
+                      { length: ads?.count_in_stock },
+                      (_, i) => i + 1
+                    ).map((qty) => (
+                      <Picker.Item
+                        key={qty}
+                        label={qty.toString()}
+                        value={qty}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              </View>
+
+              {ads?.promo_code && (
+                <View style={styles.promoSection}>
+                  <ApplyPromoCode adId={ads?.id} selectedQty={selectedQty} />
+                  <Text>
+                    Promo Discount Amount:{" "}
+                    {promoDiscount ? (
+                      <Text>
+                        {ads?.currency} {formatAmount(promoDiscount)} (
+                        {discountPercentage}%)
+                      </Text>
+                    ) : (
+                      <Text>
+                        {" "}
+                        {ads?.currency} {formatAmount(0)}
+                      </Text>
+                    )}
+                  </Text>
+                  <Text>
+                    Final Total Amount: {ads?.currency}{" "}
+                    {promoTotalPrice ? (
+                      <Text>{formatAmount(promoTotalPrice)}</Text>
+                    ) : (
+                      <Text>{formatAmount(calculateTotalPrice())}</Text>
+                    )}
+                  </Text>
+                </View>
+              )}
             </View>
 
             <View style={styles.buttonGroup}>
@@ -453,13 +521,12 @@ const PaidAdProductDetail = () => {
 
           {showPaysofterOption && (
             <Paysofter
-              promoCode={ads?.promo_code}
-              adId={ads?.id}
-              buyerEmail={userInfo?.email}
+              amount={promoTotalPrice}
               currency={ads?.currency}
-              usdPrice={ads?.usd_price}
-              amount={ads?.price}
-              sellerApiKey={sellerApiKey}
+              email={userInfo?.email}
+              paysofterPublicKey={sellerApiKey}
+              onSuccess={onSuccess}
+              onClose={onClose}
             />
           )}
         </>
@@ -591,6 +658,18 @@ const styles = StyleSheet.create({
   phoneNumber: {
     color: "#007bff",
     padding: 20,
+  },
+  selectContainer: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    justifyContent: "center",
+    textAlign: "center",
+    padding: 2,
+  },
+  promoSection: {
+    marginTop: 10,
   },
 });
 

@@ -10,6 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import { Card } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { sellCreditPoint } from "../../redux/actions/creditPointActions";
 import Message from "../../Message";
@@ -28,7 +29,9 @@ const SellCreditPoint = () => {
     }
   }, [userInfo, navigation]);
 
-  const sellCreditPointState = useSelector((state) => state.sellCreditPointState);
+  const sellCreditPointState = useSelector(
+    (state) => state.sellCreditPointState
+  );
   const { success, error, loading } = sellCreditPointState;
 
   const [username, setUsername] = useState("");
@@ -64,63 +67,67 @@ const SellCreditPoint = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {loading && <Loader />}
-      {success && (
-        <Message variant="success">
-          You have transferred {amount} credit points to {username} successfully.
-        </Message>
-      )}
-      {error && <Message variant="danger">{error}</Message>}
-      {message && <Message variant="danger">{message}</Message>}
+      <Card style={styles.card}>
+        <Card.Content>
+          {loading && <Loader />}
+          {success && (
+            <Message variant="success">
+              You have transferred {amount} credit points to {username}{" "}
+              successfully.
+            </Message>
+          )}
+          {error && <Message variant="danger">{error}</Message>}
+          {message && <Message variant="danger">{message}</Message>}
 
-      <Text style={styles.warning}>
-        <Text style={styles.warningIcon}>⚠️</Text> Warning! This action will
-        transfer the credit point amount from your account to the receiver's
-        credit point wallet.
-      </Text>
+          <Text style={styles.warning}>
+            <Text style={styles.warningIcon}>⚠️</Text> Warning! This action will
+            transfer the credit point amount from your account to the receiver's
+            credit point wallet.
+          </Text>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Receiver's Username</Text>
-        <TextInput
-          style={styles.input}
-          value={username}
-          onChangeText={(text) => setUsername(text)}
-          placeholder="Enter cps receiver's username"
-          maxLength={12}
-        />
-      </View>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Receiver's Username</Text>
+            <TextInput
+              style={styles.input}
+              value={username}
+              onChangeText={(text) => setUsername(text)}
+              placeholder="Enter cps receiver's username"
+              maxLength={12}
+            />
+          </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Amount</Text>
-        <TextInput
-          style={styles.input}
-          value={amount}
-          onChangeText={(text) => setAmount(text)}
-          placeholder="Enter cps amount"
-          keyboardType="numeric"
-        />
-      </View>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Amount</Text>
+            <TextInput
+              style={styles.input}
+              value={amount}
+              onChangeText={(text) => setAmount(text)}
+              placeholder="Enter cps amount"
+              keyboardType="numeric"
+            />
+          </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-          placeholder="Enter your password"
-          secureTextEntry
-          maxLength={100}
-        />
-      </View>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={styles.input}
+              value={password}
+              onChangeText={(text) => setPassword(text)}
+              placeholder="Enter your password"
+              secureTextEntry
+              maxLength={100}
+            />
+          </View>
 
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Sell/Share CPS"
-          onPress={handleSellCreditPoint}
-          disabled={!password || !username || !amount}
-        />
-      </View>
-
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Sell/Share CPS"
+              onPress={handleSellCreditPoint}
+              disabled={!password || !username || !amount}
+            />
+          </View>
+        </Card.Content>
+      </Card>
     </ScrollView>
   );
 };

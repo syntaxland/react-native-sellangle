@@ -46,7 +46,7 @@ import {
   faCaretDown,
   faUserCheck,
   faCodeCompare,
-  faBullhorn
+  faBullhorn,
 } from "@fortawesome/free-solid-svg-icons";
 import { logout } from "../redux/actions/userActions";
 import { getUserProfile } from "../redux/actions/userProfileActions";
@@ -62,6 +62,7 @@ import {
   listAllSupportTickets,
 } from "../redux/actions/supportActions";
 import Footer from "../Footer";
+import Time from "../Time";
 
 const Drawer = createDrawerNavigator();
 
@@ -263,6 +264,10 @@ export const CustomDrawerContent = (props) => {
             style={styles.icon}
           />
         </View>
+      </View>
+
+      <View style={styles.timeContainer}>
+        <Time />
       </View>
 
       {userInfo && (
@@ -873,8 +878,8 @@ export const CustomDrawerContent = (props) => {
         labelStyle={styles.drawerItemLabel}
       />
 
-<View style={styles.versionContainer}>
-        <Text style={styles.versionText}>Version: 2.0.6</Text>
+      <View style={styles.versionContainer}>
+        <Text style={styles.versionText}>Version: 2.1.4</Text>
         <Footer />
       </View>
     </DrawerContentScrollView>
@@ -888,6 +893,12 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   greetingContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ECECEC",
+  },
+  timeContainer: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderBottomWidth: 1,
@@ -964,6 +975,6 @@ const styles = StyleSheet.create({
   },
   versionText: {
     color: "gray",
-    textAlign: "center" 
+    textAlign: "center",
   },
 });

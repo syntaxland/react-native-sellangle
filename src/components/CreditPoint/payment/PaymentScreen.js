@@ -22,7 +22,9 @@ const PaymentScreen = ({
   currency,
   paysofterPublicKey,
   paystackPublicKey,
-  userEmail,
+  email,
+  onSuccess,
+  onClose,
 }) => {
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -121,8 +123,10 @@ const PaymentScreen = ({
             <PaystackPayment
               currency={currency}
               amount={amount}
-              userEmail={userEmail}
+              email={email}
               paystackPublicKey={paystackPublicKey}
+              onSuccess={onSuccess}
+              onClose={onClose}
             />
           )}
 
@@ -130,17 +134,21 @@ const PaymentScreen = ({
             <PaystackUsd
               currency={currency}
               amount={amount}
-              userEmail={userEmail}
+              email={email}
               paystackPublicKey={paystackPublicKey}
+              onSuccess={onSuccess}
+              onClose={onClose}
             />
           )}
 
           {selectedPaymentGateway === "paysofter" && (
             <Paysofter
-              userEmail={userEmail}
+              email={email}
               currency={currency}
               amount={amount}
               paysofterPublicKey={paysofterPublicKey}
+              onSuccess={onSuccess}
+              onClose={onClose}
             />
           )}
         </View>

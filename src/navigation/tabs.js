@@ -107,7 +107,7 @@ export const HomeTabs = () => {
           paddingBottom: 5,
         },
         tabBarActiveTintColor: "#fff",
-        tabBarInactiveTintColor: "#6c757d",
+        tabBarInactiveTintColor: "#cbd5e1",
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           if (route.name === "Home") {

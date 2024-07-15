@@ -22,6 +22,7 @@ import {
   faMapMarkerAlt,
   faPlusSquare,
 } from "@fortawesome/free-solid-svg-icons";
+import { Card } from "react-native-paper";
 import AllPaidAdScreen from "./AllPaidAdScreen";
 import AllFreeAdScreen from "./AllFreeAdScreen";
 import SellerSearchCard from "./SellerSearchCard";
@@ -261,11 +262,23 @@ const Marketplace = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View style={styles.container}>
-          <View>
-            <Quotes />
-          </View>
+        <View style={styles.cardContainer}>
+          <Card style={styles.card}>
+            <Card.Content>
+              <Text style={styles.headerTitle}>Sellangle</Text>
+            </Card.Content>
+          </Card>
+        </View>
 
+        <View style={styles.cardContainer}>
+          <Card style={styles.card}>
+            <Card.Content>
+              <Quotes />
+            </Card.Content>
+          </Card>
+        </View>
+
+        <View style={styles.container}>
           <View style={styles.buttonContainer}>
             <TouchableOpacity onPress={handlePostFreeAd}>
               <Text style={styles.roundedPrimaryBtn}>
@@ -295,97 +308,116 @@ const Marketplace = () => {
           </View> */}
 
           <View style={styles.searchContainer}>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search by Seller Username"
-              value={sellerUsername}
-              onChangeText={(text) => setSellerUsername(text)}
-            />
-            <Button title="Search" onPress={handleSellerUsernameSearch} />
+            <View style={styles.cardContainer}>
+              <Card style={styles.card}>
+                <Card.Content>
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search by Seller Username"
+                    value={sellerUsername}
+                    onChangeText={(text) => setSellerUsername(text)}
+                  />
+                  <Button title="Search" onPress={handleSellerUsernameSearch} />
+                </Card.Content>
+              </Card>
+            </View>
           </View>
 
           <View style={styles.locationContainer}>
-            <View style={styles.location}>
-              <Text style={styles.title}>
-                <FontAwesomeIcon icon={faMapMarkerAlt} size={14} />
-                Ad Location ({freeAdLength + paidAdLength} ads)
-              </Text>
-            </View>
+            <View style={styles.cardContainer}>
+              <Card style={styles.card}>
+                <Card.Content>
+                  <View style={styles.location}>
+                    <Text style={styles.title}>
+                      <FontAwesomeIcon icon={faMapMarkerAlt} size={14} />
+                      Ad Location ({freeAdLength + paidAdLength} ads)
+                    </Text>
+                  </View>
 
-            <View>
-              <Text style={styles.pickerLabel}>Country:</Text>
-              <View style={styles.adLocation}>
-                <Picker
-                  selectedValue={selectedCountry}
-                  onValueChange={handleCountryChange}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select Country" value="" />
-                  {Country.getAllCountries().map((country) => (
-                    <Picker.Item
-                      key={country.isoCode}
-                      label={country.name}
-                      value={country.isoCode}
-                    />
-                  ))}
-                </Picker>
-              </View>
-            </View>
+                  <View>
+                    <Text style={styles.pickerLabel}>Country:</Text>
+                    <View style={styles.adLocation}>
+                      <Picker
+                        selectedValue={selectedCountry}
+                        onValueChange={handleCountryChange}
+                        style={styles.picker}
+                      >
+                        <Picker.Item label="Select Country" value="" />
+                        {Country.getAllCountries().map((country) => (
+                          <Picker.Item
+                            key={country.isoCode}
+                            label={country.name}
+                            value={country.isoCode}
+                          />
+                        ))}
+                      </Picker>
+                    </View>
+                  </View>
 
-            <View>
-              <Text style={styles.pickerLabel}>State/Province:</Text>
-              <View style={styles.adLocation}>
-                <Picker
-                  selectedValue={selectedState}
-                  onValueChange={handleStateChange}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select State/Province" value="" />
-                  {State.getStatesOfCountry(selectedCountry).map((state) => (
-                    <Picker.Item
-                      key={state.isoCode}
-                      label={state.name}
-                      value={state.isoCode}
-                    />
-                  ))}
-                </Picker>
-              </View>
-            </View>
+                  <View>
+                    <Text style={styles.pickerLabel}>State/Province:</Text>
+                    <View style={styles.adLocation}>
+                      <Picker
+                        selectedValue={selectedState}
+                        onValueChange={handleStateChange}
+                        style={styles.picker}
+                      >
+                        <Picker.Item label="Select State/Province" value="" />
+                        {State.getStatesOfCountry(selectedCountry).map(
+                          (state) => (
+                            <Picker.Item
+                              key={state.isoCode}
+                              label={state.name}
+                              value={state.isoCode}
+                            />
+                          )
+                        )}
+                      </Picker>
+                    </View>
+                  </View>
 
-            <View>
-              <Text style={styles.pickerLabel}>City:</Text>
-              <View style={styles.adLocation}>
-                <Picker
-                  selectedValue={selectedCity}
-                  onValueChange={handleCityChange}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select City" value="" />
-                  {City.getCitiesOfState(selectedCountry, selectedState).map(
-                    (city) => (
-                      <Picker.Item
-                        key={city.name}
-                        label={city.name}
-                        value={city.name}
-                      />
-                    )
-                  )}
-                </Picker>
-              </View>
+                  <View>
+                    <Text style={styles.pickerLabel}>City:</Text>
+                    <View style={styles.adLocation}>
+                      <Picker
+                        selectedValue={selectedCity}
+                        onValueChange={handleCityChange}
+                        style={styles.picker}
+                      >
+                        <Picker.Item label="Select City" value="" />
+                        {City.getCitiesOfState(
+                          selectedCountry,
+                          selectedState
+                        ).map((city) => (
+                          <Picker.Item
+                            key={city.name}
+                            label={city.name}
+                            value={city.name}
+                          />
+                        ))}
+                      </Picker>
+                    </View>
+                  </View>
+                </Card.Content>
+              </Card>
             </View>
           </View>
 
-          <View>
-            <FilterBar
-              selectedCategory={selectedCategory}
-              selectedType={selectedType}
-              setSelectedType={setSelectedType}
-              setSelectedCategory={setSelectedCategory}
-              freeAds={freeAds}
-              paidAds={paidAds}
-              onCategoryChange={handleCategoryChange}
-              onTypeChange={handleTypeChange}
-            />
+          <View style={styles.cardContainer}>
+            <Card style={styles.card}>
+              <Card.Content>
+                <FilterBar
+                  selectedCategory={selectedCategory}
+                  selectedType={selectedType}
+                  setSelectedType={setSelectedType}
+                  setSelectedCategory={setSelectedCategory}
+                  freeAds={freeAds}
+                  paidAds={paidAds}
+                  onCategoryChange={handleCategoryChange}
+                  onTypeChange={handleTypeChange}
+                />
+              </Card.Content>
+            </Card>
           </View>
 
           <View>
@@ -406,24 +438,32 @@ const Marketplace = () => {
             )}
           </View>
 
-          <View style={styles.adContainer}>
-            <AllPaidAdScreen
-              selectedCountry={selectedCountry}
-              selectedState={selectedState}
-              selectedCity={selectedCity}
-              // paidAds={filteredPaidAds}
-              // paidAds={selectedType ? filteredPaidAds : paidAds}
-              paidAds={filteredPaidAds || paidAds}
-            />
-          </View>
+          {/* <View style={styles.adContainer}> */}
+            <Card style={styles.card}>
+              <Card.Content>
+                <AllPaidAdScreen
+                  selectedCountry={selectedCountry}
+                  selectedState={selectedState}
+                  selectedCity={selectedCity}
+                  // paidAds={filteredPaidAds}
+                  // paidAds={selectedType ? filteredPaidAds : paidAds}
+                  paidAds={filteredPaidAds || paidAds}
+                />
+              </Card.Content>
+            </Card>
+          {/* </View> */}
 
           <View style={styles.adContainer}>
-            <AllFreeAdScreen
-              selectedCountry={selectedCountry}
-              selectedState={selectedState}
-              selectedCity={selectedCity}
-              freeAds={filteredFreeAds || freeAds}
-            />
+            <Card style={styles.card}>
+              <Card.Content>
+                <AllFreeAdScreen
+                  selectedCountry={selectedCountry}
+                  selectedState={selectedState}
+                  selectedCity={selectedCity}
+                  freeAds={filteredFreeAds || freeAds}
+                />
+              </Card.Content>
+            </Card>
           </View>
         </View>
       </ScrollView>
@@ -445,6 +485,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     // padding: 5,
   },
+  headerTitle: {
+    textAlign: "center",
+    fontSize: 24,
+    marginBottom: 20,
+    fontWeight: "bold",
+    padding: 3,
+  },
   headerContainer: {
     padding: 20,
     backgroundColor: "#6c757d",
@@ -452,8 +499,8 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: "row",
-    padding: 10,
-    alignItems: "center",
+    padding: 2,
+    // alignItems: "center",
     justifyContent: "center",
   },
   searchInput: {
@@ -510,6 +557,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
+  },
+  cardContainer: {
+    padding: 3,
   },
 });
 

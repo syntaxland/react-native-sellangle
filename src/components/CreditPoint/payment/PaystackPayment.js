@@ -5,24 +5,25 @@ import {
   Text,
   Button,
   StyleSheet,
-  Modal,
   ScrollView,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { Paystack } from "react-native-paystack-webview";
-import { buyCreditPoint } from "../../../redux/actions/creditPointActions";
-import Loader from "../../../Loader";
-import Message from "../../../Message";
+// import { buyCreditPoint } from "../../../redux/actions/creditPointActions";
+// import Loader from "../../../Loader";
+// import Message from "../../../Message";
 import { formatAmount } from "../../../FormatAmount";
 
 const PaystackPayment = ({
   currency,
   amount,
   paystackPublicKey,
-  userEmail,
+  email,
+  onSuccess,
+  onClose,
 }) => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
@@ -34,29 +35,29 @@ const PaystackPayment = ({
     }
   }, [userInfo, navigation]);
 
-  const buyCreditPointState = useSelector((state) => state.buyCreditPointState);
-  const { success, error, loading } = buyCreditPointState;
+  // const buyCreditPointState = useSelector((state) => state.buyCreditPointState);
+  // const { success, error, loading } = buyCreditPointState;
 
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => {
-        navigation.navigate("Home");
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [success, navigation]);
+  // useEffect(() => {
+  //   if (success) {
+  //     const timer = setTimeout(() => {
+  //       navigation.navigate("Home");
+  //     }, 5000);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [success, navigation]);
 
-  const creditPointData = {
-    amount: amount,
-  };
+  // const creditPointData = {
+  //   amount: amount,
+  // };
 
-  const handlePayment = () => {
-    dispatch(buyCreditPoint(creditPointData));
-  };
+  // const handlePayment = () => {
+  //   dispatch(buyCreditPoint(creditPointData));
+  // };
 
-  const onSuccess = () => {
-    handlePayment();
-  };
+  // const onSuccess = () => {
+  //   handlePayment();
+  // };
 
   const [paymentInitiated, setPaymentInitiated] = useState(false);
 
@@ -72,14 +73,14 @@ const PaystackPayment = ({
       <View style={styles.container}>
         <Text style={styles.header}>Paystack Payment Option</Text>
 
-        {loading && <Loader />}
+        {/* {loading && <Loader />}
         {error && <Message variant="danger">{error}</Message>}
 
         {success && (
           <Message variant="success">
             You have received {amount} credit points.
           </Message>
-        )}
+        )} */}
 
         <View style={styles.infoContainer}>
           <Text>
@@ -103,11 +104,12 @@ const PaystackPayment = ({
               paystackKey={paystackPublicKey}
               amount={amount}
               // amount={amount * 100}
-              billingEmail={userEmail}
+              billingEmail={email}
               // billingMobile="1234567890"
               reference={`ref_${Math.floor(Math.random() * 1000000000)}`}
               activityIndicatorColor="green"
-              onCancel={() => setPaymentInitiated(false)}
+              onCancel={onClose}
+              // onCancel={() => setPaymentInitiated(false)}
               onSuccess={onSuccess}
               onError={(error) => console.log(error)}
               autoStart={true}

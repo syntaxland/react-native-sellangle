@@ -11,7 +11,6 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 const ConfirmPaysofterPromise = () => {
-  // const dispatch = useDispatch();  
   const navigation = useNavigation();
 
 
@@ -25,11 +24,6 @@ const ConfirmPaysofterPromise = () => {
   }, [userInfo, navigation]);
 
   const handleConfirmPromise = () => {
-    // navigation.reset({
-    //   index: 0,
-    //   routes: [{ name: "PaysofterPromise" }],
-    // });
-
     Linking.openURL("https://paysofter.com/promise/buyer");
   };
 

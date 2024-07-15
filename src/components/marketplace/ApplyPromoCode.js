@@ -5,17 +5,29 @@ import {
   View,
   Text,
   TextInput,
-  Button,
-  ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { applyPromoCode } from "../../redux/actions/marketplaceSellerActions";
+import { useNavigation } from "@react-navigation/native";
+import {
+  applyPromoCode,
+  // resetApplyPromoCode,
+} from "../../redux/actions/marketplaceSellerActions";
 import Message from "../../Message";
 import Loader from "../../Loader";
 
-const ApplyPromoCode = ({ adId }) => {
+const ApplyPromoCode = ({ adId, selectedQty }) => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
+
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+
+  useEffect(() => {
+    if (!userInfo) {
+      navigation.navigate("Login");
+    }
+  }, [userInfo]);
 
   const applyPromoCodeState = useSelector((state) => state.applyPromoCodeState);
   const { loading, success, discountPercentage, error } = applyPromoCodeState;
@@ -25,6 +37,7 @@ const ApplyPromoCode = ({ adId }) => {
   const applyCodeHandler = () => {
     const promoData = {
       ad_id: adId,
+      selected_qty: selectedQty,
       promo_code: promoCode.trim(),
     };
 
@@ -34,7 +47,7 @@ const ApplyPromoCode = ({ adId }) => {
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
-        // Add any success handling here, e.g., navigation or state reset
+        // dispatch(resetApplyPromoCode());
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -42,7 +55,6 @@ const ApplyPromoCode = ({ adId }) => {
 
   return (
     <View style={styles.container}>
-      {/* {loading && <ActivityIndicator size="large" color="#0000ff" />} */}
       {loading && <Loader />}
       {error && <Message variant="danger">{error}</Message>}
       {success && (
@@ -63,7 +75,10 @@ const ApplyPromoCode = ({ adId }) => {
         <TouchableOpacity
           style={[
             styles.button,
-            { backgroundColor: loading || success || promoCode === "" ? "gray" : "red" },
+            {
+              backgroundColor:
+                loading || success || promoCode === "" ? "gray" : "red",
+            },
           ]}
           onPress={applyCodeHandler}
           disabled={loading || success || promoCode === ""}
@@ -77,7 +92,7 @@ const ApplyPromoCode = ({ adId }) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    padding: 2,
   },
   form: {
     flexDirection: "row",
@@ -106,4 +121,3 @@ const styles = StyleSheet.create({
 });
 
 export default ApplyPromoCode;
-

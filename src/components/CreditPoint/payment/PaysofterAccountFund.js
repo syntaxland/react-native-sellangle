@@ -17,6 +17,7 @@ import {
   faEye,
   faEyeSlash,
 } from "@fortawesome/free-solid-svg-icons";
+import { Card } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { debitPaysofterAccountFund } from "../../../redux/actions/paymentActions";
@@ -29,12 +30,13 @@ import { formatAmount } from "../../../FormatAmount";
 const PaysofterAccountFund = ({
   amount,
   paymentData,
-    paysofterPublicKey,
-  reference,
-  userEmail,
+  paysofterPublicKey,
+  email,
   duration,
   paymenthMethod,
   currency,
+  onSuccess,
+  onClose,
 }) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -76,7 +78,7 @@ const PaysofterAccountFund = ({
     account_id: accountId,
     security_code: securityCode,
     amount: amount,
-        public_api_key: paysofterPublicKey,
+    public_api_key: paysofterPublicKey,
   };
 
   const submitHandler = async (e) => {
@@ -108,203 +110,214 @@ const PaysofterAccountFund = ({
     Linking.openURL("https://paysofter.com/");
   };
 
-  console.log(
-    "PaysofterAccountFund",
-    debitAccountData
-  );
+  console.log("PaysofterAccountFund", debitAccountData);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {showVerifyAccountFundOtp ? (
-        <VerifyAccountFundOtp
-          amount={amount}
-          paymentData={paymentData}
-          reference={reference}
-          currency={currency}
-          userEmail={userEmail}
-          securityCode={securityCode}
-          accountId={accountId}
-          formattedPayerEmail={formattedPayerEmail}
-          duration={duration}
-          paymenthMethod={paymenthMethod}
-        />
-      ) : (
-        <>
-          <View style={styles.header}>
-            {/* <Text style={styles.title}>Paysofter Account Fund</Text>
+      <Card style={styles.card}>
+        <Card.Content>
+          {showVerifyAccountFundOtp ? (
+            <VerifyAccountFundOtp
+              amount={amount}
+              paymentData={paymentData}
+              currency={currency}
+              email={email}
+              securityCode={securityCode}
+              accountId={accountId}
+              formattedPayerEmail={formattedPayerEmail}
+              duration={duration}
+              paymenthMethod={paymenthMethod}
+              onSuccess={onSuccess}
+              onClose={onClose}
+            />
+          ) : (
+            <>
+              <View style={styles.header}>
+                {/* <Text style={styles.title}>Paysofter Account Fund</Text>
             <Button title="Info" onPress={handleAccountInfoModalShow} /> */}
-            <View style={styles.labelContainer}>
-              <Text style={styles.title}>Paysofter Account Fund</Text>
-              <TouchableOpacity onPress={handleAccountInfoModalShow}>
-                <FontAwesomeIcon
-                  icon={faInfoCircle}
-                  size={16}
-                  // style={styles.icon}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <Modal
-            visible={showAccountInfoModal}
-            onRequestClose={handleAccountInfoModalClose}
-            transparent={true}
-            animationType="slide"
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Paysofter Account Fund</Text>
-                <Text style={styles.modalText}>
-                  Paysofter Account Fund option settles payments using the
-                  payer's funded Paysofter Account Fund.
-                </Text>
-                <Button title="Learn more" onPress={handleLearnMore} />
-                <Button title="Close" onPress={handleAccountInfoModalClose} />
-              </View>
-            </View>
-          </Modal>
-
-          {success && (
-            <Message variant="success">
-              OTP sent to your email {formattedPayerEmail} successfully.
-            </Message>
-          )}
-          {error && <Message variant="danger">{error}</Message>}
-          {loading && <Loader />}
-
-          <View style={styles.formGroup}>
-            <View style={styles.labelContainer}>
-              <Text style={styles.label}>Account ID </Text>
-              <TouchableOpacity onPress={handleInfoModalShow}>
-                <FontAwesomeIcon
-                  icon={faInfoCircle}
-                  size={16}
-                  // style={styles.icon}
-                />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.row}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter Paysofter Account ID"
-                value={accountId}
-                onChangeText={(text) => setAccountId(text)}
-                maxLength={12}
-              />
-              {/* <Button title="Info" onPress={handleInfoModalShow} /> */}
-            </View>
-          </View>
-
-          <Modal
-            visible={showInfoModal}
-            onRequestClose={handleInfoModalClose}
-            transparent={true}
-            animationType="slide"
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Paysofter Account ID</Text>
-                <Text style={styles.modalText}>
-                  A uniquely assigned 12-digit Paysofter Account ID. Don't have
-                  a Paysofter account? You're just about 3 minutes away!
-                </Text>
-                <View style={styles.learnMoreBtn}>
-                  <Button
-                    title="Create A Free Account"
-                    onPress={() => {
-                      Linking.openURL("https://paysofter.com/register/");
-                    }}
-                  />
+                <View style={styles.labelContainer}>
+                  <Text style={styles.title}>Paysofter Account Fund</Text>
+                  <TouchableOpacity onPress={handleAccountInfoModalShow}>
+                    <FontAwesomeIcon
+                      icon={faInfoCircle}
+                      size={16}
+                      // style={styles.icon}
+                    />
+                  </TouchableOpacity>
                 </View>
-                <Button title="Close" onPress={handleInfoModalClose} />
               </View>
-            </View>
-          </Modal>
 
-          <View style={styles.formGroup}>
-            <View style={styles.labelContainer}>
-              <Text style={styles.label}>Security Code </Text>
-              <TouchableOpacity onPress={handleSecurityCodeModalShow}>
-                <FontAwesomeIcon
-                  icon={faInfoCircle}
-                  size={16}
-                  // style={styles.icon}
-                />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.row}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter Account Security Code"
-                value={securityCode}
-                onChangeText={(text) => setSecurityCode(text)}
-                secureTextEntry={!securityCodeVisible}
-                maxLength={4}
-              />
-              {/* <Button title="Info" onPress={handleSecurityCodeModalShow} /> */}
-              <TouchableOpacity onPress={toggleSecurityCodeVisibility}>
-                {/* <Text>{securityCodeVisible ? "Hide" : "Show"}</Text> */}
+              <Modal
+                visible={showAccountInfoModal}
+                onRequestClose={handleAccountInfoModalClose}
+                transparent={true}
+                animationType="slide"
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>
+                      Paysofter Account Fund
+                    </Text>
+                    <Text style={styles.modalText}>
+                      Paysofter Account Fund option settles payments using the
+                      payer's funded Paysofter Account Fund.
+                    </Text>
+                    <Button title="Learn more" onPress={handleLearnMore} />
+                    <Button
+                      title="Close"
+                      onPress={handleAccountInfoModalClose}
+                    />
+                  </View>
+                </View>
+              </Modal>
 
-                <Text>
-                  {securityCodeVisible ? (
-                    <>
-                      <FontAwesomeIcon
-                        icon={faEyeSlash}
-                        size={16}
-                        style={styles.icon}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <FontAwesomeIcon
-                        icon={faEye}
-                        size={16}
-                        style={styles.icon}
-                      />
-                    </>
-                  )}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+              {success && (
+                <Message variant="success">
+                  OTP sent to your email {formattedPayerEmail} successfully.
+                </Message>
+              )}
+              {error && <Message variant="danger">{error}</Message>}
+              {loading && <Loader />}
 
-          <Modal
-            visible={showSecurityCodeModal}
-            onRequestClose={handleSecurityCodeModalClose}
-            transparent={true}
-            animationType="slide"
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>
-                  Paysofter Account Security Code
-                </Text>
-                <Text style={styles.modalText}>
-                  A 4-digit randomly generated Paysofter Account Security Code
-                  that expires at a given time. Having issue applying the
-                  security code? Refresh your paysofter account page, logout and
-                  login, or clear browsing data.
-                </Text>
-                <Button
-                  title="Learn More"
-                  onPress={() => {
-                    /* Link to paysofter.com */
-                  }}
-                />
-                <Button title="Close" onPress={handleSecurityCodeModalClose} />
+              <View style={styles.formGroup}>
+                <View style={styles.labelContainer}>
+                  <Text style={styles.label}>Account ID </Text>
+                  <TouchableOpacity onPress={handleInfoModalShow}>
+                    <FontAwesomeIcon
+                      icon={faInfoCircle}
+                      size={16}
+                      // style={styles.icon}
+                    />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.row}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter Paysofter Account ID"
+                    value={accountId}
+                    onChangeText={(text) => setAccountId(text)}
+                    maxLength={12}
+                  />
+                  {/* <Button title="Info" onPress={handleInfoModalShow} /> */}
+                </View>
               </View>
-            </View>
-          </Modal>
 
-          <View style={styles.submitContainer}>
-            <TouchableOpacity onPress={submitHandler}>
-              <Text style={styles.roundedPrimaryBtn}>{`Pay (${formatAmount(
-                amount
-              )} ${currency})`}</Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
+              <Modal
+                visible={showInfoModal}
+                onRequestClose={handleInfoModalClose}
+                transparent={true}
+                animationType="slide"
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Paysofter Account ID</Text>
+                    <Text style={styles.modalText}>
+                      A uniquely assigned 12-digit Paysofter Account ID. Don't
+                      have a Paysofter account? You're just about 3 minutes
+                      away!
+                    </Text>
+                    <View style={styles.learnMoreBtn}>
+                      <Button
+                        title="Create A Free Account"
+                        onPress={() => {
+                          Linking.openURL("https://paysofter.com/register/");
+                        }}
+                      />
+                    </View>
+                    <Button title="Close" onPress={handleInfoModalClose} />
+                  </View>
+                </View>
+              </Modal>
+
+              <View style={styles.formGroup}>
+                <View style={styles.labelContainer}>
+                  <Text style={styles.label}>Security Code </Text>
+                  <TouchableOpacity onPress={handleSecurityCodeModalShow}>
+                    <FontAwesomeIcon
+                      icon={faInfoCircle}
+                      size={16}
+                      // style={styles.icon}
+                    />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.row}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter Account Security Code"
+                    value={securityCode}
+                    onChangeText={(text) => setSecurityCode(text)}
+                    secureTextEntry={!securityCodeVisible}
+                    maxLength={4}
+                  />
+                  {/* <Button title="Info" onPress={handleSecurityCodeModalShow} /> */}
+                  <TouchableOpacity onPress={toggleSecurityCodeVisibility}>
+                    {/* <Text>{securityCodeVisible ? "Hide" : "Show"}</Text> */}
+
+                    <Text>
+                      {securityCodeVisible ? (
+                        <>
+                          <FontAwesomeIcon
+                            icon={faEyeSlash}
+                            size={16}
+                            style={styles.icon}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <FontAwesomeIcon
+                            icon={faEye}
+                            size={16}
+                            style={styles.icon}
+                          />
+                        </>
+                      )}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <Modal
+                visible={showSecurityCodeModal}
+                onRequestClose={handleSecurityCodeModalClose}
+                transparent={true}
+                animationType="slide"
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>
+                      Paysofter Account Security Code
+                    </Text>
+                    <Text style={styles.modalText}>
+                      A 4-digit randomly generated Paysofter Account Security
+                      Code that expires at a given time. Having issue applying
+                      the security code? Refresh your paysofter account page,
+                      logout and login, or clear browsing data.
+                    </Text>
+                    <Button
+                      title="Learn More"
+                      onPress={() => {
+                        /* Link to paysofter.com */
+                      }}
+                    />
+                    <Button
+                      title="Close"
+                      onPress={handleSecurityCodeModalClose}
+                    />
+                  </View>
+                </View>
+              </Modal>
+
+              <View style={styles.submitContainer}>
+                <TouchableOpacity onPress={submitHandler}>
+                  <Text style={styles.roundedPrimaryBtn}>{`Pay (${formatAmount(
+                    amount
+                  )} ${currency})`}</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </Card.Content>
+      </Card>
     </ScrollView>
   );
 };
@@ -321,6 +334,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10,
   },
   modalOverlay: {
     flex: 1,
@@ -338,6 +353,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
+    textAlign: "center",
   },
   modalText: {
     fontSize: 16,

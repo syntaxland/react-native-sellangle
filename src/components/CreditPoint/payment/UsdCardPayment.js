@@ -1,22 +1,17 @@
 // UsdCardPayment.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   TextInput,
-  Button,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-// import DatePicker from "react-native-date-picker";
+import { Picker } from "@react-native-picker/picker";
+import { Card } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  buyUsdCreditPoint,
-  resetbuyUsdCreditPointState,
-} from "../../../redux/actions/creditPointActions";
 import {
   createPaysofterPayment,
   resetCreatePaysofterPaymentState,
@@ -24,16 +19,27 @@ import {
 import Message from "../../../Message";
 import Loader from "../../../Loader";
 import { formatAmount } from "../../../FormatAmount";
+import { MONTH_CHOICES, YEAR_CHOICES } from "./payment-constants";
 
 const UsdCardPayment = ({
   amount,
   currency,
   reference,
-  userEmail,
+  email,
   paysofterPublicKey,
+  onSuccess,
+  onClose,
 }) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
+
+  const [monthChoices, setMonthChoices] = useState([]);
+  const [yearChoices, setYearChoices] = useState([]);
+
+  useEffect(() => {
+    setMonthChoices(MONTH_CHOICES);
+    setYearChoices(YEAR_CHOICES);
+  }, []);
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -45,33 +51,32 @@ const UsdCardPayment = ({
   }, [userInfo]);
 
   const createdAt = new Date().toISOString();
-  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [hasHandledSuccess, setHasHandledSuccess] = useState(false);
 
   const paysofterPayment = useSelector((state) => state.paysofterPayment);
   const { loading, success, error } = paysofterPayment;
 
-  const buyUsdCreditPointState = useSelector(
-    (state) => state.buyUsdCreditPointState
-  );
-  const {
-    success: buyUsdCreditPointSuccess,
-    error: buyUsdCreditPointError,
-    loading: buyUsdCreditPointLoading,
-  } = buyUsdCreditPointState;
-
   const [cardType, setCardType] = useState("");
   const [paymentDetails, setPaymentDetails] = useState({
     cardNumber: "",
-    expirationMonthYear: new Date(),
+    expirationMonth: "",
+    expirationYear: "",
     cvv: "",
   });
 
-  const [isExpirationMonthYearSelected, setIsExpirationMonthYearSelected] =
-    useState(false);
+  const formatCard = (value) => {
+    return value
+      .replace(/\s?/g, "")
+      .replace(/(\d{4})/g, "$1 ")
+      .trim();
+  };
 
   const handlePaymentDetailsChange = (name, value) => {
-    let detectedCardType = "";
     if (name === "cardNumber") {
+      value = formatCard(value);
+      let detectedCardType = "";
       if (/^4/.test(value)) {
         detectedCardType = "Visa";
       } else if (/^5[1-5]/.test(value)) {
@@ -79,13 +84,15 @@ const UsdCardPayment = ({
       }
       setCardType(detectedCardType);
     }
+
     setPaymentDetails({ ...paymentDetails, [name]: value });
   };
 
   const isFormValid = () => {
     return (
-      isExpirationMonthYearSelected &&
       paymentDetails.cardNumber &&
+      paymentDetails.expirationMonth &&
+      paymentDetails.expirationYear &&
       paymentDetails.cvv
     );
   };
@@ -93,159 +100,134 @@ const UsdCardPayment = ({
   const submitHandler = () => {
     const paysofterPaymentData = {
       payment_id: reference,
-      email: userEmail,
-      amount: amount,
+      email: email,
       currency: currency,
+      amount: amount,
       public_api_key: paysofterPublicKey,
       created_at: createdAt,
       card_number: paymentDetails.cardNumber,
-      expiration_month_year: paymentDetails.expirationMonthYear,
+      expiration_month: paymentDetails.expirationMonth,
+      expiration_year: paymentDetails.expirationYear,
       cvv: paymentDetails.cvv,
     };
 
     dispatch(createPaysofterPayment(paysofterPaymentData));
   };
 
-  const creditPointData = {
-    amount: amount,
-  };
+  const handleOnSuccess = useCallback(() => {
+    onSuccess();
+  }, [onSuccess]);
 
-  const handleDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || paymentDetails.expirationMonthYear;
-    setShowDatePicker(false);
-    setPaymentDetails({
-      ...paymentDetails,
-      expirationMonthYear: currentDate,
-    });
-    setIsExpirationMonthYearSelected(!!selectedDate);
-  };
+  const handleOnClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
 
   useEffect(() => {
-    if (success) {
-      dispatch(buyUsdCreditPoint(creditPointData));
-      // const timer = setTimeout(() => {}, 5000);
-      // return () => clearTimeout(timer);
-    }
-  }, [dispatch, success]);
-
-  useEffect(() => {
-    if (buyUsdCreditPointSuccess) {
+    if (success && !hasHandledSuccess) {
+      setShowSuccessMessage(true);
+      setHasHandledSuccess(true);
+      handleOnSuccess();
       dispatch(resetCreatePaysofterPaymentState());
-      dispatch(resetbuyUsdCreditPointState());
-
-      const timer = setTimeout(() => {
-        navigation.navigate("Home");
-      }, 5000);
-
-      return () => clearTimeout(timer);
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+        handleOnClose();
+      }, 3000);
     }
-  }, [buyUsdCreditPointSuccess, navigation, dispatch]);
+  }, [dispatch, success, hasHandledSuccess, handleOnSuccess, handleOnClose]);
 
-  console.log("UsdCardPayment", amount);
+  console.log("CardPayment", amount);
 
   return (
     <ScrollView>
       <View style={styles.container}>
-        <Text style={styles.header}>Debit Card</Text>
-        <Text style={styles.message}>
-          {success && (
-            <Message variant="success">Payment made successfully.</Message>
-          )}
-        </Text>
-        {error && <Message variant="danger">{error}</Message>}
-        {loading && <Loader />}
-        {buyUsdCreditPointLoading && (
-          <Text style={styles.message}>
-            {" "}
-            Creating CPS ... <Loader />{" "}
-          </Text>
-        )}
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text style={styles.header}>Debit Card</Text>
+            {showSuccessMessage && (
+              <Message variant="success">Payment made successfully.</Message>
+            )}
+            {error && <Message variant="danger">{error}</Message>}
+            {loading && <Loader />}
 
-          {buyUsdCreditPointSuccess && (
-            <Message variant="success">
-              Your account has been credited with the CPS purchased for {amount}{" "}
-              {currency}.
-            </Message>
-          )}
-        {buyUsdCreditPointError && (
-          <Message variant="danger">{buyUsdCreditPointError}</Message>
-        )}
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Card Number</Text>
+              <TextInput
+                style={styles.input}
+                value={paymentDetails.cardNumber}
+                onChangeText={(value) =>
+                  handlePaymentDetailsChange("cardNumber", value)
+                }
+                placeholder="1234 5678 9012 3456"
+                keyboardType="numeric"
+                maxLength={19}
+              />
+              {cardType ? <Text>Detected Card Type: {cardType}</Text> : null}
+            </View>
 
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Card Number</Text>
-          <TextInput
-            style={styles.input}
-            value={paymentDetails.cardNumber}
-            onChangeText={(value) =>
-              handlePaymentDetailsChange("cardNumber", value)
-            }
-            placeholder="1234 5678 9012 3456"
-            keyboardType="numeric"
-            maxLength={16}
-          />
-          {cardType ? <Text>Detected Card Type: {cardType}</Text> : null}
-        </View>
+            <View style={styles.spaceBtwGroup}>
+              <Text style={styles.label}>Expiration Month</Text>
+              <View style={styles.dateContainer}>
+                <Picker
+                  selectedValue={paymentDetails.expirationMonth}
+                  // style={styles.picker}
+                  onValueChange={(value) =>
+                    handlePaymentDetailsChange("expirationMonth", value)
+                  }
+                >
+                  <Picker.Item label="Select Month" value="" />
+                  {monthChoices.map(([value, label]) => (
+                    <Picker.Item key={value} label={label} value={value} />
+                  ))}
+                </Picker>
+              </View>
 
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Expiration Month/Year</Text>
-          <Button
-            title="Select Expiration Date"
-            onPress={() => setShowDatePicker(true)}
-          />
-          <Text>
-            Selected: {paymentDetails.expirationMonthYear.toLocaleDateString()}
-          </Text>
-          {showDatePicker && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={paymentDetails.expirationMonthYear}
-              mode="date"
-              display="default"
-              onChange={handleDateChange}
-            />
-          )}
-          {/* <Text style={styles.dateText}>
-            {moment(paymentDetails.expirationMonthYear).format("YYYY-MM")}
-          </Text> */}
-        </View>
+              <Text style={styles.label}>Expiration Year</Text>
+              <View style={styles.dateContainer}>
+                <Picker
+                  selectedValue={paymentDetails.expirationYear}
+                  // style={styles.picker}
+                  onValueChange={(value) =>
+                    handlePaymentDetailsChange("expirationYear", value)
+                  }
+                >
+                  <Picker.Item label="Select Year" value="" />
+                  {yearChoices.map(([value, label]) => (
+                    <Picker.Item key={value} label={label} value={value} />
+                  ))}
+                </Picker>
+              </View>
+            </View>
 
-        {/* <View style={styles.formGroup}>
-          <Text style={styles.label}>Expiration Month/Year</Text>
-          <DatePicker
-            date={paymentDetails.expirationMonthYear}
-            onDateChange={(date) => {
-              setPaymentDetails({ ...paymentDetails, expirationMonthYear: date });
-              setIsExpirationMonthYearSelected(!!date);
-            }}
-            mode="date"
-            display="spinner"
-            placeholder="Select month/year"
-            style={styles.datePicker}
-          />
-        </View> */}
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>CVV</Text>
+              <TextInput
+                style={styles.input}
+                value={paymentDetails.cvv}
+                onChangeText={(value) =>
+                  handlePaymentDetailsChange("cvv", value)
+                }
+                placeholder="123"
+                secureTextEntry
+                maxLength={3}
+                keyboardType="numeric"
+              />
+            </View>
 
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>CVV</Text>
-          <TextInput
-            style={styles.input}
-            value={paymentDetails.cvv}
-            onChangeText={(value) => handlePaymentDetailsChange("cvv", value)}
-            placeholder="123"
-            secureTextEntry
-            maxLength={3}
-            keyboardType="numeric"
-          />
-        </View>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={submitHandler}
-          disabled={!isFormValid()}
-        >
-          <Text style={styles.buttonText}>
-            Pay ({formatAmount(amount)} {currency})
-          </Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={
+                !isFormValid()
+                  ? styles.roundedDisabledBtn
+                  : styles.roundedPrimaryBtn
+              }
+              onPress={submitHandler}
+              disabled={!isFormValid() || loading}
+            >
+              <Text style={styles.btnText}>
+                Pay ({formatAmount(amount)} {currency})
+              </Text>
+            </TouchableOpacity>
+          </Card.Content>
+        </Card>
       </View>
     </ScrollView>
   );
@@ -253,15 +235,15 @@ const UsdCardPayment = ({
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: "white",
-    flex: 1,
+    padding: 2,
+    // backgroundColor: "white",
+    // flex: 1,
   },
   header: {
     fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
+    padding: 20,
   },
   formGroup: {
     marginBottom: 15,
@@ -276,12 +258,17 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
   },
-  datePicker: {
-    // width: "100%",
-    // width: 320,
+  dateContainer: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
+    textAlign: "center",
+    justifyContent: "center",
+  },
+  spaceBtwGroup: {
+    // flexDirection: "row",
+    // justifyContent: "space-between",
+    // paddingVertical: 2,
   },
   button: {
     backgroundColor: "#007bff",
@@ -301,6 +288,47 @@ const styles = StyleSheet.create({
     alignItems: "center",
     textAlign: "center",
     justifyContent: "center",
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    padding: 20,
+  },
+  errorContainer: {
+    paddingVertical: 10,
+    alignItems: "center",
+    textAlign: "center",
+    justifyContent: "center",
+  },
+  error: {
+    fontSize: 14,
+    color: "red",
+    textAlign: "center",
+    padding: 10,
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  roundedDisabledBtn: {
+    backgroundColor: "#d3d3d3",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  btnText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
 

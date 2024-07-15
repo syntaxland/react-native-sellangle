@@ -1,12 +1,19 @@
 // Paysofter.js
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import PaysofterButton from "./PaysofterButton";
 import { formatAmount } from "../../../FormatAmount";
 
-const Paysofter = ({ currency, amount, paysofterPublicKey, userEmail }) => {
+const Paysofter = ({
+  currency,
+  amount,
+  paysofterPublicKey,
+  email,
+  onSuccess,
+  onClose,
+}) => {
   const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
@@ -34,10 +41,12 @@ const Paysofter = ({ currency, amount, paysofterPublicKey, userEmail }) => {
 
       <View style={styles.buttonContainer}>
         <PaysofterButton
-          userEmail={userEmail}
+          email={email}
           currency={currency}
           amount={amount}
           paysofterPublicKey={paysofterPublicKey}
+          onSuccess={onSuccess}
+          onClose={onClose}
         />
       </View>
     </ScrollView>
