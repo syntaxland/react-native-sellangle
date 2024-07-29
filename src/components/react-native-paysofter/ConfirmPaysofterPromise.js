@@ -1,6 +1,5 @@
 // ConfirmPaysofterPromise.js
-import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
+import React from "react";
 import {
   View,
   Text,
@@ -8,42 +7,34 @@ import {
   StyleSheet,
   Linking,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { Card } from "react-native-paper";
 
 const ConfirmPaysofterPromise = () => {
-  const navigation = useNavigation();
-
-
-  const userLogin = useSelector((state) => state.userLogin);
-  const { userInfo } = userLogin;
-
-  useEffect(() => {
-    if (!userInfo) {
-      navigation.navigate("Login");
-    }
-  }, [userInfo, navigation]);
-
   const handleConfirmPromise = () => {
     Linking.openURL("https://paysofter.com/promise/buyer");
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.innerContainer}>
-        <Text style={styles.title}>Promise successfully created!</Text>
-        <Text style={styles.description}>
-          Is Promise fulfilled? Check your email or login to your Paysofter
-          account to check out the Promise status to confirm.
-        </Text>
-
-        <View style={styles.formGroup}>
-          <TouchableOpacity onPress={handleConfirmPromise}>
-            <Text style={styles.roundedPrimaryBtn}>
-              Confirm Promise (at Paysofter)
+      <Card style={styles.card}>
+        <Card.Content>
+          <View style={styles.innerContainer}>
+            <Text style={styles.title}>Promise successfully created!</Text>
+            <Text style={styles.description}>
+              Is Promise fulfilled? Check your email or login to your Paysofter
+              account to check out the Promise status to confirm.
             </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+
+            <View style={styles.formGroup}>
+              <TouchableOpacity onPress={handleConfirmPromise}>
+                <Text style={styles.roundedPrimaryBtn}>
+                  Confirm Promise (at Paysofter)
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Card.Content>
+      </Card>
     </View>
   );
 };

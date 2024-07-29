@@ -1,20 +1,8 @@
 // UssdPayment.js
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 
 const UssdPayment = () => {
-  const navigation = useNavigation();
-
-  const userLogin = useSelector((state) => state.userLogin);
-  const { userInfo } = userLogin;
-
-  useEffect(() => {
-    if (!userInfo) {
-      navigation.navigate("Login");
-    }
-  }, [userInfo, navigation]);
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>USSD</Text>

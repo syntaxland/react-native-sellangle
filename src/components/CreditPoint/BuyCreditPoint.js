@@ -10,9 +10,9 @@ import {
 import RNPickerSelect from "react-native-picker-select";
 import { useDispatch, useSelector } from "react-redux";
 import { Card } from "react-native-paper";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native"; 
 import { getPaymentApiKeys } from "../../redux/actions/paymentActions";
-import PaymentScreen from "./payment/PaymentScreen";
+import PaymentScreen from "./PaymentScreen";
 import {
   buyCreditPoint,
   resetbuyCreditPointState,

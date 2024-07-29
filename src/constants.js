@@ -33,7 +33,7 @@ export const PAID_AD_DURATION_CHOICES = [
   ["1 month", "1 month (864.0 cps)"],
 ];
 
-export const PAYMENT_DURATION_CHOICES = [
+export const PAYMENT_DURATION_CHOICES = [ 
   ["Within 1 day", "Within 1 day"],
   ["2 days", "Less than 2 days"],
   ["3 days", "Less than 3 days"],
@@ -50,9 +50,10 @@ export const AD_CONDITION_CHOICES = [
 
 export const AD_CATEGORY_CHOICES = [
   ["Home Appliances", "Home Appliances"],
+  ["Pets", "Pets"],
+  ["Fashion", "Fashion"],
   ["Properties", "Properties"],
   ["Electronics", "Electronics"],
-  ["Fashion", "Fashion"],
   ["Vehicles", "Vehicles"],
   ["Services", "Services"],
   ["Mobile Phones", "Mobile Phones"],
@@ -64,7 +65,6 @@ export const AD_CATEGORY_CHOICES = [
   ["Repairs", "Repairs"],
   ["Equipment & Tools", "Equipment & Tools"],
   ["CVs", "CVs"],
-  ["Pets", "Pets"],
   ["Others", "Others"],
 ];
 

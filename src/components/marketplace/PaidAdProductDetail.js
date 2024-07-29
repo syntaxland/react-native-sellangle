@@ -36,7 +36,7 @@ import ReportPaidAd from "./ReportPaidAd";
 import TogglePaidAdSave from "./TogglePaidAdSave";
 import ReviewPaidAdSeller from "./ReviewPaidAdSeller";
 import Carousel from "react-native-reanimated-carousel";
-import Paysofter from "../MarketplacePayment/Paysofter";
+import { Paysofter } from "../react-native-paysofter/Paysofter";
 import Loader from "../../Loader";
 import Message from "../../Message";
 import RatingSeller from "../../RatingSeller";
@@ -73,6 +73,7 @@ const PaidAdProductDetail = () => {
     sellerRating,
     sellerReviewCount,
   } = getPaidAdDetailState;
+  console.log("sellerApiKey", sellerApiKey);
 
   const applyPromoCodeState = useSelector((state) => state.applyPromoCodeState);
   const { discountPercentage, promoDiscount } = applyPromoCodeState;
@@ -88,7 +89,6 @@ const PaidAdProductDetail = () => {
   };
 
   const promoTotalPrice = calculateTotalPrice() - promoDiscount;
-  console.log("promoTotalPrice", promoTotalPrice);
 
   const [showPhoneNumber, setShowPhoneNumber] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -527,6 +527,10 @@ const PaidAdProductDetail = () => {
               paysofterPublicKey={sellerApiKey}
               onSuccess={onSuccess}
               onClose={onClose}
+              payment_id={`PID${Math.floor(Math.random() * 100000000000000)}`}
+              showPromiseOption={true}
+              showFundOption={true}
+              showCardOption={true}
             />
           )}
         </>

@@ -13,9 +13,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
-import PaystackPayment from "./PaystackPayment";
-import PaystackUsd from "./PaystackUsd";
-import Paysofter from "./Paysofter";
+import PaystackPayment from "./payment/PaystackPayment";
+import PaystackUsd from "./payment/PaystackUsd";
+import { Paysofter } from "../react-native-paysofter/Paysofter";
 
 const PaymentScreen = ({
   amount,
@@ -143,13 +143,19 @@ const PaymentScreen = ({
 
           {selectedPaymentGateway === "paysofter" && (
             <Paysofter
-              email={email}
-              currency={currency}
-              amount={amount}
-              paysofterPublicKey={paysofterPublicKey}
-              onSuccess={onSuccess}
-              onClose={onClose}
-            />
+                email={email}
+                currency={currency}
+                amount={amount}
+                paysofterPublicKey={paysofterPublicKey}
+                onSuccess={onSuccess}
+                onClose={onClose}
+                payment_id={`PID${Math.floor(
+                  Math.random() * 100000000000000
+                )}`}
+                showPromiseOption={true}
+                showFundOption={true}
+                showCardOption={true}
+              /> 
           )}
         </View>
       </View>

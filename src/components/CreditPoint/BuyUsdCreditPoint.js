@@ -12,7 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Card } from "react-native-paper";
 import RNPickerSelect from "react-native-picker-select";
 import { getPaymentApiKeys } from "../../redux/actions/paymentActions";
-import PaymentScreen from "./payment/PaymentScreen";
+import PaymentScreen from "./PaymentScreen";
 import {
   buyUsdCreditPoint,
   resetbuyUsdCreditPointState,

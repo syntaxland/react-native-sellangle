@@ -17,15 +17,14 @@ import {
   faEyeSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import { Card } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
-import { debitPaysofterAccountFund } from "../../redux/actions/paymentActions";
 import VerifyAccountFundPromiseOtp from "./VerifyAccountFundPromiseOtp";
-// import VerifyUsdAccountFundPromiseOtp from "./VerifyUsdAccountFundPromiseOtp";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Message from "../../Message";
-import Loader from "../../Loader";
-import { formatAmount } from "../../FormatAmount";
+import Message from "./Message";
+import MessageFixed from "./MessageFixed";
+import Loader from "./Loader";
+import { formatAmount } from "./FormatAmount";
+import { PAYSOFTER_API_URL } from "./config/apiConfig";
+import axios from "axios";
 
 const PaysofterAccountFundPromise = ({
   email,
@@ -36,23 +35,10 @@ const PaysofterAccountFundPromise = ({
   onSuccess,
   onClose,
 }) => {
-  const dispatch = useDispatch();
-  const navigation = useNavigation();
-
-  const userLogin = useSelector((state) => state.userLogin);
-  const { userInfo } = userLogin;
-
-  useEffect(() => {
-    if (!userInfo) {
-      navigation.navigate("Login");
-    }
-  }, [userInfo]);
-
-  const debitPaysofterAccountState = useSelector(
-    (state) => state.debitPaysofterAccountState
-  );
-  const { loading, success, formattedPayerEmail, error } =
-    debitPaysofterAccountState;
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [formattedPayerEmail, setFormattedPayerEmail] = useState("");
+  const [error, setError] = useState("");
 
   const [accountId, setAccountId] = useState("");
   const [accountIdError, setAccountIdError] = useState("");
@@ -60,7 +46,7 @@ const PaysofterAccountFundPromise = ({
   const [securityCode, setSecurityCode] = useState("");
   const [securityCodeError, setSecurityCodeError] = useState("");
 
-  const [formError, setFormError] = useState("");
+  // const [formError, setFormError] = useState("");
 
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showAccountInfoModal, setShowAccountInfoModal] = useState(false);
@@ -93,39 +79,48 @@ const PaysofterAccountFundPromise = ({
     }
   };
 
-  const debitAccountData = {
-    account_id: accountId,
-    security_code: securityCode,
-    amount: amount,
-    public_api_key: paysofterPublicKey,
-  };
-
-  const submitHandler = async (e) => {
-    e.preventDefault();
-
+  const submitHandler = async () => {
     if (!accountId) {
       setAccountIdError("Please enter Account ID.");
       return;
-    } else {
-      setAccountIdError("");
     }
 
     if (!securityCode) {
       setSecurityCodeError("Please enter Security Code.");
       return;
-    } else {
-      setSecurityCodeError("");
     }
 
-    if (!accountId || !securityCode) {
-      setFormError("Please attend to the errors within the form.");
-      return;
-    } else {
-      dispatch(debitPaysofterAccountFund(debitAccountData));
+    const debitAccountData = {
+      account_id: accountId,
+      security_code: securityCode,
+      amount: amount,
+      currency: currency,
+      public_api_key: paysofterPublicKey,
+    };
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const { data } = await axios.post(
+        `${PAYSOFTER_API_URL}/api/send-debit-fund-account-otp/`,
+        debitAccountData
+      );
+
+      setSuccess(true);
+      setFormattedPayerEmail(data.formattedPayerEmail);
       await AsyncStorage.setItem(
         "debitAccountData",
         JSON.stringify(debitAccountData)
       );
+    } catch (error) {
+      setError(
+        error.response && error.response.data.detail
+          ? error.response.data.detail
+          : error.message
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -136,7 +131,7 @@ const PaysofterAccountFundPromise = ({
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [dispatch, success]);
+  }, [success]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -211,7 +206,7 @@ const PaysofterAccountFundPromise = ({
               {error && <Message variant="danger">{error}</Message>}
               {loading && <Loader />}
 
-              {formError && <Message variant="danger">{formError}</Message>}
+              {/* {formError && <Message variant="danger">{formError}</Message>} */}
 
               <View style={styles.form}>
                 <View style={styles.formGroup}>
@@ -379,11 +374,24 @@ const PaysofterAccountFundPromise = ({
                 </Modal>
 
                 <View style={styles.submitContainer}>
-                  <TouchableOpacity onPress={submitHandler}>
-                    <Text
-                      style={styles.roundedPrimaryBtn}
-                    >{`Pay (${formatAmount(amount)} ${currency})`}</Text>
+                  <TouchableOpacity
+                    onPress={submitHandler}
+                    style={
+                      loading || success
+                        ? styles.roundedDisabledBtn
+                        : styles.roundedPrimaryBtn
+                    }
+                  >
+                    <Text style={styles.btnText}>{`Pay (${formatAmount(
+                      amount
+                    )} ${currency})`}</Text>
                   </TouchableOpacity>
+                </View>
+
+                <View style={styles.errorContainer}>
+                  {error && (
+                    <MessageFixed variant="danger">{error}</MessageFixed>
+                  )}
                 </View>
               </View>
             </>
@@ -465,6 +473,9 @@ const styles = StyleSheet.create({
   submitContainer: {
     marginTop: 20,
   },
+  errorContainer: {
+    padding: 10,
+  },
   labelContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -482,6 +493,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
+  },
+  roundedDisabledBtn: {
+    backgroundColor: "#d3d3d3",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  btnText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
 

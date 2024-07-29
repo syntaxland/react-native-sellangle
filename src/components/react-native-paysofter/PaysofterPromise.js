@@ -15,12 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { Picker } from "@react-native-picker/picker";
 import { Card } from "react-native-paper";
-import { useSelector } from "react-redux";
 import PaysofterAccountFundPromise from "./PaysofterAccountFundPromise";
-import PaysofterUsdAccountFundPromise from "./PaysofterUsdAccountFundPromise";
-import { useNavigation } from "@react-navigation/native";
-import Message from "../../Message";
-import Loader from "../../Loader";
 import { PAYMENT_DURATION_CHOICES } from "./payment-constants";
 
 const PaysofterPromise = ({
@@ -31,21 +26,6 @@ const PaysofterPromise = ({
   onSuccess,
   onClose,
 }) => {
-  const navigation = useNavigation();
-
-  const userLogin = useSelector((state) => state.userLogin);
-  const { userInfo } = userLogin;
-
-  useEffect(() => {
-    if (!userInfo) {
-      navigation.navigate("Login");
-    }
-  }, [userInfo, navigation]);
-
-  const debitPaysofterAccountState = useSelector(
-    (state) => state.debitPaysofterAccountState
-  );
-  const { loading, success, error } = debitPaysofterAccountState;
   const [durationChoices, setDurationChoices] = useState([]);
 
   useEffect(() => {
@@ -77,13 +57,6 @@ const PaysofterPromise = ({
     [handleShowPaysofterAccountFundPromise]
   );
 
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => {}, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
-
   const handleFieldChange = (field, value) => {
     if (field === "duration") {
       setDuration(value);
@@ -100,27 +73,15 @@ const PaysofterPromise = ({
           <Card.Content>
             {showPaysofterAccountFundPromise ? (
               <>
-                {currency === "USD" ? (
-                  <PaysofterUsdAccountFundPromise
-                    amount={amount}
-                    email={email}
-                    currency={currency}
-                    paysofterPublicKey={paysofterPublicKey}
-                    duration={duration}
-                    onSuccess={onSuccess}
-                    onClose={onClose}
-                  />
-                ) : (
-                  <PaysofterAccountFundPromise
-                    amount={amount}
-                    email={email}
-                    currency={currency}
-                    paysofterPublicKey={paysofterPublicKey}
-                    duration={duration}
-                    onSuccess={onSuccess}
-                    onClose={onClose}
-                  />
-                )}
+                <PaysofterAccountFundPromise
+                  amount={amount}
+                  email={email}
+                  currency={currency}
+                  paysofterPublicKey={paysofterPublicKey}
+                  duration={duration}
+                  onSuccess={onSuccess}
+                  onClose={onClose}
+                />
               </>
             ) : (
               <View style={styles.container}>
@@ -159,14 +120,6 @@ const PaysofterPromise = ({
                   </View>
                 </Modal>
 
-                {success && (
-                  <Message variant="success">
-                    Payment made successfully.
-                  </Message>
-                )}
-                {error && <Message variant="danger">{error}</Message>}
-                {loading && <Loader />}
-
                 <View style={styles.formGroup}>
                   <Text style={styles.label}>Currency</Text>
                   <TextInput
@@ -175,21 +128,6 @@ const PaysofterPromise = ({
                     editable={false}
                   />
                 </View>
-
-                {/* <View style={styles.formGroup}>
-                  <Text style={styles.label}>Expected Settlement Duration</Text>
-                  <RNPickerSelect
-                    onValueChange={(value) =>
-                      handleFieldChange("duration", value)
-                    }
-                    items={durationChoices?.map(([value, label]) => ({
-                      label,
-                      value,
-                    }))}
-                    style={pickerSelectStyles}
-                    value={duration}
-                  />
-                </View> */}
 
                 <View style={styles.formGroup}>
                   <Text style={styles.label}>Expected Settlement Duration</Text>
@@ -315,29 +253,6 @@ const styles = StyleSheet.create({
   learnMoreBtn: {
     padding: 5,
     marginBottom: 10,
-  },
-});
-
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    fontSize: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderWidth: 1,
-    borderColor: "gray",
-    borderRadius: 4,
-    color: "black",
-    paddingRight: 30, // to ensure the text is never behind the icon
-  },
-  inputAndroid: {
-    fontSize: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderWidth: 0.5,
-    borderColor: "purple",
-    borderRadius: 8,
-    color: "black",
-    paddingRight: 30, // to ensure the text is never behind the icon
   },
 });
 

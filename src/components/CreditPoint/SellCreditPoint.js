@@ -12,7 +12,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { Card } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import { sellCreditPoint } from "../../redux/actions/creditPointActions";
+import { sellCreditPoint } from "../../redux/actions/creditPointActions"; 
 import Message from "../../Message";
 import Loader from "../../Loader";
 
