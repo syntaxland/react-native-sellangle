@@ -16,6 +16,7 @@ import Loader from "./Loader";
 import { PAYSOFTER_API_URL } from "./config/apiConfig";
 import { generateRandomNum } from "./GenerateRandomNum";
 import axios from "axios";
+import SuccessScreenTest from "./SuccessScreenTest";
 
 const VerifyAccountFundOtpTest = ({
   amount,
@@ -33,6 +34,7 @@ const VerifyAccountFundOtpTest = ({
   const [countdown, setCountdown] = useState(60);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [hasHandledSuccess, setHasHandledSuccess] = useState(false);
+  const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -107,8 +109,9 @@ const VerifyAccountFundOtpTest = ({
       setHasHandledSuccess(true);
       handleOnSuccess();
       setTimeout(() => {
-        handleOnClose();
+        // handleOnClose();
         setShowSuccessMessage(false);
+        setShowSuccessScreen(true);
       }, 3000);
     } catch (error) {
       setError(
@@ -150,9 +153,9 @@ const VerifyAccountFundOtpTest = ({
     onSuccess();
   }, [onSuccess]);
 
-  const handleOnClose = useCallback(() => {
-    onClose();
-  }, [onClose]);
+  // const handleOnClose = useCallback(() => {
+  //   onClose();
+  // }, [onClose]);
 
   useEffect(() => {
     if (paymentSuccess && !hasHandledSuccess) {
@@ -160,6 +163,7 @@ const VerifyAccountFundOtpTest = ({
       setShowSuccessMessage(true);
       handleOnSuccess();
       setTimeout(() => {
+        setShowSuccessScreen(true);
         setShowSuccessMessage(false);
         AsyncStorage.removeItem("debitAccountData");
       }, 3000);
@@ -168,53 +172,57 @@ const VerifyAccountFundOtpTest = ({
 
   return (
     <View style={styles.container}>
-      <Card style={styles.card}>
-        <Card.Content>
-          <Text style={styles.header}>Verify OTP ({currency})</Text>
-          {showSuccessMessage && (
-            <Message variant="success">Payment made successfully!</Message>
-          )}
-          {loading && <Loader />}
-          {error && <Message variant="danger">{error}</Message>}
-          {resendMessage && (
-            <Message variant={resendLoading ? "info" : "success"}>
-              {resendMessage}
-            </Message>
-          )}
-          <TextInput
-            style={styles.input}
-            value={otp}
-            onChangeText={(text) => setOtp(text)}
-            placeholder="Enter OTP"
-            keyboardType="numeric"
-            editable={false}
-          />
-          <Button
-            onPress={handleVerifyEmailOtp}
-            title="Verify OTP"
-            disabled={loading || showSuccessMessage}
-            color="#28a745"
-          />
-          <Text style={styles.otpInfo}>
-            OTP has been automatically generated for testing purposes.
-          </Text>
-          <TouchableOpacity
-            onPress={handleResendEmailOtp}
-            disabled={resendDisabled || resendLoading}
-          >
-            <Text style={styles.resendText}>
-              {resendLoading
-                ? "Resending OTP..."
-                : resendDisabled
-                ? `Resend OTP (${countdown}sec)`
-                : "Resend OTP"}
+      {showSuccessScreen ? (
+        <SuccessScreenTest />
+      ) : (
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text style={styles.header}>Verify OTP ({currency})</Text>
+            {showSuccessMessage && (
+              <Message variant="success">Payment made successfully!</Message>
+            )}
+            {loading && <Loader />}
+            {error && <Message variant="danger">{error}</Message>}
+            {resendMessage && (
+              <Message variant={resendLoading ? "info" : "success"}>
+                {resendMessage}
+              </Message>
+            )}
+            <TextInput
+              style={styles.input}
+              value={otp}
+              onChangeText={(text) => setOtp(text)}
+              placeholder="Enter OTP"
+              keyboardType="numeric"
+              editable={false}
+            />
+            <Button
+              onPress={handleVerifyEmailOtp}
+              title="Verify OTP"
+              disabled={loading || showSuccessMessage}
+              color="#28a745"
+            />
+            <Text style={styles.otpInfo}>
+              OTP has been automatically generated for testing purposes.
             </Text>
-          </TouchableOpacity>
-          <View style={styles.errorContainer}>
-            {error && <MessageFixed variant="danger">{error}</MessageFixed>}
-          </View>
-        </Card.Content>
-      </Card>
+            <TouchableOpacity
+              onPress={handleResendEmailOtp}
+              disabled={resendDisabled || resendLoading}
+            >
+              <Text style={styles.resendText}>
+                {resendLoading
+                  ? "Resending OTP..."
+                  : resendDisabled
+                  ? `Resend OTP (${countdown}sec)`
+                  : "Resend OTP"}
+              </Text>
+            </TouchableOpacity>
+            <View style={styles.errorContainer}>
+              {error && <MessageFixed variant="danger">{error}</MessageFixed>}
+            </View>
+          </Card.Content>
+        </Card>
+      )}
     </View>
   );
 };

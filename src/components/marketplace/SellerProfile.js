@@ -482,7 +482,7 @@ function SellerProfile() {
       <View style={styles.container}>
         <Text style={styles.title}>Seller API Key</Text>
         <View style={styles.formGroup}>
-          <Text>Live API Key</Text>
+          <Text>Paysofter API Key</Text>
           <TextInput
             style={styles.input}
             value={apiKeyData.live_api_key}

@@ -11,7 +11,7 @@ import {
   ScrollView,
   Linking,
 } from "react-native";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"; 
 import {
   faInfoCircle,
   faEye,
@@ -20,7 +20,6 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Loader from "./Loader";
 import Message from "./Message";
-
 import { Card } from "react-native-paper";
 import MessageFixed from "./MessageFixed";
 import VerifyAccountFundOtp from "./VerifyAccountFundOtp";
@@ -327,6 +326,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
+    textAlign: "center",
   },
   modalOverlay: {
     flex: 1,

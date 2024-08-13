@@ -1,4 +1,4 @@
-// CardPayment.js
+// CardPaymentTest.js
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -10,16 +10,18 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { Picker } from "@react-native-picker/picker";
-import { MONTH_CHOICES, YEAR_CHOICES } from "./payment-constants";
 import { Card } from "react-native-paper";
-import MessageFixed from "./MessageFixed";
+import { MONTH_CHOICES, YEAR_CHOICES } from "./payment-constants";
 import Message from "./Message";
+import MessageFixed from "./MessageFixed";
 import Loader from "./Loader";
 import { formatAmount } from "./FormatAmount";
+import { generateRandomNum } from "./GenerateRandomNum";
 import { PAYSOFTER_API_URL } from "./config/apiConfig";
 import axios from "axios";
+import SuccessScreenTest from "./SuccessScreenTest";
 
-const CardPayment = ({
+const CardPaymentTest = ({
   amount,
   currency,
   email,
@@ -34,6 +36,8 @@ const CardPayment = ({
   const [monthChoices, setMonthChoices] = useState([]);
   const [yearChoices, setYearChoices] = useState([]);
 
+  const [showSuccessScreen, setShowSuccessScreen] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -44,10 +48,10 @@ const CardPayment = ({
 
   const [cardType, setCardType] = useState("");
   const [paymentDetails, setPaymentDetails] = useState({
-    cardNumber: "",
-    expirationMonth: null,
-    expirationYear: null,
-    cvv: "",
+    cardNumber: generateRandomNum(16),
+    expirationMonth: "11",
+    expirationYear: "2026",
+    cvv: generateRandomNum(3),
   });
 
   const [cvvVisible, setCvvVisible] = useState(false);
@@ -123,9 +127,10 @@ const CardPayment = ({
         paysofterPaymentData
       );
       console.log(data);
+      setPaymentSuccess(true);
       setShowSuccessMessage(true);
       setTimeout(() => {
-        handleOnClose();
+        // handleOnClose();
         setShowSuccessMessage(false);
       }, 3000);
       handleOnSuccess();
@@ -144,81 +149,90 @@ const CardPayment = ({
     onSuccess();
   }, [onSuccess]);
 
-  const handleOnClose = useCallback(() => {
-    onClose();
-  }, [onClose]);
+  // const handleOnClose = useCallback(() => {
+  //   onClose();
+  // }, [onClose]);
 
   useEffect(() => {
-    if (showSuccessMessage && !hasHandledSuccess) {
+    if (paymentSuccess && !hasHandledSuccess) {
       setHasHandledSuccess(true);
+      setShowSuccessMessage(true);
+      handleOnSuccess();
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+        setShowSuccessScreen(true);
+      }, 3000);
     }
-  }, [showSuccessMessage, hasHandledSuccess]);
+  }, [paymentSuccess, handleOnSuccess, hasHandledSuccess]);
 
   return (
     <View style={styles.container}>
-      <Card style={styles.card}>
-        <Card.Content>
-          <Text style={styles.header}>Debit Card</Text>
-          {showSuccessMessage && (
-            <Message variant="success">Payment made successfully.</Message>
-          )}
-          {error && <Message variant="danger">{error}</Message>}
-          {loading && <Loader />}
-
-          <View style={styles.form}>
-            <Text style={styles.label}>Card Number</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="1234 5678 9012 3456"
-              value={paymentDetails.cardNumber}
-              onChangeText={(value) =>
-                handlePaymentDetailsChange("cardNumber", value)
-              }
-              keyboardType="numeric"
-              maxLength={19}
-            />
-            {cardType && (
-              <Text style={styles.cardType}>
-                Detected Card Type: {cardType}
-              </Text>
+      {showSuccessScreen ? (
+        <SuccessScreenTest />
+      ) : (
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text style={styles.header}>Debit Card</Text>
+            {showSuccessMessage && (
+              <Message variant="success">Payment made successfully.</Message>
             )}
+            {error && <Message variant="danger">{error}</Message>}
+            {loading && <Loader />}
 
-            <View style={styles.spaceBtwGroup}>
-              <Text style={styles.label}>Expiration Month</Text>
-              <View style={styles.dateContainer}>
-                <Picker
-                  selectedValue={paymentDetails.expirationMonth}
-                  // style={styles.picker}
-                  onValueChange={(value) =>
-                    handlePaymentDetailsChange("expirationMonth", value)
-                  }
-                >
-                  <Picker.Item label="Select Month" value="" />
-                  {monthChoices.map(([value, label]) => (
-                    <Picker.Item key={value} label={label} value={value} />
-                  ))}
-                </Picker>
+            <View style={styles.form}>
+              <Text style={styles.label}>Card Number</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="1234 5678 9012 3456"
+                value={paymentDetails.cardNumber}
+                onChangeText={(value) =>
+                  handlePaymentDetailsChange("cardNumber", value)
+                }
+                keyboardType="numeric"
+                maxLength={19}
+                editable={false}
+              />
+              {cardType && (
+                <Text style={styles.cardType}>
+                  Detected Card Type: {cardType}
+                </Text>
+              )}
+
+              <View style={styles.spaceBtwGroup}>
+                <Text style={styles.label}>Expiration Month</Text>
+                <View style={styles.dateContainer}>
+                  <Picker
+                    selectedValue={paymentDetails.expirationMonth}
+                    // style={styles.picker}
+                    onValueChange={(value) =>
+                      handlePaymentDetailsChange("expirationMonth", value)
+                    }
+                  >
+                    <Picker.Item label="Select Month" value="" />
+                    {monthChoices.map(([value, label]) => (
+                      <Picker.Item key={value} label={label} value={value} />
+                    ))}
+                  </Picker>
+                </View>
+
+                <Text style={styles.label}>Expiration Year</Text>
+                <View style={styles.dateContainer}>
+                  <Picker
+                    selectedValue={paymentDetails.expirationYear}
+                    // style={styles.picker}
+                    onValueChange={(value) =>
+                      handlePaymentDetailsChange("expirationYear", value)
+                    }
+                  >
+                    <Picker.Item label="Select Year" value="" />
+                    {yearChoices.map(([value, label]) => (
+                      <Picker.Item key={value} label={label} value={value} />
+                    ))}
+                  </Picker>
+                </View>
               </View>
 
-              <Text style={styles.label}>Expiration Year</Text>
-              <View style={styles.dateContainer}>
-                <Picker
-                  selectedValue={paymentDetails.expirationYear}
-                  // style={styles.picker}
-                  onValueChange={(value) =>
-                    handlePaymentDetailsChange("expirationYear", value)
-                  }
-                >
-                  <Picker.Item label="Select Year" value="" />
-                  {yearChoices.map(([value, label]) => (
-                    <Picker.Item key={value} label={label} value={value} />
-                  ))}
-                </Picker>
-              </View>
-            </View>
-
-            <View style={styles.formGroup}>
-              <View style={styles.row}>
+              <View style={styles.formGroup}>
                 <Text style={styles.label}>CVV</Text>
                 <TextInput
                   style={styles.input}
@@ -230,6 +244,7 @@ const CardPayment = ({
                   maxLength={3}
                   keyboardType="numeric"
                   secureTextEntry={!cvvVisible}
+                  editable={false}
                 />
                 <TouchableOpacity onPress={toggleCvvVisibility}>
                   <Text>
@@ -250,29 +265,29 @@ const CardPayment = ({
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
 
-          <View style={styles.submitBtn}>
-            <TouchableOpacity
-              style={
-                !isFormValid()
-                  ? styles.roundedDisabledBtn
-                  : styles.roundedPrimaryBtn
-              }
-              onPress={submitHandler}
-              disabled={!isFormValid() || loading}
-            >
-              <Text style={styles.btnText}>
-                Pay ({formatAmount(amount)} {currency})
-              </Text>
-            </TouchableOpacity>
-          </View>
+            <View style={styles.submitBtn}>
+              <TouchableOpacity
+                style={
+                  !isFormValid()
+                    ? styles.roundedDisabledBtn
+                    : styles.roundedPrimaryBtn
+                }
+                onPress={submitHandler}
+                disabled={!isFormValid() || loading}
+              >
+                <Text style={styles.btnText}>
+                  Pay ({formatAmount(amount)} {currency})
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-          <View style={styles.errorContainer}>
-            {error && <MessageFixed variant="danger">{error}</MessageFixed>}
-          </View>
-        </Card.Content>
-      </Card>
+            <View style={styles.errorContainer}>
+              {error && <MessageFixed variant="danger">{error}</MessageFixed>}
+            </View>
+          </Card.Content>
+        </Card>
+      )}
     </View>
   );
 };
@@ -325,13 +340,10 @@ const styles = StyleSheet.create({
     // justifyContent: "space-between",
     // paddingVertical: 2,
   },
-
   row: {
     flexDirection: "row",
-    alignItems: "center",
-  },
-  errorContainer: {
-    padding: 10,
+    // alignItems: "center",
+    // justifyContent: "end",
   },
   roundedPrimaryBtn: {
     backgroundColor: "#007bff",
@@ -356,9 +368,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
   },
+  formGroup: {
+    marginBottom: 10,
+  },
   submitBtn: {
     padding: 15,
   },
 });
 
-export default CardPayment;
+export default CardPaymentTest;

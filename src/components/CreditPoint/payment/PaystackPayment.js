@@ -10,9 +10,6 @@ import {
 import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { Paystack } from "react-native-paystack-webview";
-// import { buyCreditPoint } from "../../../redux/actions/creditPointActions";
-// import Loader from "../../../Loader";
-// import Message from "../../../Message";
 import { formatAmount } from "../../../FormatAmount";
 
 const PaystackPayment = ({
@@ -35,30 +32,6 @@ const PaystackPayment = ({
     }
   }, [userInfo, navigation]);
 
-  // const buyCreditPointState = useSelector((state) => state.buyCreditPointState);
-  // const { success, error, loading } = buyCreditPointState;
-
-  // useEffect(() => {
-  //   if (success) {
-  //     const timer = setTimeout(() => {
-  //       navigation.navigate("Home");
-  //     }, 5000);
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [success, navigation]);
-
-  // const creditPointData = {
-  //   amount: amount,
-  // };
-
-  // const handlePayment = () => {
-  //   dispatch(buyCreditPoint(creditPointData));
-  // };
-
-  // const onSuccess = () => {
-  //   handlePayment();
-  // };
-
   const [paymentInitiated, setPaymentInitiated] = useState(false);
 
   const initiatePayment = () => {
@@ -72,15 +45,6 @@ const PaystackPayment = ({
     <ScrollView>
       <View style={styles.container}>
         <Text style={styles.header}>Paystack Payment Option</Text>
-
-        {/* {loading && <Loader />}
-        {error && <Message variant="danger">{error}</Message>}
-
-        {success && (
-          <Message variant="success">
-            You have received {amount} credit points.
-          </Message>
-        )} */}
 
         <View style={styles.infoContainer}>
           <Text>

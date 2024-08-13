@@ -36,13 +36,14 @@ import ReportPaidAd from "./ReportPaidAd";
 import TogglePaidAdSave from "./TogglePaidAdSave";
 import ReviewPaidAdSeller from "./ReviewPaidAdSeller";
 import Carousel from "react-native-reanimated-carousel";
-import { Paysofter } from "../react-native-paysofter/Paysofter";
 import Loader from "../../Loader";
 import Message from "../../Message";
 import RatingSeller from "../../RatingSeller";
 import PromoTimer from "../../PromoTimer";
 import ApplyPromoCode from "./ApplyPromoCode";
 import { formatAmount } from "../../FormatAmount";
+// import { Paysofter } from "../react-native-paysofter/src/index";
+import { Paysofter } from "react-native-paysofter"; 
 
 const PaidAdProductDetail = () => {
   const dispatch = useDispatch();
@@ -527,7 +528,9 @@ const PaidAdProductDetail = () => {
               paysofterPublicKey={sellerApiKey}
               onSuccess={onSuccess}
               onClose={onClose}
-              payment_id={`PID${Math.floor(Math.random() * 100000000000000)}`}
+              paymentRef={`PID${Math.floor(
+                Math.random() * 100000000000000
+              )}`}
               showPromiseOption={true}
               showFundOption={true}
               showCardOption={true}

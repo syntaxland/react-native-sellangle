@@ -15,7 +15,8 @@ import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import PaystackPayment from "./payment/PaystackPayment";
 import PaystackUsd from "./payment/PaystackUsd";
-import { Paysofter } from "../react-native-paysofter/Paysofter";
+// import { Paysofter } from "../react-native-paysofter/src/index";
+import { Paysofter } from "react-native-paysofter";
 
 const PaymentScreen = ({
   amount,
@@ -143,19 +144,17 @@ const PaymentScreen = ({
 
           {selectedPaymentGateway === "paysofter" && (
             <Paysofter
-                email={email}
-                currency={currency}
-                amount={amount}
-                paysofterPublicKey={paysofterPublicKey}
-                onSuccess={onSuccess}
-                onClose={onClose}
-                payment_id={`PID${Math.floor(
-                  Math.random() * 100000000000000
-                )}`}
-                showPromiseOption={true}
-                showFundOption={true}
-                showCardOption={true}
-              /> 
+              email={email}
+              currency={currency}
+              amount={amount}
+              paysofterPublicKey={paysofterPublicKey}
+              onSuccess={onSuccess}
+              onClose={onClose}
+              paymentRef={`PID${Math.floor(Math.random() * 100000000000000)}`}
+              showPromiseOption={true}
+              showFundOption={true}
+              showCardOption={true}
+            />
           )}
         </View>
       </View>
