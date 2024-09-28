@@ -1,5 +1,5 @@
 // supportActions.js
-import axios from "axios";
+import axios from "../../axiosConfig";
 import {
   CREATE_TICKET_REQUEST,
   CREATE_TICKET_SUCCESS,

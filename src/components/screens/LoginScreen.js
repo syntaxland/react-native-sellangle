@@ -6,7 +6,7 @@ import {
   TextInput,
   Button,
   SafeAreaView,
-  ScrollView,
+  ScrollView, 
   TouchableOpacity,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -106,7 +106,7 @@ const LoginScreen = () => {
                   onPress={submitHandler}
                   disabled={loading || !email || !password}
                   style={
-                    loading || !email || !password
+                    loading || success || !email || !password
                       ? styles.squaredDisabledBtn
                       : styles.squaredPrimaryBtn
                   }
@@ -120,7 +120,7 @@ const LoginScreen = () => {
                   onPress={() => navigation.navigate("Register")}
                   disabled={loading}
                   style={
-                    loading
+                    loading || success
                       ? styles.squaredDisabledBtn
                       : styles.squaredSuccessBtn
                   }
@@ -135,7 +135,7 @@ const LoginScreen = () => {
                   // onPress={() => navigation.navigate("Reset Password")}
                   disabled={loading}
                   style={
-                    loading
+                    loading || success
                       ? styles.squaredDisabledBtn
                       : styles.squaredDangerBtn
                   }

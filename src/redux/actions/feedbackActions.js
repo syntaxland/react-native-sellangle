@@ -1,5 +1,5 @@
 // feedbackActions.js
-import axios from "axios";
+import axios from "../../axiosConfig";
 import {
     CREATE_FEEDBACK_REQUEST,
     CREATE_FEEDBACK_SUCCESS,

@@ -1,5 +1,5 @@
 // paymentActions.js
-import axios from "axios";
+import axios from "../../axiosConfig";
 import {
   PAYMENT_CREATE_REQUEST,
   PAYMENT_CREATE_SUCCESS,

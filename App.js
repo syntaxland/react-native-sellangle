@@ -5,8 +5,9 @@ import { NavigationContainer } from "@react-navigation/native";
 import { MyDrawer } from "./src/navigation/drawer";
 import { initializeStore } from "./src/redux/store";
 // import Footer from "./src/Footer";
+import IdleLogout from "./src/IdleLogout";
 import { StatusBar } from "expo-status-bar";
-import * as NavigationBar from 'expo-navigation-bar';
+import * as NavigationBar from "expo-navigation-bar";
 import * as SplashScreen from "expo-splash-screen";
 // import { setNavigator } from "./src/navigation/RootNavigation";
 
@@ -34,8 +35,8 @@ export default function App() {
   if (!store || !isAppReady) {
     return null;
   }
-  
-  NavigationBar.setBackgroundColorAsync('#007bff');
+
+  NavigationBar.setBackgroundColorAsync("#007bff");
 
   return (
     <Provider store={store}>
@@ -44,7 +45,9 @@ export default function App() {
       //   setNavigator(navigatorRef);
       // }}
       >
-        <MyDrawer />
+        <IdleLogout>
+          <MyDrawer />
+        </IdleLogout>
         {/* <Footer /> */}
         <StatusBar style="light" translucent={true} hidden={false} />
       </NavigationContainer>

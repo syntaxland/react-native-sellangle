@@ -1,5 +1,5 @@
 // emailOtpActions.js
-import axios from "axios";
+import axios from "../../axiosConfig";
 import {
   EMAIL_OTP_SEND_REQUEST,
   EMAIL_OTP_SEND_SUCCESS,

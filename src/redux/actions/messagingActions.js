@@ -1,5 +1,5 @@
 // messagingActions.js
-import axios from "axios";
+import axios from "../../axiosConfig";
 import {
   SEND_MESSAGE_REQUEST,
   SEND_MESSAGE_SUCCESS,

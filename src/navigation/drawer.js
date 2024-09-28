@@ -5,7 +5,7 @@ import {
   createDrawerNavigator,
   DrawerContentScrollView,
   // DrawerItemList,
-  DrawerItem,
+  DrawerItem, 
 } from "@react-navigation/drawer";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import {
@@ -879,7 +879,7 @@ export const CustomDrawerContent = (props) => {
       />
 
       <View style={styles.versionContainer}>
-        <Text style={styles.versionText}>Version: 2.1.7</Text>
+        <Text style={styles.versionText}>Version: 2.1.8</Text>
         <Footer />
       </View>
     </DrawerContentScrollView>

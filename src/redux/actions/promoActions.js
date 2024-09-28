@@ -1,5 +1,5 @@
 // promoActions.js
-import axios from "axios";
+import axios from "../../axiosConfig";
 import {
   REFERRAL_SUCCESS,
   REFERRAL_ERROR,

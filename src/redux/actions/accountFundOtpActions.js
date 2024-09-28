@@ -1,5 +1,5 @@
 // accountFundOtpActions.js
-import axios from "axios";
+import axios from "../../axiosConfig";
 import {
   SEND_OTP_REQUEST,
   SEND_OTP_SUCCESS,
@@ -9,7 +9,7 @@ import {
   VERIFY_OTP_FAIL,
 } from "../constants/accountFundOtpConstants";
 
-import { PAYSOFTER_API_URL } from "../../config/apiConfig";
+import { PAYSOFTER_API_URL } from "../../config/apiConfig"; 
 
 // const API_URL = process.env.REACT_APP_API_URL;
 // const PAYSOFTER_API_URL = process.env.PAYSOFTER_API_URL;

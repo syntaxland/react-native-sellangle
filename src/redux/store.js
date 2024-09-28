@@ -4,7 +4,7 @@ import { thunk } from "redux-thunk";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
-  productListReducers,
+  productListReducers, 
   productDetailsReducers,
   // productTrackSaveReducer, 
   saveProductReducer,

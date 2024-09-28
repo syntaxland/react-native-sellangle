@@ -1,5 +1,5 @@
 // creditPointActions.js
-import axios from "axios";
+import axios from "../../axiosConfig";
 import {
   CREDIT_POINT_REQUEST_CREATE_REQUEST,
   CREDIT_POINT_REQUEST_CREATE_SUCCESS,

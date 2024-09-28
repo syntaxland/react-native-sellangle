@@ -1,5 +1,5 @@
 // recommenderActions.js
-import axios from "axios";
+import axios from "../../axiosConfig";
 import {
   GET_USER_RECOMMENDED_FREE_ADS_REQUEST,
   GET_USER_RECOMMENDED_FREE_ADS_SUCCESS,

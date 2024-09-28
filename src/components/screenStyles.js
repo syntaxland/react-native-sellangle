@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingBottom: 10,
   },
-  scrollViewContent: {
+  scrollViewContent: { 
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",

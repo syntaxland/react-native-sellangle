@@ -11,7 +11,7 @@ import {
   UPDATE_USER_LAST_LOGIN_SUCCESS,
   UPDATE_USER_LAST_LOGIN_FAIL,
 } from "../constants/userConstants";
-import axios from "axios";
+import axios from "../../axiosConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { API_URL } from "../../config/apiConfig";
