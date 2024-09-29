@@ -6,7 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   Modal,
-  TouchableOpacity,
+  TouchableOpacity, 
 } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";

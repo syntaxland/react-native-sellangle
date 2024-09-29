@@ -6,7 +6,7 @@ import {
   TextInput,
   Button,
   SafeAreaView,
-  ScrollView, 
+  ScrollView,
   TouchableOpacity,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faUser, faKey } from "@fortawesome/free-solid-svg-icons";
 import { Card } from "react-native-paper";
-import { login } from "../../redux/actions/userActions";
+import { login, resetSuccessState } from "../../redux/actions/userActions";
 import Loader from "../../Loader";
 import Message from "../../Message";
 import { styles } from "../screenStyles";
@@ -44,18 +44,13 @@ const LoginScreen = () => {
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
+        dispatch(resetSuccessState());
         navigation.navigate("Home");
       }, 1000);
 
       return () => clearTimeout(timer);
     }
   }, [success, userInfo, dispatch, navigation]);
-
-  // useEffect(() => {
-  //   if (userInfo && success) {
-  //     navigation.navigate("Home");
-  //   }
-  // }, [success, userInfo, dispatch, navigation]);
 
   return (
     <SafeAreaView>

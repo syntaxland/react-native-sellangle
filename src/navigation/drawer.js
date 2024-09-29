@@ -48,7 +48,8 @@ import {
   faCodeCompare,
   faBullhorn,
 } from "@fortawesome/free-solid-svg-icons";
-import { logout } from "../redux/actions/userActions";
+// import { logout } from "../redux/actions/userActions";
+import { logout } from "../redux/actions/logoutAction";
 import { getUserProfile } from "../redux/actions/userProfileActions";
 import { getUserMessages } from "../redux/actions/messagingActions";
 import {
@@ -252,8 +253,8 @@ export const CustomDrawerContent = (props) => {
           <Text style={styles.greetingText}>
             {userInfo
               ? `${greeting}, ${
-                  userInfo.first_name.charAt(0).toUpperCase() +
-                  userInfo.first_name.slice(1)
+                  userInfo?.first_name?.charAt(0).toUpperCase() +
+                  userInfo?.first_name?.slice(1)
                 }!`
               : `${greeting}!`}
           </Text>
@@ -879,7 +880,7 @@ export const CustomDrawerContent = (props) => {
       />
 
       <View style={styles.versionContainer}>
-        <Text style={styles.versionText}>Version: 2.1.8</Text>
+        <Text style={styles.versionText}>Version: 2.1.9</Text>
         <Footer />
       </View>
     </DrawerContentScrollView>
