@@ -7,7 +7,7 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
-import { useSelector } from "react-redux";
+import { useSelector } from "react-redux"; 
 import { useNavigation } from "@react-navigation/native";
 import { Paystack } from "react-native-paystack-webview";
 import { formatAmount } from "../../../FormatAmount";

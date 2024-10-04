@@ -130,7 +130,7 @@ export const getAdCpsCharges = () => async (dispatch, getState) => {
 
 export const getUsdBuyCreditPoint = () => async (dispatch, getState) => {
   try {
-    dispatch({ type: GET_USD_BUY_CREDIT_POINT_REQUEST });
+    dispatch({ type: GET_USD_BUY_CREDIT_POINT_REQUEST }); 
 
     const {
       userLogin: { userInfo },

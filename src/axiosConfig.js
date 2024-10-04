@@ -37,8 +37,8 @@ axiosInstance.interceptors.response.use(
 
       try {
         const store = await initStore();
-        store.dispatch(logout());
         await AsyncStorage.removeItem("userInfo");
+        store.dispatch(logout());
         console.log("store:", store);
 
         console.log("user logged out");

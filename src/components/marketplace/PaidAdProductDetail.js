@@ -532,8 +532,8 @@ const PaidAdProductDetail = () => {
                 Math.random() * 100000000000000
               )}`}
               showPromiseOption={true}
-              showFundOption={true}
-              showCardOption={true}
+              // showFundOption={true}
+              // showCardOption={true}
             />
           )}
         </>

@@ -11,12 +11,18 @@ import {
 } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
+import {
+  buyCreditPoint,
+  resetbuyCreditPointState,
+} from "../../redux/actions/creditPointActions";
+import Message from "../../Message";
+import Loader from "../../Loader";
 import PaystackPayment from "./payment/PaystackPayment";
 import PaystackUsd from "./payment/PaystackUsd";
-// import { Paysofter } from "../react-native-paysofter/src/index";
-import { Paysofter } from "react-native-paysofter";
+import { Paysofter } from "../react-native-paysofter/src/index";
+// import { Paysofter } from "react-native-paysofter";
 
 const PaymentScreen = ({
   amount,
@@ -24,18 +30,26 @@ const PaymentScreen = ({
   paysofterPublicKey,
   paystackPublicKey,
   email,
-  onSuccess,
-  onClose,
 }) => {
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!userInfo) {
       navigation.navigate("Login");
     }
   }, [userInfo]);
+
+  const buyCreditPointState = useSelector((state) => state.buyCreditPointState);
+  const {
+    loading: buyCreditPointLoading,
+    success: buyCreditPointSuccess,
+    error: buyCreditPointError,
+  } = buyCreditPointState;
+
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const [selectedPaymentGateway, setSelectedPaymentGateway] = useState(null);
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -54,11 +68,58 @@ const PaymentScreen = ({
 
   console.log("amount:", currency, amount);
   console.log("apiKeys:", paystackPublicKey, paysofterPublicKey);
+  console.log("email:", email);
+ 
+  const handleOnSuccess = () => {
+    console.log("handling onSuccess...");
+    const creditPointData = {
+      amount: amount,
+      currency: currency,
+    };
+    dispatch(buyCreditPoint(creditPointData));
+  };
+
+  const onSuccess = () => {
+    handleOnSuccess();
+  };
+
+  const handleOnClose = () => {
+    console.log("handling onClose...");
+    navigation.navigate("Home");
+  };
+
+  const onClose = () => {
+    handleOnClose();
+  };
+
+  useEffect(() => {
+    if (buyCreditPointSuccess) {
+      setShowSuccessMessage(true);
+      dispatch(resetbuyCreditPointState());
+      setTimeout(() => {
+        navigation.navigate("Home");
+        setShowSuccessMessage(false);
+      }, 3000);
+    }
+  }, [dispatch, buyCreditPointSuccess, navigation]);
 
   return (
     <ScrollView>
       <View style={styles.container}>
         <Text style={styles.header}>Payment Page</Text>
+
+        {showSuccessMessage && (
+          <Message variant="success">
+            Your account has been credited with the CPS purchased for {amount}{" "}
+            {currency}.
+          </Message>
+        )}
+        {buyCreditPointLoading && <Loader />}
+        {buyCreditPointError && (
+          <Message variant="danger" fixed>
+            {buyCreditPointError}
+          </Message>
+        )}
 
         <View style={styles.buttonContainer}>
           <View style={styles.labelContainer}>
@@ -151,7 +212,7 @@ const PaymentScreen = ({
               onSuccess={onSuccess}
               onClose={onClose}
               paymentRef={`PID${Math.floor(Math.random() * 100000000000000)}`}
-              showPromiseOption={true}
+              // showPromiseOption={true}
               showFundOption={true}
               showCardOption={true}
             />

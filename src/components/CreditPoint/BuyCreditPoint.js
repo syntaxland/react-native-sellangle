@@ -10,13 +10,13 @@ import {
 import RNPickerSelect from "react-native-picker-select";
 import { useDispatch, useSelector } from "react-redux";
 import { Card } from "react-native-paper";
-import { useNavigation } from "@react-navigation/native"; 
+import { useNavigation } from "@react-navigation/native";
 import { getPaymentApiKeys } from "../../redux/actions/paymentActions";
 import PaymentScreen from "./PaymentScreen";
-import {
-  buyCreditPoint,
-  resetbuyCreditPointState,
-} from "../../redux/actions/creditPointActions";
+// import {
+//   buyCreditPoint,
+//   resetbuyCreditPointState,
+// } from "../../redux/actions/creditPointActions";
 import Message from "../../Message";
 import Loader from "../../Loader";
 
@@ -31,19 +31,17 @@ const BuyCreditPoint = ({ currency }) => {
     getPaymentApiKeysState;
   console.log("apiKeys:", paystackPublicKey, paysofterPublicKey);
 
-  const buyCreditPointState = useSelector((state) => state.buyCreditPointState);
-  const {
-    loading: buyCreditPointLoading,
-    success: buyCreditPointSuccess,
-    error: buyCreditPointError,
-  } = buyCreditPointState;
+  // const buyCreditPointState = useSelector((state) => state.buyCreditPointState);
+  // const {
+  //   loading: buyCreditPointLoading,
+  //   success: buyCreditPointSuccess,
+  //   error: buyCreditPointError,
+  // } = buyCreditPointState;
 
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  // const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
-  const userEmail = userInfo ? userInfo.email : null;
-
   useEffect(() => {
     if (!userInfo) {
       navigation.navigate("Login");
@@ -51,6 +49,9 @@ const BuyCreditPoint = ({ currency }) => {
       dispatch(getPaymentApiKeys());
     }
   }, [userInfo, dispatch]);
+
+  const userEmail = userInfo ? userInfo.email : null;
+  console.log("userEmail:", userEmail);
 
   const [amount, setAmount] = useState("");
   const [showPaymentScreen, setShowPaymentScreen] = useState(false);
@@ -73,44 +74,45 @@ const BuyCreditPoint = ({ currency }) => {
     { label: "1,500,000 cps for 1,000,000 NGN", value: "1000000" },
   ];
 
-  const handleOnSuccess = () => {
-    console.log("handling onSuccess...");
-    const creditPointData = {
-      amount: amount,
-    };
-    dispatch(buyCreditPoint(creditPointData));
-  };
+  // const handleOnSuccess = () => {
+  //   console.log("handling onSuccess...");
+  //   const creditPointData = {
+  //     amount: amount,
+  //     currency: currency,
+  //   };
+  //   dispatch(buyCreditPoint(creditPointData));
+  // };
 
-  const onSuccess = () => {
-    handleOnSuccess();
-  };
+  // const onSuccess = () => {
+  //   handleOnSuccess();
+  // };
 
-  const handleOnClose = () => {
-    console.log("handling onClose...");
-    navigation.navigate("Home");
-  };
+  // const handleOnClose = () => {
+  //   console.log("handling onClose...");
+  //   navigation.navigate("Home");
+  // };
 
-  const onClose = () => {
-    handleOnClose();
-  };
+  // const onClose = () => {
+  //   handleOnClose();
+  // };
 
-  useEffect(() => {
-    if (buyCreditPointSuccess) {
-      setShowSuccessMessage(true);
-      dispatch(resetbuyCreditPointState());
-      setTimeout(() => {
-        navigation.navigate("Home");
-        setShowSuccessMessage(false);
-      }, 3000);
-    }
-  }, [dispatch, buyCreditPointSuccess, navigation]);
+  // useEffect(() => {
+  //   if (buyCreditPointSuccess) {
+  //     setShowSuccessMessage(true);
+  //     dispatch(resetbuyCreditPointState());
+  //     setTimeout(() => {
+  //       navigation.navigate("Home");
+  //       setShowSuccessMessage(false);
+  //     }, 3000);
+  //   }
+  // }, [dispatch, buyCreditPointSuccess, navigation]);
 
   return (
     <ScrollView>
       <Card style={styles.card}>
         <Card.Content>
           <View style={styles.container}>
-            {showSuccessMessage && (
+            {/* {showSuccessMessage && (
               <Message variant="success">
                 Your account has been credited with the CPS purchased for{" "}
                 {amount} {currency}.
@@ -121,7 +123,7 @@ const BuyCreditPoint = ({ currency }) => {
               <Message variant="danger" fixed>
                 {buyCreditPointError}
               </Message>
-            )}
+            )} */}
             {showPaymentScreen ? (
               <View style={styles.paymentContainer}>
                 <PaymentScreen
@@ -130,8 +132,8 @@ const BuyCreditPoint = ({ currency }) => {
                   paysofterPublicKey={paysofterPublicKey}
                   paystackPublicKey={paystackPublicKey}
                   email={userEmail}
-                  onSuccess={onSuccess}
-                  onClose={onClose}
+                  // onSuccess={onSuccess}
+                  // onClose={onClose}
                 />
               </View>
             ) : (

@@ -120,7 +120,7 @@ const GetSellCreditPoint = () => {
                       <DataTable.Title style={styles.headerCell}>
                         Success
                       </DataTable.Title>
-                      <DataTable.Title style={styles.headerCell}>
+                      <DataTable.Title style={styles.dateHeaderCell}>
                         Created At
                       </DataTable.Title>
                     </DataTable.Header>
@@ -183,7 +183,7 @@ const GetSellCreditPoint = () => {
                             )}
                           </ScrollView>
                         </DataTable.Cell>
-                        <DataTable.Cell style={styles.cell}>
+                        <DataTable.Cell style={styles.dateCell}>
                           <ScrollView horizontal>
                             <Text>
                               {new Date(cps.created_at).toLocaleString(
@@ -249,13 +249,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   headerCell: {
-    width: 150,
+    width: 200,
     marginLeft: 20,
     borderRightWidth: 1,
     borderColor: "black",
   },
   cell: {
-    width: 150,
+    width: 200,
     marginLeft: 10,
   },
   snHeaderCell: {
@@ -265,6 +265,16 @@ const styles = StyleSheet.create({
   },
   snCell: {
     width: 50,
+  },
+  dateHeaderCell: {
+    width: 250,
+    borderRightWidth: 1,
+    borderColor: "black",
+    marginLeft: 20,
+  },
+  dateCell: {
+    width: 250,
+    marginLeft: 10,
   },
   iconSize: {
     fontSize: 16,

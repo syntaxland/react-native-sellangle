@@ -57,7 +57,7 @@ const GetUsdBuyCreditPoint = () => {
       setTimeout(resolve, timeout);
     });
   };
-
+  
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     dispatch(getUsdBuyCreditPoint());
@@ -79,7 +79,7 @@ const GetUsdBuyCreditPoint = () => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-      >
+      > 
         <View style={styles.container}>
           <Text style={styles.title}>
             <FontAwesomeIcon icon={faCreditCard} /> Bought/Funded CPS List (USD)
@@ -90,7 +90,7 @@ const GetUsdBuyCreditPoint = () => {
             <Message variant="danger">{error}</Message>
           ) : (
             <>
-              {currentItems.length === 0 ? (
+              {currentItems?.length === 0 ? (
                 <Text style={styles.noData}>Bought cps appear here.</Text>
               ) : (
                 <ScrollView horizontal={true}>
@@ -120,19 +120,19 @@ const GetUsdBuyCreditPoint = () => {
                       <DataTable.Title style={styles.headerCell}>
                         Success
                       </DataTable.Title>
-                      <DataTable.Title style={styles.headerCell}>
+                      <DataTable.Title style={styles.dateHeaderCell}>
                         Created At
                       </DataTable.Title>
                     </DataTable.Header>
 
-                    {currentItems.map((cps, index) => (
+                    {currentItems?.map((cps, index) => (
                       <DataTable.Row key={cps.id}>
                         <DataTable.Cell style={styles.snCell}>
                           {indexOfFirstItem + index + 1}
                         </DataTable.Cell>
                         <DataTable.Cell style={styles.cell}>
                           <ScrollView horizontal>
-                            <Text>{cps.cps_purchase_id}</Text>
+                            <Text>{cps.usd_cps_purchase_id}</Text>
                           </ScrollView>
                         </DataTable.Cell>
                         <DataTable.Cell style={styles.cell}>
@@ -162,7 +162,7 @@ const GetUsdBuyCreditPoint = () => {
                             <Text>{formatAmount(cps.new_bal)}</Text>
                           </ScrollView>
                         </DataTable.Cell>
-                        <DataTable.Cell style={styles.cell}>
+                        <DataTable.Cell style={styles.cell}> 
                           <ScrollView horizontal>
                             {cps.is_success ? (
                               <Text style={{ color: "green" }}>
@@ -183,7 +183,7 @@ const GetUsdBuyCreditPoint = () => {
                             )}
                           </ScrollView>
                         </DataTable.Cell>
-                        <DataTable.Cell style={styles.cell}>
+                        <DataTable.Cell style={styles.dateCell}>
                           <ScrollView horizontal>
                             <Text>
                               {new Date(cps.created_at).toLocaleString(
@@ -249,13 +249,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   headerCell: {
-    width: 150,
+    width: 200,
     marginLeft: 20,
     borderRightWidth: 1,
     borderColor: "black",
   },
   cell: {
-    width: 150,
+    width: 200,
     marginLeft: 10,
   },
   snHeaderCell: {
@@ -265,6 +265,26 @@ const styles = StyleSheet.create({
   },
   snCell: {
     width: 50,
+  },
+  dateHeaderCell: {
+    width: 250,
+    borderRightWidth: 1,
+    borderColor: "black",
+    marginLeft: 20,
+  },
+  dateCell: {
+    width: 250,
+    marginLeft: 10,
+  },
+  dateHeaderCell: {
+    width: 250,
+    borderRightWidth: 1,
+    borderColor: "black",
+    marginLeft: 20,
+  },
+  dateCell: {
+    width: 250,
+    marginLeft: 10,
   },
   iconSize: {
     fontSize: 16,

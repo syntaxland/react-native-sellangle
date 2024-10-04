@@ -98,7 +98,7 @@ export const getAdCpsChargesReducer = (state = initialState, action) => {
 export const getUsdBuyCreditPointReducer = (state = initialState, action) => {
   switch (action.type) {
     case GET_USD_BUY_CREDIT_POINT_REQUEST:
-      return { ...state, loading: true };
+      return { ...state, loading: true }; 
     case GET_USD_BUY_CREDIT_POINT_SUCCESS:
       return {
         ...state,

@@ -880,7 +880,7 @@ export const CustomDrawerContent = (props) => {
       />
 
       <View style={styles.versionContainer}>
-        <Text style={styles.versionText}>Version: 2.1.9</Text>
+        <Text style={styles.versionText}>Version: 2.2.0</Text>
         <Footer />
       </View>
     </DrawerContentScrollView>

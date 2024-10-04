@@ -96,10 +96,10 @@ const GetBuyerCreditPoint = () => {
                       <DataTable.Title style={styles.headerCell}>Old Balance</DataTable.Title>
                       <DataTable.Title style={styles.headerCell}>New Balance</DataTable.Title>
                       <DataTable.Title style={styles.headerCell}>Success</DataTable.Title>
-                      <DataTable.Title style={styles.headerCell}>Created At</DataTable.Title>
+                      <DataTable.Title style={styles.dateHeaderCell}>Created At</DataTable.Title>
                     </DataTable.Header>
 
-                    {currentItems.map((cps, index) => (
+                    {currentItems?.map((cps, index) => (
                       <DataTable.Row key={cps.id}>
                         <DataTable.Cell style={styles.snCell}>{indexOfFirstItem + index + 1}</DataTable.Cell>
                         <DataTable.Cell style={styles.cell}>
@@ -145,7 +145,7 @@ const GetBuyerCreditPoint = () => {
                             )}
                           </ScrollView>
                         </DataTable.Cell>
-                        <DataTable.Cell style={styles.cell}>
+                        <DataTable.Cell style={styles.dateCell}>
                           <ScrollView horizontal>
                             <Text>
                               {new Date(cps.created_at).toLocaleString("en-US", {
@@ -204,13 +204,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   headerCell: {
-    width: 150,
+    width: 200,
     marginLeft: 20,
     borderRightWidth: 1,
     borderColor: "black",
   },
   cell: {
-    width: 150,
+    width: 200,
     marginLeft: 10,
   },
   snHeaderCell: {
@@ -220,6 +220,16 @@ const styles = StyleSheet.create({
   },
   snCell: {
     width: 50,
+  },
+  dateHeaderCell: {
+    width: 250,
+    borderRightWidth: 1,
+    borderColor: "black",
+    marginLeft: 20,
+  },
+  dateCell: {
+    width: 250,
+    marginLeft: 10,
   },
   iconSize: {
     fontSize: 16,
