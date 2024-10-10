@@ -21,8 +21,8 @@ import Message from "../../Message";
 import Loader from "../../Loader";
 import PaystackPayment from "./payment/PaystackPayment";
 import PaystackUsd from "./payment/PaystackUsd";
-import { Paysofter } from "../react-native-paysofter/src/index";
-// import { Paysofter } from "react-native-paysofter";
+// import { Paysofter } from "../react-native-paysofter/src/index";
+import { Paysofter } from "react-native-paysofter";
 
 const PaymentScreen = ({
   amount,
